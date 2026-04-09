@@ -164,13 +164,18 @@ st.markdown(f"""
         display: none !important;
     }}
 
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap');
+
     .stApp {{ 
-        background: 
+        background-color: {BG_COLOR} !important;
+        background-image: 
             radial-gradient(circle at 10% 20%, #E04343{RADIAL_OPACITY} 0%, transparent 50%),
             radial-gradient(circle at 90% 10%, #00CC6A{RADIAL_OPACITY} 0%, transparent 50%),
             radial-gradient(circle at 50% 80%, #B800D6{RADIAL_OPACITY} 0%, transparent 50%),
             radial-gradient(circle at 80% 90%, #5A8B8B{RADIAL_OPACITY if is_dark else '03'} 0%, transparent 40%),
-            {BG_COLOR if is_dark else f'linear-gradient(135deg, {BG_COLOR} 0%, {BG_GRADIENT_END} 100%)'} !important;
+            linear-gradient(rgba(107, 164, 164, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(107, 164, 164, 0.05) 1px, transparent 1px) !important;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50px 50px, 50px 50px !important;
         color: {TEXT_COLOR};
         background-attachment: fixed;
     }}
@@ -389,6 +394,181 @@ st.markdown(f"""
     }}
     [data-testid="stDataFrame"] ::-webkit-scrollbar-thumb:hover {{
         background: {ACCENT_COLOR};
+    }}
+    
+    /* Scan Shared Component styles */
+
+    .scan-wrapper {{
+        position: relative;
+        width: 100%;
+        height: 380px;
+        margin-bottom: 0px !important; /* Quitar margen para que el botón no se desplace */
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center; justify-content: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }}
+
+    .scan-wrapper:hover {{
+        transform: scale(1.05);
+        border-color: {ACCENT_COLOR};
+    }}
+
+    .scan-line {{
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, {ACCENT_COLOR}, transparent);
+        top: -10px;
+        animation: scan-move 3s ease-in-out infinite alternate;
+        z-index: 2;
+        box-shadow: 0 0 15px {ACCENT_COLOR};
+    }}
+
+    @keyframes scan-move {{
+        0% {{ top: -10px; opacity: 1; }}
+        100% {{ top: 100%; opacity: 1; }}
+    }}
+
+    @keyframes scan-move-reverse {{
+        0% {{ top: 100%; opacity: 1; }}
+        100% {{ top: -10px; opacity: 1; }}
+    }}
+
+    .scan-card {{
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: {CARD_BG};
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }}
+
+    .scan-wrapper:hover .scan-card {{
+        background: {CARD_BG}F0;
+    }}
+
+    .tech-badge {{
+        background: transparent;
+        color: {GOLD_COLOR};
+        padding: 5px 15px;
+        border: 1px solid {GOLD_COLOR}44;
+        font-family: 'Montserrat';
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 3px;
+        margin-top: 25px;
+        transition: all 0.3s;
+    }}
+    
+    .scan-wrapper:hover .tech-badge {{
+        background: {GOLD_COLOR};
+        color: {CARD_BG};
+    }}
+
+    .scan-wrapper::before {{
+        content: "";
+        position: absolute;
+        width: 120%;
+        height: 120%;
+        background-image: conic-gradient(transparent, {ACCENT_COLOR}, transparent 30%);
+        animation: rotate-laser 3s linear infinite;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }}
+
+    .scan-wrapper:hover::before {{
+        opacity: 1;
+    }}
+
+    @keyframes rotate-laser {{
+        from {{ transform: rotate(0deg); }}
+        to {{ transform: rotate(360deg); }}
+    }}
+
+    /* --- NEW FUTURISTIC HUD ELEMENTS --- */
+    .hud-corner {{
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid {ACCENT_COLOR};
+        z-index: 3;
+        opacity: 0.5;
+        transition: all 0.3s;
+    }}
+    .corner-tl {{ top: 10px; left: 10px; border-right: none; border-bottom: none; }}
+    .corner-tr {{ top: 10px; right: 10px; border-left: none; border-bottom: none; }}
+    .corner-bl {{ bottom: 10px; left: 10px; border-right: none; border-top: none; }}
+    .corner-br {{ bottom: 10px; right: 10px; border-left: none; border-top: none; }}
+
+    .scan-wrapper:hover .hud-corner {{
+        opacity: 1;
+        width: 30px;
+        height: 30px;
+        border-color: {GOLD_COLOR};
+        box-shadow: 0 0 10px {GOLD_COLOR}44;
+    }}
+
+    .tech-ring {{
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        border: 1px dashed {ACCENT_COLOR};
+        border-radius: 50%;
+        opacity: 0.1;
+        animation: rotate-ring 20s linear infinite;
+        z-index: 0;
+    }}
+
+    @keyframes rotate-ring {{
+        from {{ transform: rotate(0deg); }}
+        to {{ transform: rotate(360deg); }}
+    }}
+
+    .scan-wrapper:hover .tech-ring {{
+        opacity: 0.3;
+        border-style: solid;
+        border-width: 2px;
+    }}
+
+    .status-label {{
+        position: absolute;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.55rem;
+        color: {ACCENT_COLOR};
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 4;
+        animation: flicker 2s linear infinite;
+    }}
+    .stat-tl {{ top: 15px; left: 45px; }}
+    .stat-br {{ bottom: 15px; right: 45px; }}
+
+    @keyframes flicker {{
+        0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {{ opacity: 0.8; }}
+        20%, 21.999%, 63%, 63.999%, 65%, 69.999% {{ opacity: 0.2; }}
+    }}
+
+    .sc-noise {{
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.02) 3px,
+            transparent 4px
+        );
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0.3;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -682,23 +862,109 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-if 'radio_seleccion_modulo' not in st.session_state:
-    st.session_state.radio_seleccion_modulo = "📊 Simulador de Retiro"
+if 'modulo_activo' not in st.session_state:
+    st.session_state.modulo_activo = "Hub"
 
-# Selector en el tope de la pantalla (o sidebar)
-with st.sidebar:
-    st.markdown("<br>", unsafe_allow_html=True)
-    seleccion = st.radio("Módulo Principal", ["📊 Simulador de Retiro", "✨ Nuevo Simulador"], label_visibility="collapsed", key="radio_seleccion_modulo")
-    st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+def ir_a_simulador(nombre_sim):
+    st.session_state.modulo_activo = nombre_sim
 
-if st.session_state.radio_seleccion_modulo == "✨ Nuevo Simulador":
+# --- NAVEGACIÓN DE REGRESO ---
+if st.session_state.modulo_activo != "Hub":
+    with st.sidebar:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🏠 MENÚ PRINCIPAL", use_container_width=True, type="primary"):
+            st.session_state.modulo_activo = "Hub"
+            st.rerun()
+        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+
+if st.session_state.modulo_activo == "Hub":
+    # --- PANTALLA HUB (MENÚ PRINCIPAL) ---
+    # --- LÓGICA DE NAVEGACIÓN POR URL (Para que las tarjetas sean botones) ---
+    q_params = st.query_params
+    if "sim" in q_params:
+        target_sim = q_params["sim"]
+        if target_sim == "retiro":
+            st.session_state.modulo_activo = "📊 Simulador de Retiro"
+        elif target_sim == "costos":
+            st.session_state.modulo_activo = "✨ Nuevo Simulador"
+        
+        # Limpiar parámetros y recargar
+        st.query_params.clear()
+        st.rerun()
+
+    logo_filename_hub = "1-08.png" if is_dark else "1-01-copy.png"
+    logo_hub_path = get_asset_path(logo_filename_hub)
+    
+    if os.path.exists(logo_hub_path):
+        bin_str_logo = get_base64_of_bin_file(logo_hub_path)
+        st.markdown(f"""
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 50px;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="width: 250px; margin-bottom: 20px;">
+                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 5rem;">ASTOR SIMULADOR</h1>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    c1, c2, c3, c4, c5 = st.columns([1, 2, 0.5, 2, 1])
+    
+    with c2:
+        st.markdown(f"""
+            <a href="/?sim=retiro" target="_self" style="text-decoration: none; color: inherit; display: block; border-radius: 15px;">
+                <div class="scan-wrapper">
+                    <div class="sc-noise"></div>
+                    <div class="hud-corner corner-tl"></div>
+                    <div class="hud-corner corner-tr"></div>
+                    <div class="hud-corner corner-bl"></div>
+                    <div class="hud-corner corner-br"></div>
+                    <div class="status-label stat-tl">SYSTEM: ACTIVE [v5.100]</div>
+                    <div class="status-label stat-br">DECRYPTING DATA...</div>
+                    <div class="scan-line"></div>
+                    <div class="tech-ring"></div>
+                    <div class="scan-card">
+                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">ASTOR</div>
+                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 700; margin: 0;">SIMULADOR</div>
+                        <div class="tech-badge">ENTRAR AL SISTEMA</div>
+                    </div>
+                </div>
+            </a>
+        """, unsafe_allow_html=True)
+            
+    with c4:
+        st.markdown(f"""
+            <a href="/?sim=costos" target="_self" style="text-decoration: none; color: inherit; display: block; border-radius: 15px;">
+                <div class="scan-wrapper">
+                    <div class="sc-noise"></div>
+                    <div class="hud-corner corner-tl"></div>
+                    <div class="hud-corner corner-tr"></div>
+                    <div class="hud-corner corner-bl"></div>
+                    <div class="hud-corner corner-br"></div>
+                    <div class="status-label stat-tl">SIM_CORE: STABLE</div>
+                    <div class="status-label stat-br">MOD: ALFA_PRIME</div>
+                    <div class="scan-line" style="animation: scan-move-reverse 3s ease-in-out infinite alternate; background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR};"></div>
+                    <div class="tech-ring" style="border-color: {GOLD_COLOR}; animation-direction: reverse;"></div>
+                    <div class="scan-card">
+                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">PROYECTO</div>
+                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 700; margin: 0;">COSTOS</div>
+                        <div class="tech-badge" style="border-color: {ACCENT_COLOR}; color: {ACCENT_COLOR};">EJECUTAR MÓDULO</div>
+                    </div>
+                </div>
+            </a>
+        """, unsafe_allow_html=True)
+            
+    st.stop() # No procesar el resto de la página si estamos en el Hub
+
+# --- SELECTOR ORIGINAL ELIMINADO (Ya no se usa) ---
+# seleccion = st.radio(...) - Se omite para usar modulo_activo
+
+if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     # --- PANTALLA NUEVO SIMULADOR ---
     logo_filename = "1-07.png" if is_dark else "1-01.png"
     logo_sidebar = get_asset_path(logo_filename)
     
     with st.sidebar:
         if os.path.exists(logo_sidebar):
-            st.image(logo_sidebar, use_column_width=True)
+            st.image(logo_sidebar, use_container_width=True)
         st.title("Configuración")
         st.subheader("Costo de Esperar")
         m_meta = st.session_state.get("meta_retiro_val", 10000000)
@@ -706,6 +972,19 @@ if st.session_state.radio_seleccion_modulo == "✨ Nuevo Simulador":
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=18, step=1)
         edad_retiro = st.selectbox("Edad a la que te quieres retirar", [60, 65, 70, 75], index=0)
         rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
+        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        frecuencia = st.selectbox("Frecuencia de Visualización", ["Mensual", "Semestral", "Anual"], index=2)
+        
+        # Factores de conversión
+        dict_factores = {"Mensual": 1, "Semestral": 6, "Anual": 12}
+        factor_frecuencia = dict_factores[frecuencia]
+        label_dinamico = f"Aportación {frecuencia}"
+
+        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        with st.expander("💰 Plan de Jubilación", expanded=False):
+            años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=25)
+            rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=6.0, step=0.5)
+            label_dinamico_retiro = f"Recepción {frecuencia}"
 
     logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
     logo_dash = get_asset_path(logo_filename_dash)
@@ -719,52 +998,61 @@ if st.session_state.radio_seleccion_modulo == "✨ Nuevo Simulador":
             </div>
         """, unsafe_allow_html=True)
 
-    st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Para llegar a ${meta_retiro:,.2f} a los {edad_retiro} años</h3>", unsafe_allow_html=True)
-    st.write("Esta tabla muestra cuánto tendría que aportar mensualmente una persona según la edad a la que comience a invertir, asumiendo un rendimiento constante.")
+    tab_dinamica, tab_retiro = st.tabs(["📊 Tabla Dinámica", "💰 Etapa de Retiro"])
+
+    # 1. Calcular aporte mensual base para la edad inicial seleccionada
+    años_inversion = edad_retiro - edad_inicial
+    meses_totales = años_inversion * 12
+    r_mensual = (rendimiento_anual / 100.0) / 12.0
     
-    # Lógica Matemática
-    datos_tabla = []
-    
-    for edad in range(int(edad_inicial), int(edad_retiro)):
-        años_inversion = edad_retiro - edad
-        meses_inversion = años_inversion * 12
-        tasa_mensual = (rendimiento_anual / 100.0) / 12.0
+    if r_mensual > 0:
+        aporte_m = (meta_retiro * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
+    else:
+        aporte_m = meta_retiro / meses_totales
+
+    with tab_dinamica:
+        st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Plan de Acumulación: ${meta_retiro:,.2f} a los {edad_retiro} años</h3>", unsafe_allow_html=True)
+        st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
-        if tasa_mensual > 0:
-            aportacion_mensual = (meta_retiro * tasa_mensual) / (((1 + tasa_mensual) ** meses_inversion) - 1)
-        else:
-            aportacion_mensual = meta_retiro / meses_inversion
+        n_periodos = meses_totales // factor_frecuencia
+        datos_tabla = []
+        aporte_acum_total = 0.0
+        
+        for p in range(1, n_periodos + 1):
+            monto_periodo = aporte_m * factor_frecuencia
+            aporte_acum_total += monto_periodo
+            m_actual = p * factor_frecuencia
             
-        aportacion_acumulada = aportacion_mensual * meses_inversion
-        rendimientos_generados = meta_retiro - aportacion_acumulada
-        
-        datos_tabla.append({
-            "Edad": edad,
-            "Aportación Mensual": aportacion_mensual,
-            "Aportación Acumulada": aportacion_acumulada,
-            "Rendimiento": rendimientos_generados,
-            "Suma Total": meta_retiro
-        })
-        
-    if datos_tabla:
-        df_espera = pd.DataFrame(datos_tabla)
-        
-        # Formatear la tabla usando pandas Styler y convertirla a HTML manual para evitar el quiebre del componente st.dataframe
-        html_table = (
-            df_espera.style
-            .format({
-                "Aportación Mensual": "${:,.2f}",
-                "Aportación Acumulada": "${:,.2f}",
-                "Rendimiento": "${:,.2f}",
-                "Suma Total": "${:,.2f}",
-                "Edad": "{:.0f}"
+            if r_mensual > 0:
+                saldo_acum = aporte_m * (((1 + r_mensual) ** m_actual) - 1) / r_mensual
+            else:
+                saldo_acum = aporte_m * m_actual
+                
+            datos_tabla.append({
+                "AÑO": (m_actual - 1) // 12 + 1,
+                "EDAD": edad_inicial + (m_actual - 1) // 12,
+                label_dinamico: monto_periodo,
+                "APORTACIÓN ACUMULADA": aporte_acum_total,
+                "SALDO FINAL": saldo_acum
             })
-            .set_properties(**{'text-align': 'center'})
-            .hide(axis="index")
-            .to_html()
-        )
-        
-        st.markdown(f"""
+            
+        if datos_tabla:
+            df_espera = pd.DataFrame(datos_tabla)
+            html_table = (
+                df_espera.style
+                .format({
+                    label_dinamico: "${:,.2f}",
+                    "APORTACIÓN ACUMULADA": "${:,.2f}",
+                    "SALDO FINAL": "${:,.2f}",
+                    "EDAD": "{:.0f}",
+                    "AÑO": "{:.0f}"
+                })
+                .set_properties(**{'text-align': 'center'})
+                .hide(axis="index")
+                .to_html()
+            )
+            
+            st.markdown(f"""
 <style>
     .tabla-espera table {{
         width: 100% !important;
@@ -775,35 +1063,117 @@ if st.session_state.radio_seleccion_modulo == "✨ Nuevo Simulador":
 {html_table}
 </div>
 """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=df_espera["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_espera) + 1)),
+                y=df_espera["SALDO FINAL"].tolist(),
+                mode='lines+markers',
+                fill='tozeroy',
+                line=dict(color=ACCENT_COLOR, width=3),
+                marker=dict(size=6, color=GOLD_COLOR),
+                name="Progreso del Saldo"
+            ))
+            
+            fig.update_layout(
+                title=f"Crecimiento del Saldo ({frecuencia})",
+                xaxis_title="Tiempo",
+                yaxis_title="Saldo Acumulado ($)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color=TEXT_COLOR),
+                margin=dict(t=50, b=40)
+            )
+            
+            fig.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
+            fig.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
+            
+            st.plotly_chart(fig, use_container_width=True, theme=None)
+
+    with tab_retiro:
+        st.markdown(f"<h3 style='text-align: center; color: {ACCENT_COLOR};'>Plan de Distribución: Etapa de Jubilación</h3>", unsafe_allow_html=True)
         
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Lógica de Retiro (Decumulación)
+        r_retiro_mensual = (rendimiento_retiro / 100.0) / 12.0
+        meses_retiro = años_retiro_pago * 12
         
-        # Gráfica de aportación requerida
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=df_espera["Edad"].astype(str).tolist(),
-            y=df_espera["Aportación Mensual"].tolist(),
-            marker_color=COLORES[3],
-            name="Aportación Mensual"
-        ))
+        # Fórmula de Pago de Anualidad (PMT)
+        if r_retiro_mensual > 0:
+            pago_mensual_retiro = (meta_retiro * r_retiro_mensual) / (1 - (1 + r_retiro_mensual)**(-meses_retiro))
+        else:
+            pago_mensual_retiro = meta_retiro / meses_retiro
+            
+        st.success(f"💰 Se estima una renta mensual de **${pago_mensual_retiro:,.2f}** durante {años_retiro_pago} años.")
         
-        fig.update_layout(
-            title=f"Aportación Mensual Requerida según Edad de Inicio",
-            xaxis_title="Edad de Inicio",
-            yaxis_title="Aportación Mensual ($)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color=TEXT_COLOR),
-            margin=dict(t=50, b=40)
-        )
+        n_periodos_retiro = meses_retiro // factor_frecuencia
+        datos_retiro = []
+        saldo_remanente = meta_retiro
         
-        fig.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
-        fig.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
-        
-        st.plotly_chart(fig, use_container_width=True, theme=None)
-        
-    else:
-        st.warning("La edad inicial debe ser menor a la edad de retiro.")
+        for p in range(1, n_periodos_retiro + 1):
+            monto_periodo_rec = pago_mensual_retiro * factor_frecuencia
+            m_actual_ret = p * factor_frecuencia
+            
+            # Saldo remanente después de p periodos
+            if r_retiro_mensual > 0:
+                saldo_remanente = meta_retiro * (1 + r_retiro_mensual)**m_actual_ret - \
+                                 pago_mensual_retiro * (((1 + r_retiro_mensual)**m_actual_ret - 1) / r_retiro_mensual)
+            else:
+                saldo_remanente = meta_retiro - (pago_mensual_retiro * m_actual_ret)
+                
+            datos_retiro.append({
+                "AÑO": (m_actual_ret - 1) // 12 + 1,
+                "EDAD": edad_retiro + (m_actual_ret - 1) // 12,
+                label_dinamico_retiro: monto_periodo_rec,
+                "SALDO REMANENTE": max(0, saldo_remanente)
+            })
+            
+        if datos_retiro:
+            df_retiro = pd.DataFrame(datos_retiro)
+            html_table_ret = (
+                df_retiro.style
+                .format({
+                    label_dinamico_retiro: "${:,.2f}",
+                    "SALDO REMANENTE": "${:,.2f}",
+                    "EDAD": "{:.0f}",
+                    "AÑO": "{:.0f}"
+                })
+                .set_properties(**{'text-align': 'center'})
+                .hide(axis="index")
+                .to_html()
+            )
+            
+            st.markdown(f"""
+<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+{html_table_ret}
+</div>
+""", unsafe_allow_html=True)
+            
+            fig_ret = go.Figure()
+            fig_ret.add_trace(go.Scatter(
+                x=df_retiro["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_retiro) + 1)),
+                y=df_retiro["SALDO REMANENTE"].tolist(),
+                mode='lines',
+                fill='tozeroy',
+                line=dict(color=GOLD_COLOR, width=3),
+                name="Saldo en Retiro"
+            ))
+            
+            fig_ret.update_layout(
+                title=f"Desglose de Saldo en Etapa de Retiro ({frecuencia})",
+                xaxis_title="Tiempo (Retiro)",
+                yaxis_title="Saldo Disponible ($)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color=TEXT_COLOR),
+                margin=dict(t=50, b=40)
+            )
+            
+            fig_ret.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
+            fig_ret.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
+            
+            st.plotly_chart(fig_ret, use_container_width=True, theme=None)
 
     st.stop() # Detenemos aquí para que no cargue el otro simulador
 
@@ -815,7 +1185,7 @@ with st.sidebar:
     logo_sidebar = get_asset_path(logo_filename)
     try:
         if os.path.exists(logo_sidebar):
-            st.image(logo_sidebar, use_column_width=True)
+            st.image(logo_sidebar, use_container_width=True)
         else:
             st.markdown(f"""
                 <div style="text-align: center; padding: 10px; border-bottom: 2px solid {COLORES[0]}; margin-bottom: 20px;">
