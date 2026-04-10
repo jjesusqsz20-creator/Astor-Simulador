@@ -1166,15 +1166,13 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
     logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
     logo_dash = get_asset_path(logo_filename_dash)
-    if os.path.exists(logo_dash):
-        bin_str_logo = get_base64_of_bin_file(logo_dash)
-        st.markdown(f"""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; opacity: 0.8;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="width: 150px; margin-bottom: 10px;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">ASTOR SIMULADOR</h1>
-                <h2 style="color: {ACCENT_COLOR};">EL COSTO DE ESPERAR</h2>
-            </div>
-        """, unsafe_allow_html=True)
+    # --- CABECERA DASHBOARD ---
+    st.markdown(f"""
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; opacity: 0.8;">
+            <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">ASTOR SIMULADOR</h1>
+            <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 1px;">EL COSTO DE ESPERAR</h2>
+        </div>
+    """, unsafe_allow_html=True)
 
     # --- MÉTRICAS HUD EN DASHBOARD (Simulador 2) ---
     # Cálculo previo de aportaciones para las métricas y lógica de tablas
@@ -1209,67 +1207,60 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         </div>
         """, unsafe_allow_html=True)
 
-    # --- NUEVA SECCIÓN: COSTE DE ESPERAR ---
-    st.markdown(f"""
-        <div style="text-align: center; margin-top: 20px; margin-bottom: 15px;">
-            <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTE DE ESPERAR</h3>
-        </div>
-    """, unsafe_allow_html=True)
-
+    # --- SECCIÓN: COSTE DE ESPERAR ---
     costos_espera_list = []
-    # Calculamos hasta 10 años de coste de espera
+    r_anual_dec = rendimiento_anual / 100.0
+    r_mensual_dec = r_anual_dec / 12.0
+    
     for p_delay in range(1, 11):
         edad_espera = edad_inicial + p_delay
         if edad_espera >= edad_retiro:
             break
         
         meses_e = (edad_retiro - edad_espera) * 12
-        if r_mensual > 0:
-            # Fórmula de ahorro mensual necesaria para llegar a meta_retiro
-            aporte_e = (meta_retiro * r_mensual) / (((1 + r_mensual) ** (meses_e)) - 1)
+        if r_mensual_dec > 0:
+            aporte_e = (meta_retiro * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
         else:
             aporte_e = meta_retiro / meses_e
         
         costos_espera_list.append({
             "edad": edad_espera,
             "aporte": aporte_e,
-            "diff": aporte_e - aporte_m_metric,
-            "pct": ((aporte_e / aporte_m_metric) - 1) * 100 if aporte_m_metric > 0 else 0
+            "diff": aporte_e - aporte_m_metric
         })
 
     if costos_espera_list:
-        # Generar tabla HTML personalizada ultra-limpia
-        # Usamos nombres únicos para evitar conflictos de variables
-        html_rows_espera = ""
+        rows_html = ""
         for itm in costos_espera_list:
-            clr_diff = "#ff4b4b" if itm['diff'] > 0 else TEXT_COLOR
-            row_bg = "rgba(255,255,255,0.03)" if itm['edad'] % 2 == 0 else "transparent"
-            
-            html_rows_espera += f"""
-            <tr style="background-color: {row_bg}; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; font-size: 1.1rem; text-align: center;">Si empiezas a los {itm['edad']}</td>
+            diff_clr = "#ff4b4b" if itm['diff'] > 0 else TEXT_COLOR
+            bg_r = "rgba(255,255,255,0.03)" if itm['edad'] % 2 == 0 else "transparent"
+            rows_html += f"""
+            <tr style="background-color: {bg_r}; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">Si empiezas a los {itm['edad']}</td>
                 <td style="padding: 15px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; text-align: center;">${itm['aporte']:,.2f}</td>
-                <td style="padding: 15px; color: {clr_diff}; font-weight: bold; text-align: center;">(+${itm['diff']:,.2f})</td>
+                <td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">(+${itm['diff']:,.2f})</td>
             </tr>
             """
 
-        final_table_html = f"""
-            <div style="background: rgba(10, 10, 10, 0.4); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;">
+        st.markdown(f"""
+            <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+                <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTE DE ESPERAR</h3>
+            </div>
+            <div style="background: rgba(10, 10, 10, 0.5); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;">
                 <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
                     <thead style="border-bottom: 2px solid {GOLD_COLOR};">
                         <tr>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">EDAD DE INICIO</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">APORTACIÓN MENSUAL</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">SOBRE COSTO MENSUAL</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">Edad de Inicio</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">Aportación Mensual</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">Sobre Costo Mensual</th>
                         </tr>
                     </thead>
-                    <tbody style="text-align: center;">
-                        {html_rows_espera}
+                    <tbody>
+                        {rows_html}
                     </tbody>
                 </table>
             </div>
-        """
-        st.markdown(final_table_html, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
     tab_dinamica, tab_retiro = st.tabs(["📊 Tabla Dinámica", "💰 Etapa de Retiro"])
 
