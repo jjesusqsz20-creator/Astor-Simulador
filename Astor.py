@@ -571,8 +571,37 @@ st.markdown(f"""
             transparent 4px
         );
         pointer-events: none;
-        z-index: 5;
+        z-index: 1;
         opacity: 0.3;
+    }}
+
+    /* Lógica de Contenedor HUD usando :has */
+    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) {{
+        position: relative !important;
+        background: {CARD_BG}EB !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
+        border-radius: 15px !important;
+        padding: 40px 20px !important;
+        transition: all 0.4s ease !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }}
+
+    [data-testid="stVerticalBlock"]:has(> div > .hud-tag):hover {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 20px {ACCENT_COLOR}33 !important;
+        transform: translateY(-5px) !important;
+    }}
+
+    /* Asegurar que el láser y el HUD se expandan en el contenedor */
+    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) .scan-line {{
+        z-index: 5 !important;
+    }}
+
+    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) .hud-corner {{
+        z-index: 6 !important;
     }}
 
     .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
@@ -944,59 +973,48 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([1, 2, 0.5, 2, 1])
     
     with c2:
-        # Contenedor de la tarjeta con efecto HUD
-        st.markdown(f"""
-            <div class="scan-wrapper" style="height: auto; min-height: 400px; padding: 20px;">
+        with st.container():
+            # Marcador de contenedor HUD y elementos decorativos internos
+            st.markdown(f"""
+                <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
                 <div class="hud-corner corner-tl"></div>
                 <div class="hud-corner corner-tr"></div>
                 <div class="hud-corner corner-bl"></div>
                 <div class="hud-corner corner-br"></div>
-                <div class="status-label stat-tl">SYSTEM: READY [v5.100]</div>
-                <div class="status-label stat-br">WAITING FOR INPUT...</div>
                 <div class="scan-line"></div>
-                <div class="tech-ring" style="width: 300px; height: 300px;"></div>
-                <div class="scan-card" style="background: transparent; justify-content: flex-start; padding-top: 30px;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7; margin-bottom: 5px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; text-shadow: 0 0 10px {ACCENT_COLOR}44;">SIMULADOR</div>
-                    <div id="hub-form-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-        """, unsafe_allow_html=True)
-        
-        # Inputs de Streamlit dentro del div (usando columnas para que floten centrados)
-        nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", label_visibility="visible")
-        monto_h = st.number_input("Monto Mensual ($)", min_value=1000, value=3000, step=500)
-        edad_h = st.number_input("Edad del Cliente", min_value=18, max_value=70, value=35)
-        tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000")
-        email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True):
-            # Guardar datos en session_state
-            st.session_state.hub_nombre = nombre_h
-            st.session_state.hub_monto = monto_h
-            st.session_state.hub_edad = edad_h
-            st.session_state.hub_tel = tel_h
-            st.session_state.hub_email = email_h
-            
-            # Configurar automáticamente los 3 escenarios
-            st.session_state.num_escenarios = 3
-            st.session_state.monto_0 = float(monto_h)
-            st.session_state.monto_1 = float(monto_h + 1000)
-            st.session_state.monto_2 = float(monto_h + 2000)
-            
-            # Forzar edad en el simulador
-            # La clave de la edad en el simulador es 'edad_actual_input' (verificaremos luego)
-            
-            # Cambiar de módulo
-            st.session_state.modulo_activo = "📊 Simulador de Retiro"
-            st.rerun()
-
-        st.markdown("""
-                    </div>
+                <div class="status-label stat-tl">SYSTEM: READY</div>
+                <div class="status-label stat-br">MODE: INPUT_HUD</div>
+                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.22rem; font-weight: 700; text-shadow: 0 0 15px {ACCENT_COLOR}66;">SIMULADOR</div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+            
+            # Inputs de Streamlit (ahora vivirán DENTRO del contenedor estilizado)
+            nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
+            monto_h = st.number_input("Monto Mensual ($)", min_value=1000, value=3000, step=500, key="hub_monto_input")
+            edad_h = st.number_input("Edad del Cliente", min_value=18, max_value=70, value=35, key="hub_edad_input")
+            tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
+            email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True):
+                # Guardar datos en session_state
+                st.session_state.hub_nombre = nombre_h
+                st.session_state.hub_monto = monto_h
+                st.session_state.hub_edad = edad_h
+                
+                # Configurar automáticamente los 3 escenarios
+                st.session_state.num_escenarios = 3
+                st.session_state.monto_0 = float(monto_h)
+                st.session_state.monto_1 = float(monto_h + 1000)
+                st.session_state.monto_2 = float(monto_h + 2000)
+                
+                # Cambiar de módulo
+                st.session_state.modulo_activo = "📊 Simulador de Retiro"
+                st.rerun()
             
     with c4:
         st.markdown(f"""
