@@ -157,11 +157,15 @@ st.markdown(f"""
     /* Quitar franja blanca superior */
     header[data-testid="stHeader"] {{
         background: transparent !important;
-        color: transparent !important;
     }}
     
-    [data-testid="stHeader"] {{
-        display: none !important;
+    [data-testid="stSidebarCollapseButton"] {{
+        color: {TEXT_COLOR} !important;
+        background-color: transparent !important;
+    }}
+    [data-testid="stSidebarCollapseButton"]:hover {{
+        color: {ACCENT_COLOR} !important;
+        background-color: {ACCENT_COLOR}11 !important;
     }}
 
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap');
