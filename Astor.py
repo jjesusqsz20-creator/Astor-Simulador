@@ -1161,6 +1161,39 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
     tab_dinamica, tab_retiro = st.tabs(["📊 Tabla Dinámica", "💰 Etapa de Retiro"])
 
+    # --- MÉTRICAS HUD EN DASHBOARD (Simulador 2) ---
+    m1, m2 = st.columns(2)
+    
+    # Cálculo previo de aportaciones para las métricas
+    años_inversion = edad_retiro - edad_inicial
+    meses_totales = años_inversion * 12
+    r_mensual = (rendimiento_anual / 100.0) / 12.0
+    
+    if r_mensual > 0:
+        aporte_m_metric = (meta_retiro * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
+    else:
+        aporte_m_metric = meta_retiro / meses_totales
+
+    with m1:
+        st.markdown(f"""
+        <div style="background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-left: 5px solid {GOLD_COLOR}; box-shadow: 0 4px 20px rgba(0,0,0,0.4); height: 180px; display: flex; flex-direction: column; justify-content: center;">
+            <p style="color: {TEXT_COLOR}; font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Meta de Retiro ({edad_retiro} años)</p>
+            <div style="color: {GOLD_COLOR}; font-size: 2.8rem; font-weight: bold; margin: 10px 0; text-shadow: 0 0 15px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
+            <div style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.5;">CAPITAL TOTAL OBJETIVO</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with m2:
+        st.markdown(f"""
+        <div style="background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-left: 5px solid {ACCENT_COLOR}; box-shadow: 0 4px 20px rgba(0,0,0,0.4); height: 180px; display: flex; flex-direction: column; justify-content: center;">
+            <p style="color: {TEXT_COLOR}; font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Aportación Sugerida</p>
+            <div style="color: {ACCENT_COLOR}; font-size: 2.8rem; font-weight: bold; margin: 10px 0; text-shadow: 0 0 15px {ACCENT_COLOR}44;">${aporte_m_metric:,.2f}</div>
+            <div style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.5;">MENSUAL PARA LOGRAR LA META</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # 1. Calcular aporte mensual base para la edad inicial seleccionada
     años_inversion = edad_retiro - edad_inicial
     meses_totales = años_inversion * 12
