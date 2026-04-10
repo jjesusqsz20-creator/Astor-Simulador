@@ -1241,7 +1241,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # Generar tabla HTML personalizada para que sea muy visual
         filas_html = ""
         for item in costos_espera_list:
-            color_pct = "#ff4b4b" if item['pct'] > 0 else TEXT_COLOR
+            color_diff = "#ff4b4b" if item['diff'] > 0 else TEXT_COLOR
             # Alternar fondo sutil
             bg_row = "rgba(255,255,255,0.03)" if item['edad'] % 2 == 0 else "transparent"
             
@@ -1249,8 +1249,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             <tr style="background-color: {bg_row}; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding: 12px; color: {TEXT_COLOR}; font-weight: bold; font-size: 1.1rem;">Si empiezas a los {item['edad']}</td>
                 <td style="padding: 12px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700;">${item['aporte']:,.2f}</td>
-                <td style="padding: 12px; color: {color_pct}; font-weight: bold;">(+${item['diff']:,.2f})</td>
-                <td style="padding: 12px; color: {color_pct}; font-style: italic; opacity: 0.8;">{item['pct']:.1f}% adicional</td>
+                <td style="padding: 12px; color: {color_diff}; font-weight: bold;">(+${item['diff']:,.2f})</td>
             </tr>
             """
 
@@ -1261,8 +1260,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                         <tr>
                             <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">EDAD DE INICIO</th>
                             <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">APORTACIÓN MENSUAL</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">SOBRE COSTO</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">IMPACTO %</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">SOBRE COSTO MENSUAL</th>
                         </tr>
                     </thead>
                     <tbody>
