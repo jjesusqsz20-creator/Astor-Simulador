@@ -1209,6 +1209,69 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         </div>
         """, unsafe_allow_html=True)
 
+    # --- NUEVA SECCIÓN: COSTE DE ESPERAR ---
+    st.markdown(f"""
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 15px;">
+            <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTE DE ESPERAR</h3>
+        </div>
+    """, unsafe_allow_html=True)
+
+    costos_espera_list = []
+    # Calculamos hasta 10 años de coste de espera
+    for p_delay in range(1, 11):
+        edad_espera = edad_inicial + p_delay
+        if edad_espera >= edad_retiro:
+            break
+        
+        meses_e = (edad_retiro - edad_espera) * 12
+        if r_mensual > 0:
+            # Fórmula de ahorro mensual necesaria para llegar a meta_retiro
+            aporte_e = (meta_retiro * r_mensual) / (((1 + r_mensual) ** (meses_e)) - 1)
+        else:
+            aporte_e = meta_retiro / meses_e
+        
+        costos_espera_list.append({
+            "edad": edad_espera,
+            "aporte": aporte_e,
+            "diff": aporte_e - aporte_m_metric,
+            "pct": ((aporte_e / aporte_m_metric) - 1) * 100 if aporte_m_metric > 0 else 0
+        })
+
+    if costos_espera_list:
+        # Generar tabla HTML personalizada para que sea muy visual
+        filas_html = ""
+        for item in costos_espera_list:
+            color_pct = "#ff4b4b" if item['pct'] > 0 else TEXT_COLOR
+            # Alternar fondo sutil
+            bg_row = "rgba(255,255,255,0.03)" if item['edad'] % 2 == 0 else "transparent"
+            
+            filas_html += f"""
+            <tr style="background-color: {bg_row}; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 12px; color: {TEXT_COLOR}; font-weight: bold; font-size: 1.1rem;">Si empiezas a los {item['edad']}</td>
+                <td style="padding: 12px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700;">${item['aporte']:,.2f}</td>
+                <td style="padding: 12px; color: {color_pct}; font-weight: bold;">(+${item['diff']:,.2f})</td>
+                <td style="padding: 12px; color: {color_pct}; font-style: italic; opacity: 0.8;">{item['pct']:.1f}% adicional</td>
+            </tr>
+            """
+
+        st.markdown(f"""
+            <div style="background: rgba(10, 10, 10, 0.4); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
+                    <thead style="border-bottom: 2px solid {GOLD_COLOR};">
+                        <tr>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">EDAD DE INICIO</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">APORTACIÓN MENSUAL</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">SOBRE COSTO</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">IMPACTO %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filas_html}
+                    </tbody>
+                </table>
+            </div>
+        """, unsafe_allow_html=True)
+
     tab_dinamica, tab_retiro = st.tabs(["📊 Tabla Dinámica", "💰 Etapa de Retiro"])
 
     with tab_dinamica:
