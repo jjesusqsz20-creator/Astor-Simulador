@@ -1247,20 +1247,20 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             
             filas_html += f"""
             <tr style="background-color: {bg_row}; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 12px; color: {TEXT_COLOR}; font-weight: bold; font-size: 1.1rem;">Si empiezas a los {item['edad']}</td>
-                <td style="padding: 12px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700;">${item['aporte']:,.2f}</td>
-                <td style="padding: 12px; color: {color_diff}; font-weight: bold;">(+${item['diff']:,.2f})</td>
+                <td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; font-size: 1.1rem; text-align: center;">Si empiezas a los {item['edad']}</td>
+                <td style="padding: 15px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; text-align: center;">${item['aporte']:,.2f}</td>
+                <td style="padding: 15px; color: {color_diff}; font-weight: bold; text-align: center;">(+${item['diff']:,.2f})</td>
             </tr>
             """
 
         st.markdown(f"""
-            <div style="background: rgba(10, 10, 10, 0.4); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
+            <div style="background: rgba(10, 10, 10, 0.4); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
                     <thead style="border-bottom: 2px solid {GOLD_COLOR};">
                         <tr>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">EDAD DE INICIO</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">APORTACIÓN MENSUAL</th>
-                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">SOBRE COSTO MENSUAL</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">EDAD DE INICIO</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">APORTACIÓN MENSUAL</th>
+                            <th style="padding: 15px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; text-align: center;">SOBRE COSTO MENSUAL</th>
                         </tr>
                     </thead>
                     <tbody>
