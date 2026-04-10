@@ -573,6 +573,37 @@ st.markdown(f"""
         pointer-events: none;
         z-index: 5;
         opacity: 0.3;
+    }
+
+    .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
+        width: 85% !important;
+        margin-bottom: -10px !important;
+    }}
+
+    .scan-wrapper .stTextInput input, .scan-wrapper .stNumberInput input {{
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid {ACCENT_COLOR}44 !important;
+        color: {TEXT_COLOR} !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-size: 0.85rem !important;
+        text-align: center !important;
+        border-radius: 4px !important;
+        transition: all 0.3s ease !important;
+    }}
+
+    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 10px {ACCENT_COLOR}44 !important;
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }}
+
+    .scan-wrapper label {{
+        color: {ACCENT_COLOR} !important;
+        font-size: 0.6rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 2px !important;
+        text-transform: uppercase !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -913,25 +944,58 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([1, 2, 0.5, 2, 1])
     
     with c2:
+        # Contenedor de la tarjeta con efecto HUD
         st.markdown(f"""
-            <a href="/?sim=retiro" target="_self" style="text-decoration: none; color: inherit; display: block; border-radius: 15px;">
-                <div class="scan-wrapper">
-                    <div class="sc-noise"></div>
-                    <div class="hud-corner corner-tl"></div>
-                    <div class="hud-corner corner-tr"></div>
-                    <div class="hud-corner corner-bl"></div>
-                    <div class="hud-corner corner-br"></div>
-                    <div class="status-label stat-tl">SYSTEM: ACTIVE [v5.100]</div>
-                    <div class="status-label stat-br">DECRYPTING DATA...</div>
-                    <div class="scan-line"></div>
-                    <div class="tech-ring"></div>
-                    <div class="scan-card">
-                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">ASTOR</div>
-                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 700; margin: 0;">SIMULADOR</div>
-                        <div class="tech-badge">ENTRAR AL SISTEMA</div>
+            <div class="scan-wrapper" style="height: auto; min-height: 400px; padding: 20px;">
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl"></div>
+                <div class="hud-corner corner-tr"></div>
+                <div class="hud-corner corner-bl"></div>
+                <div class="hud-corner corner-br"></div>
+                <div class="status-label stat-tl">SYSTEM: READY [v5.100]</div>
+                <div class="status-label stat-br">WAITING FOR INPUT...</div>
+                <div class="scan-line"></div>
+                <div class="tech-ring" style="width: 300px; height: 300px;"></div>
+                <div class="scan-card" style="background: transparent; justify-content: flex-start; padding-top: 30px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7; margin-bottom: 5px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; text-shadow: 0 0 10px {ACCENT_COLOR}44;">SIMULADOR</div>
+                    <div id="hub-form-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+        """, unsafe_allow_html=True)
+        
+        # Inputs de Streamlit dentro del div (usando columnas para que floten centrados)
+        nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", label_visibility="visible")
+        monto_h = st.number_input("Monto Mensual ($)", min_value=1000, value=3000, step=500)
+        edad_h = st.number_input("Edad del Cliente", min_value=18, max_value=70, value=35)
+        tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000")
+        email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True):
+            # Guardar datos en session_state
+            st.session_state.hub_nombre = nombre_h
+            st.session_state.hub_monto = monto_h
+            st.session_state.hub_edad = edad_h
+            st.session_state.hub_tel = tel_h
+            st.session_state.hub_email = email_h
+            
+            # Configurar automáticamente los 3 escenarios
+            st.session_state.num_escenarios = 3
+            st.session_state.monto_0 = float(monto_h)
+            st.session_state.monto_1 = float(monto_h + 1000)
+            st.session_state.monto_2 = float(monto_h + 2000)
+            
+            # Forzar edad en el simulador
+            # La clave de la edad en el simulador es 'edad_actual_input' (verificaremos luego)
+            
+            # Cambiar de módulo
+            st.session_state.modulo_activo = "📊 Simulador de Retiro"
+            st.rerun()
+
+        st.markdown("""
                     </div>
                 </div>
-            </a>
+            </div>
         """, unsafe_allow_html=True)
             
     with c4:
@@ -1203,8 +1267,11 @@ with st.sidebar:
     st.title("Configuración")
     
     with st.expander("👤 Datos del Cliente", expanded=True):
-        nombre = st.text_input("Nombre", "Cliente Ejemplo")
-        edad = st.number_input("Edad Actual", 18, 70, 35)
+        nombre_default = st.session_state.get('hub_nombre', "Cliente Ejemplo")
+        nombre = st.text_input("Nombre", value=nombre_default)
+        
+        edad_default = st.session_state.get('hub_edad', 35)
+        edad = st.number_input("Edad Actual", 18, 70, value=int(edad_default), key="edad_actual_input")
         tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
 
     with st.expander("⚙️ Parámetros Globales", expanded=True):
@@ -1222,18 +1289,24 @@ with st.sidebar:
     detalles_bonos = []
 
     with st.expander("💰 Comparativa de Inversión", expanded=True):
+        # Aseguramos que si venimos del Hub, tengamos al menos 3 escenarios
+        if 'hub_monto' in st.session_state and st.session_state.get('num_escenarios') < 3:
+            st.session_state.num_escenarios = 3
+
         st.caption(f"Escenarios activos: {st.session_state.num_escenarios}/5")
         
         for i in range(st.session_state.num_escenarios):
             color = COLORES[i]
             st.markdown(f"<div style='color:{color}; font-weight:900; margin-bottom:2px;'>Escenario de inversión {i+1}</div>", unsafe_allow_html=True)
+            
+            # Valor por defecto si no existe en session_state
             val_defecto = 3000 + (i * 1000)
             
             # 1. Monto Inicial
             # ETIQUETA VIVO (Separador de miles)
             m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
             st.markdown(f"<div style='font-size: 0.85rem; font-weight: 900; color: {color}; margin-bottom: -15px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
-            monto = st.number_input(f"Monto Mensual {i+1}", min_value=2000, value=val_defecto, step=500, key=f"monto_{i}", label_visibility="collapsed")
+            monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000, value=float(m_val), step=500, key=f"monto_{i}", label_visibility="collapsed")
             
             # 2. Checkbox para cambio en mes 19
             usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", key=f"chk_m19_{i}")
