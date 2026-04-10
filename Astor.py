@@ -1122,7 +1122,9 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         
         # Sincronización con el Hub (Renta mensual deseada)
         renta_def = st.session_state.get("renta_costos_sync", 50000.0)
-        renta_mensual_sidebar = st.number_input("Renta Mensual Deseada ($)", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar")
+        # Mostrar el valor actual en el Label como pidió el usuario
+        renta_actual_label = st.session_state.get("renta_sync_sidebar", renta_def)
+        renta_mensual_sidebar = st.number_input(f"Renta Mensual Deseada (${renta_actual_label:,.0f})", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar")
         
         # Calcular Meta de Retiro basada en la Renta deseada (25 años, 10%)
         r_m_sidebar = 0.10 / 12.0
