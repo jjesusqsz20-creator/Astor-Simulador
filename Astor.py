@@ -1059,17 +1059,47 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
                 <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; margin-top: 30px; margin-bottom: 50px;">
+                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 250px;">
-                    <p style="color: {TEXT_COLOR}; opacity: 0.6; text-align: center; font-family: 'Montserrat';">Análisis avanzado de costos y proyecciones de ahorro temporal.</p>
-                </div>
             """, unsafe_allow_html=True)
             
+            # Inputs de Proyecto Costos
+            nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes? ($)", min_value=1000, value=50000, step=5000, key="costos_renta_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=1, key="costos_retiro_age_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
+            
             st.markdown("<br><br>", unsafe_allow_html=True)
+            
             if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
+                # LÓGICA DE CÁLCULO INVERSO (PROYECTO COSTOS)
+                # Meta de Retiro (M) necesaria para pago mensual de renta_c (Y)
+                # Asumiendo 25 años de pagos y 10% de rendimiento compartido por el usuario
+                r_anual_retiro = 0.10 
+                r_m = r_anual_retiro / 12.0
+                n_meses_pago = 25 * 12
+                
+                # Fórmula de Valor Presente de una Anualidad Ordinaria
+                if r_m > 0:
+                    meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
+                else:
+                    meta_calculada = renta_c * n_meses_pago
+                
+                # Guardar en session_state para el simulador
+                st.session_state.hub_nombre_costos = nombre_c
+                st.session_state.meta_retiro_val = float(meta_calculada)
+                st.session_state.costos_edad_inicial = int(edad_c)
+                st.session_state.costos_edad_retiro = int(retiro_c)
+                
                 st.session_state.modulo_activo = "✨ Nuevo Simulador"
                 st.rerun()
             
@@ -1088,10 +1118,19 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             st.image(logo_sidebar, use_container_width=True)
         st.title("Configuración")
         st.subheader("Costo de Esperar")
-        m_meta = st.session_state.get("meta_retiro_val", 10000000)
-        meta_retiro = st.number_input(f"Meta de retiro (${m_meta:,.0f})", min_value=100000, value=m_meta, step=500000, format="%d", key="meta_retiro_val")
-        edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=18, step=1)
-        edad_retiro = st.selectbox("Edad a la que te quieres retirar", [60, 65, 70, 75], index=0)
+        
+        # Sincronización con el Hub (Proyecto Costos)
+        m_meta_default = st.session_state.get("meta_retiro_val", 10000000)
+        meta_retiro = st.number_input(f"Meta de retiro (${m_meta_default:,.0f})", min_value=100000, value=float(m_meta_default), step=500000, format="%.0f", key="meta_retiro_val_sync")
+        
+        e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
+        edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
+        
+        e_retiro_default = st.session_state.get("costos_edad_retiro", 60)
+        opciones_retiro = [60, 65, 70, 75]
+        idx_retiro = opciones_retiro.index(e_retiro_default) if e_retiro_default in opciones_retiro else 0
+        edad_retiro = st.selectbox("Edad a la que te quieres retirar", opciones_retiro, index=idx_retiro)
+        
         rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         frecuencia = st.selectbox("Frecuencia de Visualización", ["Mensual", "Semestral", "Anual"], index=2)
@@ -1104,7 +1143,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         with st.expander("💰 Plan de Jubilación", expanded=False):
             años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=25)
-            rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=6.0, step=0.5)
+            # USAR 10.0% como solicitó el usuario para el cálculo predeterminado
+            rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=10.0, step=0.5)
             label_dinamico_retiro = f"Recepción {frecuencia}"
 
     logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
