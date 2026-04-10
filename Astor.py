@@ -1164,9 +1164,19 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=10.0, step=0.5)
             label_dinamico_retiro = f"Recepción {frecuencia}"
 
-    logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
-    logo_dash = get_asset_path(logo_filename_dash)
-    # --- CABECERA DASHBOARD ---
+    # --- CÁLCULOS BASE ---
+    años_inversion = edad_retiro - edad_inicial
+    meses_totales = años_inversion * 12
+    r_mensual = (rendimiento_anual / 100.0) / 12.0
+    
+    if r_mensual > 0:
+        aporte_m = (meta_retiro * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
+    else:
+        aporte_m = meta_retiro / meses_totales
+
+    # Variable global para el dashboard y la tabla de costos
+    aporte_m_metric = aporte_m
+
     # --- DASHBOARD UNIFICADO (CABECERA + MÉTRICAS + TABLA COSTE ESPERA) ---
     # Los cálculos de años_inversion, aporte_m, etc., ya están arriba (líneas 1179-1186)
     
