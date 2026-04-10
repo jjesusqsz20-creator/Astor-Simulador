@@ -1359,7 +1359,7 @@ with st.sidebar:
             # ETIQUETA VIVO (Separador de miles)
             m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
             st.markdown(f"<div style='font-size: 0.85rem; font-weight: 900; color: {color}; margin-bottom: -15px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
-            monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000, value=float(m_val), step=500, key=f"monto_{i}", label_visibility="collapsed")
+            monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_val), step=500.0, key=f"monto_{i}", label_visibility="collapsed")
             
             # 2. Checkbox para cambio en mes 19
             usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", key=f"chk_m19_{i}")
