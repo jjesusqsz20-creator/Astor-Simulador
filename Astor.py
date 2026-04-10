@@ -1121,7 +1121,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         
         # Sincronización con el Hub (Proyecto Costos)
         m_meta_default = st.session_state.get("meta_retiro_val", 10000000)
-        meta_retiro = st.number_input(f"Meta de retiro (${m_meta_default:,.0f})", min_value=100000, value=float(m_meta_default), step=500000, format="%.0f", key="meta_retiro_val_sync")
+        meta_retiro = st.number_input(f"Meta de retiro (${m_meta_default:,.0f})", min_value=100000.0, value=float(m_meta_default), step=500000.0, format="%.0f", key="meta_retiro_val_sync")
         
         e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
