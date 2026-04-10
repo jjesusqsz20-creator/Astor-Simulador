@@ -1160,15 +1160,18 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         """, unsafe_allow_html=True)
 
     # --- MÉTRICAS HUD EN DASHBOARD (Simulador 2) ---
-    # Cálculo previo de aportaciones para las métricas
-    años_inversion_m = edad_retiro - edad_inicial
-    meses_totales_m = años_inversion_m * 12
-    r_mensual_m = (rendimiento_anual / 100.0) / 12.0
+    # Cálculo previo de aportaciones para las métricas y lógica de tablas
+    años_inversion = edad_retiro - edad_inicial
+    meses_totales = años_inversion * 12
+    r_mensual = (rendimiento_anual / 100.0) / 12.0
     
-    if r_mensual_m > 0:
-        aporte_m_metric = (meta_retiro * r_mensual_m) / (((1 + r_mensual_m) ** meses_totales_m) - 1)
+    if r_mensual > 0:
+        aporte_m = (meta_retiro * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
     else:
-        aporte_m_metric = meta_retiro / meses_totales_m
+        aporte_m = meta_retiro / meses_totales
+
+    # Para las métricas usaremos estas mismas variables
+    aporte_m_metric = aporte_m
 
     m1, m2 = st.columns(2)
     with m1:
