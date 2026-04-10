@@ -1096,6 +1096,7 @@ if st.session_state.modulo_activo == "Hub":
                 
                 # Guardar en session_state para el simulador
                 st.session_state.hub_nombre_costos = nombre_c
+                st.session_state.renta_costos_sync = float(renta_c)
                 st.session_state.meta_retiro_val = float(meta_calculada)
                 st.session_state.costos_edad_inicial = int(edad_c)
                 st.session_state.costos_edad_retiro = int(retiro_c)
@@ -1119,9 +1120,21 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.title("Configuración")
         st.subheader("Costo de Esperar")
         
-        # Sincronización con el Hub (Proyecto Costos)
-        m_meta_default = st.session_state.get("meta_retiro_val", 10000000)
-        meta_retiro = st.number_input(f"Meta de retiro (${m_meta_default:,.0f})", min_value=100000.0, value=float(m_meta_default), step=500000.0, format="%.0f", key="meta_retiro_val_sync")
+        # Sincronización con el Hub (Renta mensual deseada)
+        renta_def = st.session_state.get("renta_costos_sync", 50000.0)
+        renta_mensual_sidebar = st.number_input("Renta Mensual Deseada ($)", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar")
+        
+        # Calcular Meta de Retiro basada en la Renta deseada (25 años, 10%)
+        r_m_sidebar = 0.10 / 12.0
+        n_meses_sidebar = 25 * 12
+        if r_m_sidebar > 0:
+            meta_retiro = renta_mensual_sidebar * (1 - (1 + r_m_sidebar)**(-n_meses_sidebar)) / r_m_sidebar
+        else:
+            meta_retiro = renta_mensual_sidebar * n_meses_sidebar
+
+        # Guardar en session state para otros cálculos
+        st.session_state.meta_retiro_val = meta_retiro
+        st.caption(f"Meta de retiro calculada: **${meta_retiro:,.0f}**")
         
         e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
