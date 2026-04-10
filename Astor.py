@@ -573,7 +573,7 @@ st.markdown(f"""
         pointer-events: none;
         z-index: 5;
         opacity: 0.3;
-    }
+    }}
 
     .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
         width: 85% !important;
