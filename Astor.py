@@ -1142,7 +1142,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
         
         e_retiro_default = st.session_state.get("costos_edad_retiro", 60)
-        opciones_retiro = [60, 65, 70, 75]
+        opciones_retiro = [60, 65]
         idx_retiro = opciones_retiro.index(e_retiro_default) if e_retiro_default in opciones_retiro else 0
         edad_retiro = st.selectbox("Edad a la que te quieres retirar", opciones_retiro, index=idx_retiro)
         
