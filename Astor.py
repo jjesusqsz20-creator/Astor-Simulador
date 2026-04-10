@@ -758,8 +758,8 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         anio_actual = (mes - 1) // 12 + 1
         mes_del_ano = (mes - 1) % 12 + 1
         
-        # AJUSTE DE EDAD: Año 1 = Edad Inicial + 1
-        edad_actual = edad + anio_actual 
+        # AJUSTE DE EDAD: El incremento ocurre al completar cada ciclo de 12 meses
+        edad_actual = edad + (mes // 12)
         
         # 1. Ajuste Inflacionario Anual
         if inflacion_activa and mes > 1 and (mes - 1) % 12 == 0:
@@ -1191,7 +1191,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 
             datos_tabla.append({
                 "AÑO": (m_actual - 1) // 12 + 1,
-                "EDAD": edad_inicial + (m_actual - 1) // 12,
+                "EDAD": edad_inicial + (m_actual // 12),
                 label_dinamico: monto_periodo,
                 "APORTACIÓN ACUMULADA": aporte_acum_total,
                 "SALDO FINAL": saldo_acum
@@ -1285,7 +1285,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 
             datos_retiro.append({
                 "AÑO": (m_actual_ret - 1) // 12 + 1,
-                "EDAD": edad_retiro + (m_actual_ret - 1) // 12,
+                "EDAD": edad_retiro + (m_actual_ret // 12),
                 label_dinamico_retiro: monto_periodo_rec,
                 "SALDO REMANENTE": max(0, saldo_remanente)
             })
