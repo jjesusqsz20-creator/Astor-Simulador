@@ -575,33 +575,59 @@ st.markdown(f"""
         opacity: 0.3;
     }}
 
-    /* Lógica de Contenedor HUD usando :has */
-    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) {{
+    /* Lógica de Contenedor HUD Ampliado usando :has en Column */
+    [data-testid="column"]:has(.hud-tag) {{
         position: relative !important;
-        background: {CARD_BG}EB !important;
-        border: 1px solid rgba(255,255,255,0.05) !important;
-        border-radius: 15px !important;
-        padding: 40px 20px !important;
-        transition: all 0.4s ease !important;
+        background: {CARD_BG}F5 !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 18px !important;
+        padding: 50px 35px !important;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         overflow: hidden !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+        min-height: 700px;
     }}
 
-    [data-testid="stVerticalBlock"]:has(> div > .hud-tag):hover {{
+    [data-testid="column"]:has(.hud-tag):hover {{
         border-color: {ACCENT_COLOR} !important;
-        box-shadow: 0 0 20px {ACCENT_COLOR}33 !important;
-        transform: translateY(-5px) !important;
+        box-shadow: 0 0 50px {ACCENT_COLOR}33 !important;
+        transform: translateY(-10px) scale(1.02) !important;
     }}
+
+    /* Efecto de láser dentro del contenedor ampliado */
+    [data-testid="column"]:has(.hud-tag)::before {{
+        content: "";
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background-image: conic-gradient(transparent, {ACCENT_COLOR}, transparent 30%);
+        animation: rotate-laser 4s linear infinite;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.5s;
+        top: -25%; left: -25%;
+        pointer-events: none;
+    }}
+
+    [data-testid="column"]:has(.hud-tag):hover::before {{ opacity: 0.6; }}
 
     /* Asegurar que el láser y el HUD se expandan en el contenedor */
-    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) .scan-line {{
-        z-index: 5 !important;
+    [data-testid="column"]:has(.hud-tag) .scan-line {{
+        z-index: 10 !important;
+        opacity: 0.8;
     }}
 
-    [data-testid="stVerticalBlock"]:has(> div > .hud-tag) .hud-corner {{
-        z-index: 6 !important;
+    [data-testid="column"]:has(.hud-tag) .hud-corner {{
+        z-index: 11 !important;
+        width: 35px;
+        height: 35px;
+    }}
+
+    [data-testid="column"]:has(.hud-tag) .status-label {{
+        z-index: 12 !important;
     }}
 
     .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
@@ -970,7 +996,7 @@ if st.session_state.modulo_activo == "Hub":
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
-    c1, c2, c3, c4, c5 = st.columns([1, 2, 0.5, 2, 1])
+    c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
     
     with c2:
         with st.container():
@@ -983,24 +1009,28 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="hud-corner corner-bl"></div>
                 <div class="hud-corner corner-br"></div>
                 <div class="scan-line"></div>
-                <div class="status-label stat-tl">SYSTEM: READY</div>
-                <div class="status-label stat-br">MODE: INPUT_HUD</div>
+                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
+                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
                 <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.22rem; font-weight: 700; text-shadow: 0 0 15px {ACCENT_COLOR}66;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {ACCENT_COLOR}77;">SIMULADOR</div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # Inputs de Streamlit (ahora vivirán DENTRO del contenedor estilizado)
+            # Inputs de Streamlit con mayor espaciado
             nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-            monto_h = st.number_input("Monto Mensual ($)", min_value=1000, value=3000, step=500, key="hub_monto_input")
-            edad_h = st.number_input("Edad del Cliente", min_value=18, max_value=70, value=35, key="hub_edad_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            monto_h = st.number_input("Monto Mensual que va depositar ($)", min_value=1000, value=3000, step=500, key="hub_monto_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
             
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<br><br>", unsafe_allow_html=True)
             
-            if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True):
+            if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
                 # Guardar datos en session_state
                 st.session_state.hub_nombre = nombre_h
                 st.session_state.hub_monto = monto_h
@@ -1017,26 +1047,31 @@ if st.session_state.modulo_activo == "Hub":
                 st.rerun()
             
     with c4:
-        st.markdown(f"""
-            <a href="/?sim=costos" target="_self" style="text-decoration: none; color: inherit; display: block; border-radius: 15px;">
-                <div class="scan-wrapper">
-                    <div class="sc-noise"></div>
-                    <div class="hud-corner corner-tl"></div>
-                    <div class="hud-corner corner-tr"></div>
-                    <div class="hud-corner corner-bl"></div>
-                    <div class="hud-corner corner-br"></div>
-                    <div class="status-label stat-tl">SIM_CORE: STABLE</div>
-                    <div class="status-label stat-br">MOD: ALFA_PRIME</div>
-                    <div class="scan-line" style="animation: scan-move-reverse 3s ease-in-out infinite alternate; background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR};"></div>
-                    <div class="tech-ring" style="border-color: {GOLD_COLOR}; animation-direction: reverse;"></div>
-                    <div class="scan-card">
-                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.2rem; opacity: 0.7;">PROYECTO</div>
-                        <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 700; margin: 0;">COSTOS</div>
-                        <div class="tech-badge" style="border-color: {ACCENT_COLOR}; color: {ACCENT_COLOR};">EJECUTAR MÓDULO</div>
-                    </div>
+        # Convertimos también la segunda tarjeta al mismo formato para simetría
+        with st.container():
+            st.markdown(f"""
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
+                <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
+                <div style="text-align: center; margin-top: 30px; margin-bottom: 50px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
                 </div>
-            </a>
-        """, unsafe_allow_html=True)
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 250px;">
+                    <p style="color: {TEXT_COLOR}; opacity: 0.6; text-align: center; font-family: 'Montserrat';">Análisis avanzado de costos y proyecciones de ahorro temporal.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
+                st.session_state.modulo_activo = "✨ Nuevo Simulador"
+                st.rerun()
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
