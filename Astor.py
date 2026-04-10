@@ -1019,8 +1019,9 @@ if st.session_state.modulo_activo == "Hub":
             
             # Inputs de Streamlit con mayor espaciado
             nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            monto_h = st.number_input("Monto Mensual que va depositar ($)", min_value=1000, value=3000, step=500, key="hub_monto_input")
+            # Mostrar valor dinámico en el label
+            m_h_val = st.session_state.get("hub_monto_input", 3000)
+            monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1067,8 +1068,9 @@ if st.session_state.modulo_activo == "Hub":
             
             # Inputs de Proyecto Costos
             nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes? ($)", min_value=1000, value=50000, step=5000, key="costos_renta_input")
+            # Mostrar valor dinámico en el label
+            r_c_val = st.session_state.get("costos_renta_input", 50000)
+            renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
