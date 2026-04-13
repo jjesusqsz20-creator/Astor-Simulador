@@ -15,7 +15,13 @@ def get_asset_path(relative_path):
         base_path = sys._MEIPASS
     else:
         base_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_path, relative_path)
+        
+    asset_dir = os.path.join(base_path, 'assets')
+    # Fallback por si en un ejecutable congelado no existe la subcarpeta
+    if not os.path.exists(asset_dir):
+        asset_dir = base_path
+        
+    return os.path.join(asset_dir, relative_path)
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 if 'theme' not in st.session_state:
