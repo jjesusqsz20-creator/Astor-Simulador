@@ -627,29 +627,34 @@ st.markdown(f"""
         left: 0;
     }}
 
-    /* CSS para el Botón Invisible que hace clickable la tarjeta */
-    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
+    /* CSS para el Botón Invisible (Técnica de Hermanos para alta compatibilidad) */
+    [data-testid="element-container"]:has(.hud-tag) + [data-testid="element-container"] [data-testid="stButton"] button {{
         position: absolute !important;
-        top: 0 !important;
+        top: -300px !important; /* Mueve el botón hacia arriba para cubrir el encabezado */
         left: 0 !important;
         width: 100% !important;
-        height: 250px !important; /* Cubre toda el área del header HUD */
+        height: 300px !important; 
         background: transparent !important;
         border: none !important;
         color: transparent !important;
-        z-index: 1001 !important;
-        opacity: 0 !important; /* Completamente invisible */
+        z-index: 9999 !important;
+        opacity: 0 !important;
         cursor: pointer !important;
         box-shadow: none !important;
     }}
 
-    /* Estilo para que la columna completa reaccione al hover */
-    [data-testid="column"]:has(.hud-tag):hover {{
+    /* Estilo de Zoom Mejorado (Compatible con más navegadores) */
+    div.stColumn:has(.hud-tag):hover {{
         border-color: {ACCENT_COLOR} !important;
-        box-shadow: 0 0 60px {ACCENT_COLOR}44 !important;
-        transform: scale(1.02) !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        z-index: 1002 !important;
+        box-shadow: 0 0 70px {ACCENT_COLOR}55 !important;
+        transform: scale(1.03) !important;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        z-index: 10000 !important;
+    }}
+
+    /* Asegurar que el contenedor no corte el botón que sube */
+    [data-testid="column"] {{
+        overflow: visible !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
