@@ -1068,7 +1068,7 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
+    c1, c2, c3, c4, c5, c6, c7 = st.columns([0.1, 2.8, 0.2, 2.8, 0.2, 2.8, 0.1])
 
     with c2:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1173,8 +1173,33 @@ if st.session_state.modulo_activo == "Hub":
                 st.session_state.costos_edad_retiro = int(retiro_c)
                 st.session_state.modulo_activo = "✨ Nuevo Simulador"
                 st.rerun()
+
+    with c6:
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
+                <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
+            st.session_state.modulo_activo = "📈 Planificador Financiero"
+            st.rerun()
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
+
 
 # --- SELECTOR ORIGINAL ELIMINADO (Ya no se usa) ---
 # seleccion = st.radio(...) - Se omite para usar modulo_activo
@@ -2361,3 +2386,7 @@ st.download_button(
     file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
+elif st.session_state.modulo_activo == "📈 Planificador Financiero":
+    import planificador
+    planificador.render_planificador()
