@@ -627,6 +627,29 @@ st.markdown(f"""
         left: 0;
     }}
 
+    /* CSS para el Botón Invisible que hace clickable la tarjeta */
+    .stButton > button[key^="toggle_"] {{
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 250px !important; /* Cubre toda el área del header */
+        background: transparent !important;
+        border: none !important;
+        color: transparent !important;
+        z-index: 1001 !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
+    }}
+
+    .stButton > button[key^="toggle_"]:hover {{
+        background: rgba(255,255,255,0.03) !important;
+    }}
+    
+    .stButton > button[key^="toggle_"]:active {{
+        background: rgba(255,255,255,0.05) !important;
+    }}
+
     /* Efecto de láser dentro del contenedor ampliado */
     [data-testid="column"]:has(.hud-tag)::before {{
         content: "";
@@ -1028,7 +1051,7 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
 
     with c2:
-        # Encabezado HUD Premium Persistente
+        # Encabezado HUD Premium Persistente (Clickable)
         st.markdown(f"""
             <div class="hud-tag"></div>
             <div class="sc-noise"></div>
@@ -1045,16 +1068,13 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        # Botón de Toggle con estilo
-        col_t1, col_t2, col_t3 = st.columns([1, 2, 1])
-        with col_t2:
-            toggle_label = "🔼 CERRAR REGISTRO" if st.session_state.show_sim_form else "🔽 ABRIR REGISTRO"
-            if st.button(toggle_label, key="toggle_sim", use_container_width=True):
-                st.session_state.show_sim_form = not st.session_state.show_sim_form
-                st.rerun()
+        # Botón Invisible Superpuesto (Trigger de expansión)
+        if st.button("", key="toggle_sim"):
+            st.session_state.show_sim_form = not st.session_state.show_sim_form
+            st.rerun()
 
         if st.session_state.show_sim_form:
-            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Streamlit
             nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
             m_h_val = st.session_state.get("hub_monto_input", 3000)
@@ -1080,7 +1100,7 @@ if st.session_state.modulo_activo == "Hub":
                 st.rerun()
             
     with c4:
-        # Encabezado HUD Premium (Segunda Tarjeta)
+        # Encabezado HUD Premium Persistente (Clickable)
         st.markdown(f"""
             <div class="hud-tag"></div>
             <div class="sc-noise"></div>
@@ -1097,16 +1117,13 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        # Botón de Toggle con estilo
-        col_t3, col_t4, col_t5 = st.columns([1, 2, 1])
-        with col_t4:
-            toggle_label_c = "🔼 CERRAR REGISTRO" if st.session_state.show_costos_form else "🔽 ABRIR REGISTRO"
-            if st.button(toggle_label_c, key="toggle_costos", use_container_width=True):
-                st.session_state.show_costos_form = not st.session_state.show_costos_form
-                st.rerun()
+        # Botón Invisible Superpuesto (Trigger de expansión)
+        if st.button("", key="toggle_costos"):
+            st.session_state.show_costos_form = not st.session_state.show_costos_form
+            st.rerun()
 
         if st.session_state.show_costos_form:
-            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Proyecto Costos
             nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
             r_c_val = st.session_state.get("costos_renta_input", 50000)
