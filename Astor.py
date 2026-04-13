@@ -554,8 +554,8 @@ st.markdown(f"""
         z-index: 4;
         animation: flicker 2s linear infinite;
     }}
-    .stat-tl {{ top: 35px; left: 35px; letter-spacing: 2px; }}
-    .stat-br {{ bottom: 35px; right: 35px; letter-spacing: 2px; }}
+    .stat-tl {{ top: 10px; left: 10px; letter-spacing: 2px; color: {ACCENT_COLOR}; font-weight: bold; opacity: 0.6; }}
+    .stat-br {{ bottom: 10px; right: 10px; letter-spacing: 2px; color: {ACCENT_COLOR}; font-weight: bold; opacity: 0.6; }}
 
     @keyframes flicker {{
         0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {{ opacity: 0.8; }}
@@ -1050,9 +1050,9 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line"></div>
                 <div class="status-label stat-tl">SYSTEM: ONLINE</div>
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="text-align: center; margin-bottom: 25px; margin-top: 20px; pointer-events: none;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {ACCENT_COLOR}77;">SIMULADOR</div>
+                <div style="text-align: center; padding: 100px 20px; pointer-events: none;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -1097,11 +1097,11 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
                 <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
-                <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
-                <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; margin-bottom: 25px; margin-top: 20px; pointer-events: none;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
+                <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
+                <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
+                <div style="text-align: center; padding: 100px 20px; pointer-events: none;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
                 </div>
             """, unsafe_allow_html=True)
             
