@@ -554,8 +554,8 @@ st.markdown(f"""
         z-index: 4;
         animation: flicker 2s linear infinite;
     }}
-    .stat-tl {{ top: 15px; left: 45px; }}
-    .stat-br {{ bottom: 15px; right: 45px; }}
+    .stat-tl {{ top: 35px; left: 35px; letter-spacing: 2px; }}
+    .stat-br {{ bottom: 35px; right: 35px; letter-spacing: 2px; }}
 
     @keyframes flicker {{
         0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {{ opacity: 0.8; }}
@@ -631,6 +631,13 @@ st.markdown(f"""
         z-index: 99 !important;
         opacity: 0.8;
         pointer-events: none;
+        position: absolute;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, transparent, {ACCENT_COLOR}, transparent);
+        box-shadow: 0 0 20px {ACCENT_COLOR};
+        animation: scan-move 4s linear infinite;
+        left: 0;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
@@ -650,25 +657,16 @@ st.markdown(f"""
 
     [data-testid="column"]:has(.hud-tag):hover::before {{ opacity: 0.6; }}
 
-    /* Asegurar que el láser y el HUD se expandan en el contenedor */
-    [data-testid="column"]:has(.hud-tag) .scan-line {{
-        z-index: 99 !important;
-        opacity: 0.8;
-    }}
-
-    [data-testid="column"]:has(.hud-tag) .hud-corner {{
+    /* Asegurar que el láser y el HUD se expandan en el contenedor del expander */
+    [data-testid="stExpander"] .hud-corner {{
         z-index: 100 !important;
-        width: 35px;
-        height: 35px;
+        width: 45px;
+        height: 45px;
     }}
-
-    [data-testid="column"]:has(.hud-tag) .corner-bl,
-    [data-testid="column"]:has(.hud-tag) .corner-br {{
+    
+    [data-testid="stExpander"] .corner-bl,
+    [data-testid="stExpander"] .corner-br {{
         bottom: 0px !important;
-    }}
-
-    [data-testid="column"]:has(.hud-tag) .status-label {{
-        z-index: 12 !important;
     }}
 
     .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
@@ -1052,7 +1050,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line"></div>
                 <div class="status-label stat-tl">SYSTEM: ONLINE</div>
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
+                <div style="text-align: center; margin-bottom: 25px; margin-top: 20px; pointer-events: none;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">ASTOR</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {ACCENT_COLOR}77;">SIMULADOR</div>
                 </div>
@@ -1101,7 +1099,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
                 <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
+                <div style="text-align: center; margin-bottom: 25px; margin-top: 20px; pointer-events: none;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
                 </div>
