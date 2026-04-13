@@ -426,9 +426,10 @@ st.markdown(f"""
         height: 4px;
         background: linear-gradient(90deg, transparent, {ACCENT_COLOR}, transparent);
         top: -10px;
-        animation: scan-move 3s ease-in-out infinite alternate;
-        z-index: 2;
+        animation: scan-move 4s ease-in-out infinite alternate;
+        z-index: 99 !important;
         box-shadow: 0 0 15px {ACCENT_COLOR};
+        pointer-events: none;
     }}
 
     @keyframes scan-move {{
@@ -583,12 +584,17 @@ st.markdown(f"""
         border-radius: 18px !important;
         padding: 50px 35px !important;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        overflow: hidden !important;
+        overflow: visible !important; /* Permitir que el escaneo se vea si sale un poco */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
         min-height: 700px;
+    }}
+
+    /* Hacer que el contenedor de markdown no bloquee el posicionamiento absoluto */
+    [data-testid="column"]:has(.hud-tag) [data-testid="stMarkdownContainer"] {{
+        position: static !important;
     }}
 
     [data-testid="column"]:has(.hud-tag):hover {{
@@ -616,7 +622,7 @@ st.markdown(f"""
 
     /* Asegurar que el láser y el HUD se expandan en el contenedor */
     [data-testid="column"]:has(.hud-tag) .scan-line {{
-        z-index: 10 !important;
+        z-index: 99 !important;
         opacity: 0.8;
     }}
 
