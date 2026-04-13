@@ -627,28 +627,11 @@ st.markdown(f"""
         left: 0;
     }}
 
-    /* ELIMINAR CUADRITOS Y HACER CLICKABLE TODA LA TARJETA */
-    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"],
-    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
-        position: absolute !important;
-        top: -320px !important; /* Cubre todo el encabezado HUD */
-        left: 0 !important;
-        width: 100% !important;
-        height: 350px !important; 
-        background: transparent !important;
-        border: none !important;
-        color: transparent !important;
-        z-index: 9999 !important;
-        opacity: 0 !important; /* Invisibilidad total garantizada */
-        cursor: pointer !important;
-        box-shadow: none !important;
-        transition: none !important;
-    }}
-
-    /* Estilo de Zoom Premium en la Columna */
+    /* EFECTO DE ZOOM Y PUNTERO EN LA TARJETA CLICKABLE */
     div.stColumn:has(.hud-tag) {{
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         overflow: visible !important;
+        cursor: pointer !important;
     }}
 
     div.stColumn:has(.hud-tag):hover {{
@@ -656,6 +639,15 @@ st.markdown(f"""
         box-shadow: 0 0 70px {ACCENT_COLOR}55 !important;
         transform: scale(1.03) !important;
         z-index: 10000 !important;
+    }}
+
+    /* Estilo para que el enlace cubra todo y no tenga decoración */
+    .hud-card-link {{
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block !important;
+        width: 100% !important;
+        cursor: pointer !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
@@ -1051,6 +1043,19 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
     
+    # Lógica de Interacción mediante Query Parameters (Solución Definitiva)
+    q_params = st.query_params
+    if "action" in q_params:
+        action = q_params["action"]
+        if action == "toggle_sim":
+            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', True)
+        elif action == "toggle_costos":
+            st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
+        
+        # Limpiar y recargar para procesar el cambio de estado
+        st.query_params.clear()
+        st.rerun()
+
     # Inicializar estados de despliegue si no existen
     if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
@@ -1059,28 +1064,25 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
 
     with c2:
-        # Encabezado HUD Premium Persistente (Clickable)
+        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta)
         st.markdown(f"""
-            <div class="hud-tag"></div>
-            <div class="sc-noise"></div>
-            <div class="hud-corner corner-tl"></div>
-            <div class="hud-corner corner-tr"></div>
-            <div class="hud-corner corner-bl"></div>
-            <div class="hud-corner corner-br"></div>
-            <div class="scan-line"></div>
-            <div class="status-label stat-tl">SYSTEM: ONLINE</div>
-            <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-            <div style="text-align: center; padding: 60px 20px; pointer-events: none;">
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
-            </div>
+            <a href="/?action=toggle_sim" target="_self" class="hud-card-link">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl"></div>
+                <div class="hud-corner corner-tr"></div>
+                <div class="hud-corner corner-bl"></div>
+                <div class="hud-corner corner-br"></div>
+                <div class="scan-line"></div>
+                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
+                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                </div>
+            </a>
         """, unsafe_allow_html=True)
         
-        # Botón Invisible Superpuesto (Trigger de expansión)
-        if st.button("", key="toggle_sim"):
-            st.session_state.show_sim_form = not st.session_state.show_sim_form
-            st.rerun()
-
         if st.session_state.show_sim_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Streamlit
@@ -1108,28 +1110,25 @@ if st.session_state.modulo_activo == "Hub":
                 st.rerun()
             
     with c4:
-        # Encabezado HUD Premium Persistente (Clickable)
+        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta)
         st.markdown(f"""
-            <div class="hud-tag"></div>
-            <div class="sc-noise"></div>
-            <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
-            <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
-            <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
-            <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
-            <div style="text-align: center; padding: 60px 20px; pointer-events: none;">
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
-            </div>
+            <a href="/?action=toggle_costos" target="_self" class="hud-card-link">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
+                <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                </div>
+            </a>
         """, unsafe_allow_html=True)
         
-        # Botón Invisible Superpuesto (Trigger de expansión)
-        if st.button("", key="toggle_costos"):
-            st.session_state.show_costos_form = not st.session_state.show_costos_form
-            st.rerun()
-
         if st.session_state.show_costos_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Proyecto Costos
