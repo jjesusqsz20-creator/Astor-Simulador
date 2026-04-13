@@ -1124,9 +1124,6 @@ if st.session_state.modulo_activo == "Hub":
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
                 </div>
             </a>
-        """, unsafe_allow_html=True) line-height: 1.2;">COSTOS</div>
-                </div>
-            </a>
         """, unsafe_allow_html=True)
         
         if st.session_state.show_costos_form:
