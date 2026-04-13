@@ -640,14 +640,15 @@ st.markdown(f"""
         z-index: 1001 !important;
         cursor: pointer !important;
         box-shadow: none !important;
+        opacity: 0 !important; /* Completamente invisible */
     }}
 
-    .stButton > button[key^="toggle_"]:hover {{
-        background: rgba(255,255,255,0.03) !important;
-    }}
-    
-    .stButton > button[key^="toggle_"]:active {{
-        background: rgba(255,255,255,0.05) !important;
+    /* Estilo para que la columna completa reaccione al hover */
+    [data-testid="column"]:has(.hud-tag):hover {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 60px {ACCENT_COLOR}44 !important;
+        transform: scale(1.02) !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
