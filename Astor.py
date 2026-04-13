@@ -1509,6 +1509,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
     st.stop() # Detenemos aquí para que no cargue el otro simulador
 
+if st.session_state.modulo_activo == "📈 Planificador Financiero":
+    import planificador
+    planificador.render_planificador()
+    st.stop()
 # --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
 # --- SIDEBAR ---
 with st.sidebar:
@@ -2386,7 +2390,3 @@ st.download_button(
     file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-elif st.session_state.modulo_activo == "📈 Planificador Financiero":
-    import planificador
-    planificador.render_planificador()
