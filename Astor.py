@@ -1024,6 +1024,9 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
 
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
+
     with c2:
         # Encabezado HUD Premium Persistente
         st.markdown(f"""
