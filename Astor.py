@@ -1064,9 +1064,9 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
 
     with c2:
-        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta)
+        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta con URL Relativa)
         st.markdown(f"""
-            <a href="/?action=toggle_sim" target="_self" class="hud-card-link">
+            <a href="?action=toggle_sim" target="_self" class="hud-card-link">
                 <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
                 <div class="hud-corner corner-tl"></div>
@@ -1106,13 +1106,10 @@ if st.session_state.modulo_activo == "Hub":
                 st.session_state.monto_0 = float(monto_h)
                 st.session_state.monto_1 = float(monto_h + 1000)
                 st.session_state.monto_2 = float(monto_h + 2000)
-                st.session_state.modulo_activo = "📊 Simulador de Retiro"
-                st.rerun()
-            
-    with c4:
-        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta)
+            with c4:
+        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta con URL Relativa)
         st.markdown(f"""
-            <a href="/?action=toggle_costos" target="_self" class="hud-card-link">
+            <a href="?action=toggle_costos" target="_self" class="hud-card-link">
                 <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
                 <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
@@ -1125,6 +1122,9 @@ if st.session_state.modulo_activo == "Hub":
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                </div>
+            </a>
+        """, unsafe_allow_html=True) line-height: 1.2;">COSTOS</div>
                 </div>
             </a>
         """, unsafe_allow_html=True)
