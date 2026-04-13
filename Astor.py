@@ -641,13 +641,27 @@ st.markdown(f"""
         z-index: 10000 !important;
     }}
 
-    /* Estilo para que el enlace cubra todo y no tenga decoración */
-    .hud-card-link {{
-        text-decoration: none !important;
-        color: inherit !important;
+    /* BOTONES INVISIBLES (Solución nativa de Streamlit para clicks sin refresh) */
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] {{
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 9999 !important;
+        margin: 0 !important;
+    }}
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
+        opacity: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        cursor: pointer !important;
+    }}
+    .hud-card-content {{
         display: block !important;
         width: 100% !important;
-        cursor: pointer !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
@@ -1043,19 +1057,6 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
     
-    # Lógica de Interacción mediante Query Parameters (Solución Definitiva)
-    q_params = st.query_params
-    if "action" in q_params:
-        action = q_params["action"]
-        if action == "toggle_sim":
-            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', True)
-        elif action == "toggle_costos":
-            st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
-        
-        # Limpiar y recargar para procesar el cambio de estado
-        st.query_params.clear()
-        st.rerun()
-
     # Inicializar estados de despliegue si no existen
     if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
@@ -1064,9 +1065,9 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
 
     with c2:
-        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta con URL Relativa)
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
         st.markdown(f"""
-            <a href="?action=toggle_sim" target="_self" class="hud-card-link">
+            <div class="hud-card-content">
                 <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
                 <div class="hud-corner corner-tl"></div>
@@ -1080,9 +1081,13 @@ if st.session_state.modulo_activo == "Hub":
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
                 </div>
-            </a>
+            </div>
         """, unsafe_allow_html=True)
         
+        if st.button(" ", key="btn_toggle_sim", use_container_width=True):
+            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', True)
+            st.rerun()
+
         if st.session_state.show_sim_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Streamlit
@@ -1107,9 +1112,9 @@ if st.session_state.modulo_activo == "Hub":
                 st.session_state.monto_1 = float(monto_h + 1000)
                 st.session_state.monto_2 = float(monto_h + 2000)
     with c4:
-        # Encabezado HUD Premium envuelto en un enlace (Solución Robusta con URL Relativa)
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
         st.markdown(f"""
-            <a href="?action=toggle_costos" target="_self" class="hud-card-link">
+            <div class="hud-card-content">
                 <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
                 <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
@@ -1123,9 +1128,13 @@ if st.session_state.modulo_activo == "Hub":
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
                 </div>
-            </a>
+            </div>
         """, unsafe_allow_html=True)
         
+        if st.button(" ", key="btn_toggle_costos", use_container_width=True):
+            st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
+            st.rerun()
+
         if st.session_state.show_costos_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             # Inputs de Proyecto Costos
