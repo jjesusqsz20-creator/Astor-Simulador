@@ -583,25 +583,39 @@ st.markdown(f"""
         background: {CARD_BG}F5 !important;
         border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 18px !important;
-        padding: 50px 35px !important;
+        padding: 60px 40px !important;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        overflow: visible !important; /* Permitir que el escaneo se vea si sale un poco */
+        overflow: visible !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-        min-height: 700px;
+        min-height: 800px; /* Asegurar espacio suficiente para el formulario */
     }}
 
-    /* Hacer que el contenedor de markdown no bloquee el posicionamiento absoluto */
+    /* PARCHE AGRESIVO: Desactivar contextos de posicionamiento intermedios de Streamlit */
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"],
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"] > div,
+    [data-testid="column"]:has(.hud-tag) [data-testid="element-container"],
     [data-testid="column"]:has(.hud-tag) [data-testid="stMarkdownContainer"] {{
         position: static !important;
     }}
 
+    [data-testid="column"]:has(.hud-tag) .hud-corner {{
+        z-index: 100 !important;
+        width: 40px;
+        height: 40px;
+    }}
+
+    [data-testid="column"]:has(.hud-tag) .corner-tl {{ top: 0px !important; left: 0px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-tr {{ top: 0px !important; right: 0px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-bl {{ bottom: 0px !important; left: 0px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-br {{ bottom: 0px !important; right: 0px !important; }}
+
     [data-testid="column"]:has(.hud-tag):hover {{
         border-color: {ACCENT_COLOR} !important;
         box-shadow: 0 0 50px {ACCENT_COLOR}33 !important;
-        transform: translateY(-10px) scale(1.02) !important;
+        transform: translateY(-5px) !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
