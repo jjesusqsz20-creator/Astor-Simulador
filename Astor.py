@@ -577,45 +577,60 @@ st.markdown(f"""
         opacity: 0.3;
     }}
 
-    /* Lógica de Contenedor HUD Ampliado usando :has en Column */
-    [data-testid="column"]:has(.hud-tag) {{
-        position: relative !important;
+    /* ESTILIZACIÓN DE LA TARJETA HUD BASADA EN EXPANDER */
+    [data-testid="stExpander"] {{
         background: {CARD_BG}F5 !important;
         border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 18px !important;
-        padding: 60px 40px !important;
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        transition: all 0.5s ease !important;
         overflow: visible !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-        min-height: 800px; /* Asegurar espacio suficiente para el formulario */
+        position: relative !important;
+        margin-bottom: 2rem !important;
     }}
 
-    /* PARCHE AGRESIVO: Desactivar contextos de posicionamiento intermedios de Streamlit */
-    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"],
-    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"] > div,
-    [data-testid="column"]:has(.hud-tag) [data-testid="element-container"],
-    [data-testid="column"]:has(.hud-tag) [data-testid="stMarkdownContainer"] {{
-        position: static !important;
+    /* Eliminar el estilo predeterminado del resumen (header) del expander */
+    [data-testid="stExpander"] summary {{
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+    }}
+    [data-testid="stExpander"] summary:hover {{
+        background: transparent !important;
+    }}
+    /* Ocultar el icono de flecha si es posible, o ajustarlo */
+    [data-testid="stExpander"] summary svg {{
+        display: none !important;
     }}
 
-    [data-testid="column"]:has(.hud-tag) .hud-corner {{
+    [data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
+        border: none !important;
+        padding: 40px !important;
+        position: static !important; /* Permitir que los hijos absolutos busquen el contenedor stExpander */
+    }}
+
+    [data-testid="stExpander"] .hud-corner {{
         z-index: 100 !important;
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
+        position: absolute !important;
     }}
 
-    [data-testid="column"]:has(.hud-tag) .corner-tl {{ top: 0px !important; left: 0px !important; }}
-    [data-testid="column"]:has(.hud-tag) .corner-tr {{ top: 0px !important; right: 0px !important; }}
-    [data-testid="column"]:has(.hud-tag) .corner-bl {{ bottom: 0px !important; left: 0px !important; }}
-    [data-testid="column"]:has(.hud-tag) .corner-br {{ bottom: 0px !important; right: 0px !important; }}
+    [data-testid="stExpander"] .corner-tl {{ top: -2px !important; left: -2px !important; }}
+    [data-testid="stExpander"] .corner-tr {{ top: -2px !important; right: -2px !important; }}
+    [data-testid="stExpander"] .corner-bl {{ bottom: -2px !important; left: -2px !important; }}
+    [data-testid="stExpander"] .corner-br {{ bottom: -2px !important; right: -2px !important; }}
 
-    [data-testid="column"]:has(.hud-tag):hover {{
+    [data-testid="stExpander"]:hover {{
         border-color: {ACCENT_COLOR} !important;
-        box-shadow: 0 0 50px {ACCENT_COLOR}33 !important;
+        box-shadow: 0 0 50px {ACCENT_COLOR}22 !important;
         transform: translateY(-5px) !important;
+    }}
+
+    [data-testid="stExpander"] .scan-line {{
+        z-index: 99 !important;
+        opacity: 0.8;
+        pointer-events: none;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
@@ -1025,110 +1040,112 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
     
     with c2:
-        # Marcador de contenedor HUD y elementos decorativos internos
-        st.markdown(f"""
-            <div class="hud-tag"></div>
-            <div class="sc-noise"></div>
-            <div class="hud-corner corner-tl"></div>
-            <div class="hud-corner corner-tr"></div>
-            <div class="hud-corner corner-bl"></div>
-            <div class="hud-corner corner-br"></div>
-            <div class="scan-line"></div>
-            <div class="status-label stat-tl">SYSTEM: ONLINE</div>
-            <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-            <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">ASTOR</div>
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {ACCENT_COLOR}77;">SIMULADOR</div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Inputs de Streamlit con mayor espaciado
-        nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-        # Mostrar valor dinámico en el label
-        m_h_val = st.session_state.get("hub_monto_input", 3000)
-        monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
-        
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        
-        if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
-            # Guardar datos en session_state
-            st.session_state.hub_nombre = nombre_h
-            st.session_state.hub_monto = monto_h
-            st.session_state.hub_edad = edad_h
+        with st.expander("", expanded=True):
+            # Marcador de contenedor HUD y elementos decorativos internos
+            st.markdown(f"""
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl"></div>
+                <div class="hud-corner corner-tr"></div>
+                <div class="hud-corner corner-bl"></div>
+                <div class="hud-corner corner-br"></div>
+                <div class="scan-line"></div>
+                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
+                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
+                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {ACCENT_COLOR}77;">SIMULADOR</div>
+                </div>
+            """, unsafe_allow_html=True)
             
-            # Configurar automáticamente los 3 escenarios
-            st.session_state.num_escenarios = 3
-            st.session_state.monto_0 = float(monto_h)
-            st.session_state.monto_1 = float(monto_h + 1000)
-            st.session_state.monto_2 = float(monto_h + 2000)
+            # Inputs de Streamlit con mayor espaciado
+            nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
+            # Mostrar valor dinámico en el label
+            m_h_val = st.session_state.get("hub_monto_input", 3000)
+            monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
             
-            # Cambiar de módulo
-            st.session_state.modulo_activo = "📊 Simulador de Retiro"
-            st.rerun()
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            
+            if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
+                # Guardar datos en session_state
+                st.session_state.hub_nombre = nombre_h
+                st.session_state.hub_monto = monto_h
+                st.session_state.hub_edad = edad_h
+                
+                # Configurar automáticamente los 3 escenarios
+                st.session_state.num_escenarios = 3
+                st.session_state.monto_0 = float(monto_h)
+                st.session_state.monto_1 = float(monto_h + 1000)
+                st.session_state.monto_2 = float(monto_h + 2000)
+                
+                # Cambiar de módulo
+                st.session_state.modulo_activo = "📊 Simulador de Retiro"
+                st.rerun()
             
     with c4:
-        # Convertimos también la segunda tarjeta al mismo formato para simetría
-        st.markdown(f"""
-            <div class="hud-tag"></div>
-            <div class="sc-noise"></div>
-            <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
-            <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
-            <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
-            <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
-            <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
-            <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
-                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Inputs de Proyecto Costos
-        nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
-        # Mostrar valor dinámico en el label
-        r_c_val = st.session_state.get("costos_renta_input", 50000)
-        renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=1, key="costos_retiro_age_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-        email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
-        
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        
-        if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-            # LÓGICA DE CÁLCULO INVERSO (PROYECTO COSTOS)
-            # Meta de Retiro (M) necesaria para pago mensual de renta_c (Y)
-            # Asumiendo 25 años de pagos y 10% de rendimiento compartido por el usuario
-            r_anual_retiro = 0.10 
-            r_m = r_anual_retiro / 12.0
-            n_meses_pago = 25 * 12
+        with st.expander("", expanded=True):
+            # Convertimos también la segunda tarjeta al mismo formato para simetría
+            st.markdown(f"""
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: {GOLD_COLOR};">SIM_CORE: STABLE</div>
+                <div class="status-label stat-br" style="color: {GOLD_COLOR};">MOD: ALFA_PRIME</div>
+                <div style="text-align: center; margin-bottom: 25px; pointer-events: none;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.3rem; opacity: 0.7; letter-spacing: 2px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.5rem; font-weight: 700; text-shadow: 0 0 20px {GOLD_COLOR}77;">COSTOS</div>
+                </div>
+            """, unsafe_allow_html=True)
             
-            # Fórmula de Valor Presente de una Anualidad Ordinaria
-            if r_m > 0:
-                meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
-            else:
-                meta_calculada = renta_c * n_meses_pago
+            # Inputs de Proyecto Costos
+            nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
+            # Mostrar valor dinámico en el label
+            r_c_val = st.session_state.get("costos_renta_input", 50000)
+            renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=1, key="costos_retiro_age_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+            email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
             
-            # Guardar en session_state para el simulador
-            st.session_state.hub_nombre_costos = nombre_c
-            st.session_state.renta_costos_sync = float(renta_c)
-            st.session_state.meta_retiro_val = float(meta_calculada)
-            st.session_state.costos_edad_inicial = int(edad_c)
-            st.session_state.costos_edad_retiro = int(retiro_c)
+            st.markdown("<br><br>", unsafe_allow_html=True)
             
-            st.session_state.modulo_activo = "✨ Nuevo Simulador"
-            st.rerun()
+            if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
+                # LÓGICA DE CÁLCULO INVERSO (PROYECTO COSTOS)
+                # Meta de Retiro (M) necesaria para pago mensual de renta_c (Y)
+                # Asumiendo 25 años de pagos y 10% de rendimiento compartido por el usuario
+                r_anual_retiro = 0.10 
+                r_m = r_anual_retiro / 12.0
+                n_meses_pago = 25 * 12
+                
+                # Fórmula de Valor Presente de una Anualidad Ordinaria
+                if r_m > 0:
+                    meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
+                else:
+                    meta_calculada = renta_c * n_meses_pago
+                
+                # Guardar en session_state para el simulador
+                st.session_state.hub_nombre_costos = nombre_c
+                st.session_state.renta_costos_sync = float(renta_c)
+                st.session_state.meta_retiro_val = float(meta_calculada)
+                st.session_state.costos_edad_inicial = int(edad_c)
+                st.session_state.costos_edad_retiro = int(retiro_c)
+                
+                st.session_state.modulo_activo = "✨ Nuevo Simulador"
+                st.rerun()
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
