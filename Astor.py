@@ -1205,56 +1205,47 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     for itm in costos_espera_list:
         diff_clr = "#ff4b4b" if itm['diff'] > 0 else TEXT_COLOR
         bg_r = "rgba(255,255,255,0.03)" if itm['edad'] % 2 == 0 else "transparent"
-        rows_html_unified += f"""
-        <tr style="background-color: {bg_r}; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm['edad']} años</td>
-            <td style="padding: 15px; color: {ACCENT_COLOR}; font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm['aporte']:,.2f}</td>
-            <td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">(+${itm['diff']:,.2f})</td>
-        </tr>
-        """
+        rows_html_unified += f'<tr style="background-color: {bg_r}; border-bottom: 1px solid rgba(255,255,255,0.05);">' \
+                             f'<td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm["edad"]} años</td>' \
+                             f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm["aporte"]:,.2f}</td>' \
+                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">(+${itm["diff"]:,.2f})</td>' \
+                             f'</tr>'
 
     # BLOQUE MAESTRO HUD UNIFICADO
     st.markdown(f"""
-        <!-- Cabecera -->
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 35px; opacity: 0.9;">
-            <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">ASTOR SIMULADOR</h1>
-            <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-top: 10px;">EL COSTO DE POSTERGAR</h2>
-        </div>
-
-        <!-- Tarjetas de Métricas (Flexbox para estabilidad absoluta) -->
-        <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 280px; max-width: 450px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: center;">
-                <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Meta de Retiro ({edad_retiro} años)</p>
-                <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
-                <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">CAPITAL OBJETIVO</div>
-            </div>
-            <div style="flex: 1; min-width: 280px; max-width: 450px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: center;">
-                <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
-                <div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_m_metric:,.2f}</div>
-                <div style="color: {ACCENT_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">PARA LOGRAR LA META</div>
-            </div>
-        </div>
-
-        <!-- Tabla Coste de Esperar -->
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTO DE POSTERGAR</h3>
-            <p style="color: {ACCENT_COLOR}; font-size: 1.1rem; margin-top: 10px; font-weight: bold;">¿Cuánto te cuesta cada año que esperas?</p>
-        </div>
-        <div style="background: rgba(10, 10, 10, 0.5); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 40px;">
-            <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-                <thead style="border-bottom: 2px solid {GOLD_COLOR};">
-                    <tr>
-                        <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan a</th>
-                        <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
-                        <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
-                    </tr>
-                </thead>
-                <tbody style="text-align: center;">
-                    {rows_html_unified}
-                </tbody>
-            </table>
-        </div>
-    """, unsafe_allow_html=True)
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 35px; opacity: 0.9;">
+    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">ASTOR SIMULADOR</h1>
+    <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-top: 10px;">EL COSTO DE POSTERGAR</h2>
+</div>
+<div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 280px; max-width: 450px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Meta de Retiro ({edad_retiro} años)</p>
+        <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
+        <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">CAPITAL OBJETIVO</div>
+    </div>
+    <div style="flex: 1; min-width: 280px; max-width: 450px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
+        <div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_m_metric:,.2f}</div>
+        <div style="color: {ACCENT_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">PARA LOGRAR LA META</div>
+    </div>
+</div>
+<div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTO DE POSTERGAR</h3>
+    <p style="color: {ACCENT_COLOR}; font-size: 1.1rem; margin-top: 10px; font-weight: bold;">¿Cuánto te cuesta cada año que esperas?</p>
+</div>
+<div style="background: rgba(10, 10, 10, 0.5); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 40px;">
+    <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+        <thead style="border-bottom: 2px solid {GOLD_COLOR};">
+            <tr>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan a</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
+            </tr>
+        </thead>
+        <tbody style="text-align: center;">{rows_html_unified}</tbody>
+    </table>
+</div>
+""", unsafe_allow_html=True)
 
     tab_dinamica, tab_retiro = st.tabs(["📊 Tabla Dinámica", "💰 Etapa de Retiro"])
 
