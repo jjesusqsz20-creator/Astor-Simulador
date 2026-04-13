@@ -577,87 +577,44 @@ st.markdown(f"""
         opacity: 0.3;
     }}
 
-    /* ESTILIZACIÓN DE LA TARJETA HUD BASADA EN EXPANDER */
-    [data-testid="stExpander"] {{
+    /* RETORNO A POSICIONAMIENTO BASADO EN COLUMNA (CARGAS PREMIUM) */
+    [data-testid="column"]:has(.hud-tag) {{
+        position: relative !important;
         background: {CARD_BG}F5 !important;
         border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 18px !important;
-        transition: all 0.5s ease !important;
+        padding: 40px !important;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         overflow: visible !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-        position: relative !important;
-        margin-bottom: 2rem !important;
+        min-height: 350px;
     }}
 
-    /* Estilización del Encabezado (Summary) para HUD Persistente */
-    [data-testid="stExpander"] summary {{
-        border: none !important;
-        background: transparent !important;
-        padding: 60px 20px !important;
-        min-height: 250px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        cursor: pointer !important;
-        position: relative !important;
-        overflow: visible !important;
-    }}
-    
-    [data-testid="stExpander"] summary:hover {{
-        background: rgba(255,255,255,0.02) !important;
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"],
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"] > div,
+    [data-testid="column"]:has(.hud-tag) [data-testid="element-container"] {{
+        position: static !important;
     }}
 
-    /* Ocultar el icono de flecha */
-    [data-testid="stExpander"] summary svg {{
-        display: none !important;
-    }}
-
-    /* Estilo del texto del título dentro del Summary */
-    [data-testid="stExpander"] summary label p {{
-        font-family: 'Cinzel', serif !important;
-        color: {TEXT_COLOR} !important;
-        font-size: 2.5rem !important;
-        font-weight: 800 !important;
-        text-shadow: 0 0 30px {ACCENT_COLOR}99 !important;
-        text-align: center !important;
-        width: 100% !important;
-        margin: 0 !important;
-        letter-spacing: 4px !important;
-    }}
-
-    [data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
-        border: none !important;
-        padding: 40px !important;
-        background: transparent !important;
-    }}
-
-    /* Esquinas y Láser en el Summary (Persistentes) */
-    [data-testid="stExpander"] summary::before,
-    [data-testid="stExpander"] summary::after {{
-        /* Placeholder para lógica de esquinas si se desea vía CSS, 
-           pero seguiremos usando los divs por ahora pero anclados al expander principal */
-    }}
-
-    [data-testid="stExpander"] .hud-corner {{
+    [data-testid="column"]:has(.hud-tag) .hud-corner {{
         z-index: 100 !important;
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         position: absolute !important;
     }}
 
-    /* Anclar esquinas al contenedor principal del expander, no solo al contenido */
-    [data-testid="stExpander"] .corner-tl {{ top: -2px !important; left: -2px !important; }}
-    [data-testid="stExpander"] .corner-tr {{ top: -2px !important; right: -2px !important; }}
-    [data-testid="stExpander"] .corner-bl {{ bottom: -2px !important; left: -2px !important; }}
-    [data-testid="stExpander"] .corner-br {{ bottom: -2px !important; right: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-tl {{ top: -2px !important; left: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-tr {{ top: -2px !important; right: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-bl {{ bottom: -2px !important; left: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-br {{ bottom: -2px !important; right: -2px !important; }}
 
-    [data-testid="stExpander"]:hover {{
+    [data-testid="column"]:has(.hud-tag):hover {{
         border-color: {ACCENT_COLOR} !important;
-        box-shadow: 0 0 50px {ACCENT_COLOR}22 !important;
+        box-shadow: 0 0 50px {ACCENT_COLOR}33 !important;
         transform: translateY(-5px) !important;
     }}
 
-    [data-testid="stExpander"] .scan-line {{
+    [data-testid="column"]:has(.hud-tag) .scan-line {{
         z-index: 99 !important;
         opacity: 0.8;
         pointer-events: none;
@@ -1063,30 +1020,40 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    
-    c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
-    
+    # Inicializar estados de despliegue si no existen
+    if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
+    if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
+
     with c2:
-        with st.expander("SIMULADOR", expanded=True):
-            # Marcador de contenedor HUD y elementos decorativos internos
-            # Las esquinas y el láser se anclan al expander principal vía CSS
-            st.markdown(f"""
-                <div class="hud-tag"></div>
-                <div class="sc-noise"></div>
-                <div class="hud-corner corner-tl"></div>
-                <div class="hud-corner corner-tr"></div>
-                <div class="hud-corner corner-bl"></div>
-                <div class="hud-corner corner-br"></div>
-                <div class="scan-line"></div>
-                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
-                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="height: 20px;"></div> <!-- Espacio para compensar el título en el header -->
-            """, unsafe_allow_html=True)
-            
-            # Inputs de Streamlit con mayor espaciado
+        # Encabezado HUD Premium Persistente
+        st.markdown(f"""
+            <div class="hud-tag"></div>
+            <div class="sc-noise"></div>
+            <div class="hud-corner corner-tl"></div>
+            <div class="hud-corner corner-tr"></div>
+            <div class="hud-corner corner-bl"></div>
+            <div class="hud-corner corner-br"></div>
+            <div class="scan-line"></div>
+            <div class="status-label stat-tl">SYSTEM: ONLINE</div>
+            <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
+            <div style="text-align: center; padding: 60px 20px; pointer-events: none;">
+                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
+                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Botón de Toggle con estilo
+        col_t1, col_t2, col_t3 = st.columns([1, 2, 1])
+        with col_t2:
+            toggle_label = "🔼 CERRAR REGISTRO" if st.session_state.show_sim_form else "🔽 ABRIR REGISTRO"
+            if st.button(toggle_label, key="toggle_sim", use_container_width=True):
+                st.session_state.show_sim_form = not st.session_state.show_sim_form
+                st.rerun()
+
+        if st.session_state.show_sim_form:
+            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+            # Inputs de Streamlit
             nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-            # Mostrar valor dinámico en el label
             m_h_val = st.session_state.get("hub_monto_input", 3000)
             monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1096,43 +1063,49 @@ if st.session_state.modulo_activo == "Hub":
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
             
-            st.markdown("<br><br>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             
             if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
-                # Guardar datos en session_state
                 st.session_state.hub_nombre = nombre_h
                 st.session_state.hub_monto = monto_h
                 st.session_state.hub_edad = edad_h
-                
-                # Configurar automáticamente los 3 escenarios
                 st.session_state.num_escenarios = 3
                 st.session_state.monto_0 = float(monto_h)
                 st.session_state.monto_1 = float(monto_h + 1000)
                 st.session_state.monto_2 = float(monto_h + 2000)
-                
-                # Cambiar de módulo
                 st.session_state.modulo_activo = "📊 Simulador de Retiro"
                 st.rerun()
             
     with c4:
-        with st.expander("COSTOS", expanded=True):
-            # Convertimos también la segunda tarjeta al mismo formato para simetría
-            st.markdown(f"""
-                <div class="hud-tag"></div>
-                <div class="sc-noise"></div>
-                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
-                <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
-                <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
-                <div style="height: 20px;"></div>
-            """, unsafe_allow_html=True)
-            
+        # Encabezado HUD Premium (Segunda Tarjeta)
+        st.markdown(f"""
+            <div class="hud-tag"></div>
+            <div class="sc-noise"></div>
+            <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
+            <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
+            <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
+            <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
+            <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+            <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
+            <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
+            <div style="text-align: center; padding: 60px 20px; pointer-events: none;">
+                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
+                <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Botón de Toggle con estilo
+        col_t3, col_t4, col_t5 = st.columns([1, 2, 1])
+        with col_t4:
+            toggle_label_c = "🔼 CERRAR REGISTRO" if st.session_state.show_costos_form else "🔽 ABRIR REGISTRO"
+            if st.button(toggle_label_c, key="toggle_costos", use_container_width=True):
+                st.session_state.show_costos_form = not st.session_state.show_costos_form
+                st.rerun()
+
+        if st.session_state.show_costos_form:
+            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
             # Inputs de Proyecto Costos
             nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
-            # Mostrar valor dinámico en el label
             r_c_val = st.session_state.get("costos_renta_input", 50000)
             renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1144,29 +1117,21 @@ if st.session_state.modulo_activo == "Hub":
             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
             
-            st.markdown("<br><br>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             
             if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-                # LÓGICA DE CÁLCULO INVERSO (PROYECTO COSTOS)
-                # Meta de Retiro (M) necesaria para pago mensual de renta_c (Y)
-                # Asumiendo 25 años de pagos y 10% de rendimiento compartido por el usuario
                 r_anual_retiro = 0.10 
                 r_m = r_anual_retiro / 12.0
                 n_meses_pago = 25 * 12
-                
-                # Fórmula de Valor Presente de una Anualidad Ordinaria
                 if r_m > 0:
                     meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
                 else:
                     meta_calculada = renta_c * n_meses_pago
-                
-                # Guardar en session_state para el simulador
                 st.session_state.hub_nombre_costos = nombre_c
                 st.session_state.renta_costos_sync = float(renta_c)
                 st.session_state.meta_retiro_val = float(meta_calculada)
                 st.session_state.costos_edad_inicial = int(edad_c)
                 st.session_state.costos_edad_retiro = int(retiro_c)
-                
                 st.session_state.modulo_activo = "✨ Nuevo Simulador"
                 st.rerun()
             
