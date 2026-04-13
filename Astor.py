@@ -589,24 +589,53 @@ st.markdown(f"""
         margin-bottom: 2rem !important;
     }}
 
-    /* Eliminar el estilo predeterminado del resumen (header) del expander */
+    /* Estilización del Encabezado (Summary) para HUD Persistente */
     [data-testid="stExpander"] summary {{
         border: none !important;
         background: transparent !important;
-        padding: 0 !important;
+        padding: 60px 20px !important;
+        min-height: 250px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        position: relative !important;
+        overflow: visible !important;
     }}
+    
     [data-testid="stExpander"] summary:hover {{
-        background: transparent !important;
+        background: rgba(255,255,255,0.02) !important;
     }}
-    /* Ocultar el icono de flecha si es posible, o ajustarlo */
+
+    /* Ocultar el icono de flecha */
     [data-testid="stExpander"] summary svg {{
         display: none !important;
+    }}
+
+    /* Estilo del texto del título dentro del Summary */
+    [data-testid="stExpander"] summary label p {{
+        font-family: 'Cinzel', serif !important;
+        color: {TEXT_COLOR} !important;
+        font-size: 2.5rem !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 30px {ACCENT_COLOR}99 !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+        letter-spacing: 4px !important;
     }}
 
     [data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
         border: none !important;
         padding: 40px !important;
-        position: static !important; /* Permitir que los hijos absolutos busquen el contenedor stExpander */
+        background: transparent !important;
+    }}
+
+    /* Esquinas y Láser en el Summary (Persistentes) */
+    [data-testid="stExpander"] summary::before,
+    [data-testid="stExpander"] summary::after {{
+        /* Placeholder para lógica de esquinas si se desea vía CSS, 
+           pero seguiremos usando los divs por ahora pero anclados al expander principal */
     }}
 
     [data-testid="stExpander"] .hud-corner {{
@@ -616,6 +645,7 @@ st.markdown(f"""
         position: absolute !important;
     }}
 
+    /* Anclar esquinas al contenedor principal del expander, no solo al contenido */
     [data-testid="stExpander"] .corner-tl {{ top: -2px !important; left: -2px !important; }}
     [data-testid="stExpander"] .corner-tr {{ top: -2px !important; right: -2px !important; }}
     [data-testid="stExpander"] .corner-bl {{ bottom: -2px !important; left: -2px !important; }}
@@ -1038,8 +1068,9 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.2, 3.2, 0.4, 3.2, 0.2])
     
     with c2:
-        with st.expander("", expanded=True):
+        with st.expander("SIMULADOR", expanded=True):
             # Marcador de contenedor HUD y elementos decorativos internos
+            # Las esquinas y el láser se anclan al expander principal vía CSS
             st.markdown(f"""
                 <div class="hud-tag"></div>
                 <div class="sc-noise"></div>
@@ -1050,10 +1081,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line"></div>
                 <div class="status-label stat-tl">SYSTEM: ONLINE</div>
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="text-align: center; padding: 100px 20px; pointer-events: none;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
-                </div>
+                <div style="height: 20px;"></div> <!-- Espacio para compensar el título en el header -->
             """, unsafe_allow_html=True)
             
             # Inputs de Streamlit con mayor espaciado
@@ -1087,7 +1115,7 @@ if st.session_state.modulo_activo == "Hub":
                 st.rerun()
             
     with c4:
-        with st.expander("", expanded=True):
+        with st.expander("COSTOS", expanded=True):
             # Convertimos también la segunda tarjeta al mismo formato para simetría
             st.markdown(f"""
                 <div class="hud-tag"></div>
@@ -1099,10 +1127,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
                 <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; padding: 100px 20px; pointer-events: none;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
-                </div>
+                <div style="height: 20px;"></div>
             """, unsafe_allow_html=True)
             
             # Inputs de Proyecto Costos
