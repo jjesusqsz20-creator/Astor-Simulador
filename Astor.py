@@ -627,34 +627,35 @@ st.markdown(f"""
         left: 0;
     }}
 
-    /* CSS para el Botón Invisible (Técnica de Hermanos para alta compatibilidad) */
-    [data-testid="element-container"]:has(.hud-tag) + [data-testid="element-container"] [data-testid="stButton"] button {{
+    /* ELIMINAR CUADRITOS Y HACER CLICKABLE TODA LA TARJETA */
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"],
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
         position: absolute !important;
-        top: -300px !important; /* Mueve el botón hacia arriba para cubrir el encabezado */
+        top: -320px !important; /* Cubre todo el encabezado HUD */
         left: 0 !important;
         width: 100% !important;
-        height: 300px !important; 
+        height: 350px !important; 
         background: transparent !important;
         border: none !important;
         color: transparent !important;
         z-index: 9999 !important;
-        opacity: 0 !important;
+        opacity: 0 !important; /* Invisibilidad total garantizada */
         cursor: pointer !important;
         box-shadow: none !important;
+        transition: none !important;
     }}
 
-    /* Estilo de Zoom Mejorado (Compatible con más navegadores) */
+    /* Estilo de Zoom Premium en la Columna */
+    div.stColumn:has(.hud-tag) {{
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        overflow: visible !important;
+    }}
+
     div.stColumn:has(.hud-tag):hover {{
         border-color: {ACCENT_COLOR} !important;
         box-shadow: 0 0 70px {ACCENT_COLOR}55 !important;
         transform: scale(1.03) !important;
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         z-index: 10000 !important;
-    }}
-
-    /* Asegurar que el contenedor no corte el botón que sube */
-    [data-testid="column"] {{
-        overflow: visible !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
