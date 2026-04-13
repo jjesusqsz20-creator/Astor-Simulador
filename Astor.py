@@ -628,19 +628,19 @@ st.markdown(f"""
     }}
 
     /* CSS para el Botón Invisible que hace clickable la tarjeta */
-    .stButton > button[key^="toggle_"] {{
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
-        height: 250px !important; /* Cubre toda el área del header */
+        height: 250px !important; /* Cubre toda el área del header HUD */
         background: transparent !important;
         border: none !important;
         color: transparent !important;
         z-index: 1001 !important;
+        opacity: 0 !important; /* Completamente invisible */
         cursor: pointer !important;
         box-shadow: none !important;
-        opacity: 0 !important; /* Completamente invisible */
     }}
 
     /* Estilo para que la columna completa reaccione al hover */
@@ -649,6 +649,7 @@ st.markdown(f"""
         box-shadow: 0 0 60px {ACCENT_COLOR}44 !important;
         transform: scale(1.02) !important;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        z-index: 1002 !important;
     }}
 
     /* Efecto de láser dentro del contenedor ampliado */
