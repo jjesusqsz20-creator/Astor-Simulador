@@ -284,6 +284,16 @@ def render_planificador():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap');
 
+    /* ====================================================
+       SUPRIMIR MARCA DE AGUA DE FONDO DE ASTOR.PY
+       (el ::before con position:fixed se inyecta globalmente
+        y muestra las letras ASTOR sobre el contenido)
+    ==================================================== */
+    .stApp::before {
+        display: none !important;
+        opacity: 0 !important;
+    }
+
     /* 2. Sidebar Estilizada */
     [data-testid="stSidebar"] {
         background-color: var(--sidebar-bg) !important;
