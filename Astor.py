@@ -596,36 +596,32 @@ st.markdown(f"""
         min-height: 390px;
     }}
 
-    /* --- MASTER HUD BUTTON DESIGN (Directly on Native Buttons) --- */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {{
-        position: relative !important;
-        width: 100% !important;
-        height: 400px !important;
-        margin-top: 10px !important;
-    }}
-
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {{
-        background: #0a0d12 !important; /* Base ultra-oscura */
-        border: 1px solid rgba(255,255,255,0.08) !important;
-        border-radius: 20px !important;
+    /* --- DEFINITIVE HUD NATIVE BUTTON DESIGN (2024 Stable Selectors) --- */
+    
+    /* Target common styles for all Hub buttons using the stable st-key class */
+    div[class*="st-key-hub_btn_"] button {{
+        background-color: #0c1016 !important;
+        border: 1px solid rgba(107, 164, 164, 0.15) !important;
+        border-radius: 18px !important;
         height: 400px !important;
         width: 100% !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding-top: 60px !important;
-        transition: all 0.4s ease !important;
+        padding: 60px 20px !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         overflow: hidden !important;
         color: white !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
         position: relative !important;
         z-index: 1 !important;
+        cursor: pointer !important;
     }}
 
-    /* CAPA DE LÁSER ROTATIVO (Background layer) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
-        content: "ASTOR"; /* Texto base para HUD Superior */
+    /* LASER ROTATIVO (Layer Behind Text) */
+    div[class*="st-key-hub_btn_"] button::before {{
+        content: "ASTOR";
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
         display: flex;
@@ -633,32 +629,27 @@ st.markdown(f"""
         padding-top: 125px;
         font-family: 'Cinzel', serif;
         font-size: 1.4rem;
-        opacity: 0.8;
+        opacity: 0.6;
         letter-spacing: 5px;
         color: rgba(255,255,255,0.7);
-        z-index: -1;
-        transition: all 0.5s;
-    }}
-
-    /* Fondo de láser rotativo dinámico */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
+        z-index: 0;
+        transition: opacity 0.5s;
+        pointer-events: none;
         background-image: conic-gradient(from 0deg, transparent, {ACCENT_COLOR}33, transparent 30%);
         animation: rotate-laser 4s linear infinite;
         opacity: 0;
     }}
-    
-    div[data-testid="column"]:has(button[key^="hub_btn_"]):hover div[data-testid="stButton"] button::before {{
-        opacity: 1;
-    }}
 
-    /* CAPA DE ESCÁNER Y SUBTÍTULO (Overlay layer) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {{
-        content: ""; /* Se llena específicamente abajo */
+    div[class*="st-key-hub_btn_"] button:hover::before {{ opacity: 1; }}
+
+    /* ESCÁNER Y SUBTÍTULO (Top Layer Overlay) */
+    div[class*="st-key-hub_btn_"] button::after {{
+        content: ""; 
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background-image: linear-gradient(0deg, transparent, {ACCENT_COLOR}22, transparent 5%);
+        background-image: linear-gradient(0deg, transparent, {ACCENT_COLOR}33, {ACCENT_COLOR}55, transparent 15%);
         background-size: 100% 400%;
-        animation: scan-move 4s linear infinite;
+        animation: scan-move 4s ease-in-out infinite;
         pointer-events: none;
         z-index: 2;
         display: flex;
@@ -669,52 +660,92 @@ st.markdown(f"""
         font-size: 0.85rem;
         letter-spacing: 1px;
         text-align: center;
-        padding-left: 20px;
-        padding-right: 20px;
-        opacity: 0.6;
+        opacity: 0.5;
     }}
 
     /* Título principal del botón */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {{
+    div[class*="st-key-hub_btn_"] button p {{
         font-family: 'Cinzel', serif !important;
         font-size: 2.1rem !important;
         font-weight: 800 !important;
         letter-spacing: 3px !important;
-        text-shadow: 0 0 20px rgba(107, 164, 164, 0.4) !important;
+        text-shadow: 0 0 20px rgba(107, 164, 164, 0.6) !important;
         margin: 0 !important;
-        z-index: 3 !important;
+        z-index: 5 !important;
         color: white !important;
+        position: relative !important;
+        pointer-events: none !important;
     }}
 
-    /* VARIANTES DE COLOR Y TEXTO POR MÓDULO */
-    /* Simulador principales */
-    div[data-testid="column"]:has(button[key*="sim"]) div[data-testid="stButton"] button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; }}
-    
-    /* Costos (Gualda/Oro) */
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::before {{ content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }}
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}22, transparent 5%); }}
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button p {{ text-shadow: 0 0 20px {GOLD_COLOR}66 !important; }}
+    /* DIBUJO DE ESQUINAS NEON (Usando background del botón) */
+    div[class*="st-key-hub_btn_"] button {{
+        background-image: 
+            linear-gradient(to right, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to bottom, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to left, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to bottom, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to right, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to top, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to left, {ACCENT_COLOR} 2px, transparent 2px),
+            linear-gradient(to top, {ACCENT_COLOR} 2px, transparent 2px);
+        background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%;
+        background-size: 30px 30px;
+        background-repeat: no-repeat;
+    }}
 
-    /* Planificador (Verde/Teal) */
-    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::before {{ content: "PLANIFICADOR"; }}
-    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::after {{ content: "¿Administro bien mis gastos diarios?"; }}
+    /* Overrides por módulo */
+    div.st-key-hub_btn_sim button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; }}
 
-    /* Comparación (Purple/Púrpura) */
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::before {{ content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }}
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::after {{ content: "¿Me conviene más casa o bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F722, transparent 5%); }}
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button p {{ text-shadow: 0 0 20px #A855F766 !important; }}
+    div.st-key-hub_btn_costos button {{
+        background-image: 
+            linear-gradient(to right, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to bottom, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to left, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to bottom, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to right, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to top, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to left, {GOLD_COLOR} 2px, transparent 2px),
+            linear-gradient(to top, {GOLD_COLOR} 2px, transparent 2px);
+    }}
+    div.st-key-hub_btn_costos button::before {{ content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }}
+    div.st-key-hub_btn_costos button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}33, {GOLD_COLOR}55, transparent 15%); }}
+    div.st-key-hub_btn_costos button p {{ text-shadow: 0 0 20px {GOLD_COLOR}77 !important; }}
 
-    /* Hover State refinements */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {{
+    div.st-key-hub_btn_plan button {{
+        background-image: 
+            linear-gradient(to right, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to bottom, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to left, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to bottom, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to right, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to top, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to left, #6BA4A4 2px, transparent 2px),
+            linear-gradient(to top, #6BA4A4 2px, transparent 2px);
+    }}
+    div.st-key-hub_btn_plan button::before {{ content: "FINANCIERO"; }}
+    div.st-key-hub_btn_plan button::after {{ content: "¿Administro bien mis ingresos?"; }}
+
+    div.st-key-hub_btn_comp button {{
+        background-image: 
+            linear-gradient(to right, #A855F7 2px, transparent 2px),
+            linear-gradient(to bottom, #A855F7 2px, transparent 2px),
+            linear-gradient(to left, #A855F7 2px, transparent 2px),
+            linear-gradient(to bottom, #A855F7 2px, transparent 2px),
+            linear-gradient(to right, #A855F7 2px, transparent 2px),
+            linear-gradient(to top, #A855F7 2px, transparent 2px),
+            linear-gradient(to left, #A855F7 2px, transparent 2px),
+            linear-gradient(to top, #A855F7 2px, transparent 2px);
+    }}
+    div.st-key-hub_btn_comp button::before {{ content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }}
+    div.st-key-hub_btn_comp button::after {{ content: "¿Casa propia o Inversión en Bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F733, #A855F755, transparent 15%); }}
+    div.st-key-hub_btn_comp button p {{ text-shadow: 0 0 20px #A855F777 !important; }}
+
+    /* Interacción Hover */
+    div[class*="st-key-hub_btn_"] button:hover {{
         transform: scale(1.05) translateY(-5px) !important;
-        border-color: rgba(255,255,255,0.3) !important;
+        border-color: rgba(255,255,255,0.4) !important;
         box-shadow: 0 0 60px rgba(107, 164, 164, 0.3) !important;
-        background-color: #11151c !important;
-    }}
-
-    /* Marcos angulares neon (Pseudo-elementos finales) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); /* Borde interno sutil */
+        background-color: #121821 !important;
     }}
 
     </style>
@@ -1056,6 +1087,7 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
     if 'show_planificador_form' not in st.session_state: st.session_state.show_planificador_form = False
 
+    st.markdown('<div class="astor-hub-master">', unsafe_allow_html=True)
     st.markdown("<br><br>", unsafe_allow_html=True)
     c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
@@ -1184,6 +1216,7 @@ if st.session_state.modulo_activo == "Hub":
         if st.button("COMPARACIÓN", key="hub_btn_comp", use_container_width=True):
             st.session_state.modulo_activo = "⚖️ Simulador Comparación"
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
         
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
