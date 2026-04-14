@@ -101,7 +101,7 @@ def render_planificador():
     # --- SELECCIÓN DE ACTIVOS Y COLORES POR TEMA ---
     if st.session_state['dark_mode']:
         logo_watermark_file = "1-07 copy.png"
-        logo_header_file = "image copy.png"
+        logo_header_file = "1-07.png"
         bg_style = """
             background: 
                 radial-gradient(circle at 0% 0%, #E043431A 0%, transparent 40%),
@@ -123,7 +123,7 @@ def render_planificador():
         """
     else:
         logo_watermark_file = "1-07.png"
-        logo_header_file = "image.png"
+        logo_header_file = "1-01.png"
         bg_style = """
             background: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%) !important;
         """
@@ -906,8 +906,7 @@ def render_planificador():
     </style>
     """, unsafe_allow_html=True)
 
-    # 12. Inyectar marca de agua fuera del estilo
-    st.markdown(watermark_html, unsafe_allow_html=True)
+    # 12. Marca de agua la maneja Astor.py globalmente (no duplicar)
 
 
     # --- SIDEBAR: DATOS PERSONALES ---
