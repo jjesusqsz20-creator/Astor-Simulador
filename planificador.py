@@ -65,7 +65,10 @@ def render_planificador():
 
 
     # --- INICIALIZACIÓN DE ESTADO (PERSISTENCIA ROBUSTA) ---
-    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = False
+    # Sincronizar dark_mode con el tema global (dark por defecto, igual que los demás módulos)
+    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = True
+    # Mantener sincronía con el toggle global de Astor.py
+    st.session_state['dark_mode'] = (st.session_state.get('theme', 'dark') == 'dark')
     if 'nombre_cliente' not in st.session_state: st.session_state['nombre_cliente'] = "Cliente Ejemplo"
     if 'sidebar_ingreso' not in st.session_state: st.session_state['sidebar_ingreso'] = 25000
     if 'num_dependientes' not in st.session_state: st.session_state['num_dependientes'] = 0
@@ -912,11 +915,6 @@ def render_planificador():
 
     # --- SIDEBAR: DATOS PERSONALES ---
     with st.sidebar:
-        # Botón de cambio de tema personalizado
-        theme_label = "🌙 Modo Oscuro" if st.session_state['dark_mode'] else "☀️ Modo Claro"
-        if st.button(theme_label, use_container_width=True):
-            st.session_state['dark_mode'] = not st.session_state['dark_mode']
-            st.rerun()
 
         with st.expander("👤 Datos del Cliente", expanded=True):
             nombre = st.text_input("Nombre completo", key="nombre_cliente")
