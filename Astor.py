@@ -1216,24 +1216,33 @@ if st.session_state.modulo_activo == "Hub":
                 nombre_p = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="plan_name_input")
                 ingreso_p = st.number_input("Ingreso mensual", min_value=1000, value=30000, step=1000, key="plan_ingreso_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                dependientes_p = st.number_input("Dependientes económicos", min_value=0, max_value=10, value=0, step=1, key="plan_dep_input")
+                
+                opciones_dep = [0, 1, 2, 3, 4, 5, 6]
+                dependientes_p = st.selectbox("Dependientes económicos", opciones_dep, key="plan_dep_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                necesidades_p = st.number_input("Necesidades y servicios", min_value=0, value=10000, step=1000, key="plan_nec_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                estilo_p = st.number_input("Estilo de vida", min_value=0, value=5000, step=1000, key="plan_estilo_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                creditos_p = st.number_input("Créditos", min_value=0, value=2000, step=500, key="plan_creditos_input")
+                
+                nec_opciones = ["🏠 Vivienda (Renta/hipoteca)", "🍎 Despensa", "🚗 Gasolina / Transporte", "⚡ Servicios (luz, agua, gas, internet)", "🧹 Personal de limpieza"]
+                with st.popover("📋 Necesidades y Servicios", use_container_width=True):
+                    for op in nec_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_{op}")
+                        
+                est_opciones = ["🎓 Educación / colegiatura", "🥂 Salidas y restaurante", "📺 Suscripciones y digital", "💅 Cuidado personal y ropa", "🎨 Hobbies y proyectos", "🏋️ Gimnasio/club", "🐾 Mascotas (Comida y cuidados)", "🚲 Uber Eats / Delivery", "✈️ Viajes y Vacaciones", "📂 Otros gastos"]
+                with st.popover("📋 Estilo de Vida", use_container_width=True):
+                    for op in est_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_est_{op}")
+                        
+                cred_opciones = ["🚗 Crédito de auto", "💳 Tarjeta de crédito (Meses sin intereses)", "🏦 Otros créditos"]
+                with st.popover("📋 Créditos", use_container_width=True):
+                    for op in cred_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_cred_{op}")
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 if st.button("📊 ABRIR PLANIFICADOR", use_container_width=True):
-                    # Guardar variables en session_state para su uso en la vista del planificador
-                    st.session_state.plan_nombre = nombre_p
-                    st.session_state.plan_ingreso = float(ingreso_p)
-                    st.session_state.plan_dependientes = int(dependientes_p)
-                    st.session_state.plan_necesidades = float(necesidades_p)
-                    st.session_state.plan_estilo = float(estilo_p)
-                    st.session_state.plan_creditos = float(creditos_p)
+                    # Sincronizar con las variables exactas que utiliza planificador.py
+                    st.session_state['nombre_cliente'] = nombre_p
+                    st.session_state['sidebar_ingreso'] = float(ingreso_p)
+                    st.session_state['num_dependientes'] = dependientes_p
                     
                     st.session_state.modulo_activo = "📈 Planificador Financiero"
                     st.rerun()
