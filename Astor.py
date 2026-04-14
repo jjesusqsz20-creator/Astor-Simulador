@@ -1495,7 +1495,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             fig.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
             fig.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
             
-            st.plotly_chart(fig, use_container_width=True, theme=None)
+            st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_acumulacion")
 
     with tab_retiro:
         st.markdown(f"<h3 style='text-align: center; color: {ACCENT_COLOR};'>Plan de Distribución: Etapa de Jubilación</h3>", unsafe_allow_html=True)
@@ -1578,7 +1578,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             fig_ret.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
             fig_ret.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
             
-            st.plotly_chart(fig_ret, use_container_width=True, theme=None)
+            st.plotly_chart(fig_ret, use_container_width=True, theme=None, key="chart_retiro")
 
     st.stop() # Detenemos aquí para que no cargue el otro simulador
 
@@ -2054,7 +2054,7 @@ for idx in range(len(resultados)):
                 gridcolor="#0a3a42"
             )
         )
-        st.plotly_chart(fig, use_container_width=True, theme=None)
+        st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_comparacion_escenarios")
     
     
         def highlight_age_60(row):
@@ -2473,8 +2473,18 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
         if os.path.exists(logo_sidebar):
             st.image(logo_sidebar, use_container_width=True)
         st.title("Configuración")
-        st.subheader("Comparativa de Activos")
+        st.subheader("Datos de la Propiedad")
         
+        valor_casa = st.number_input("Valor Actual de la Casa ($)", min_value=100000.0, value=2500000.0, step=100000.0)
+        enganche_pct = st.number_input("Tu Enganche Inicial (%)", min_value=0.0, max_value=100.0, value=20.0, step=5.0)
+        tasa_hipoteca = st.number_input("Tasa Hipotecaria (%)", min_value=1.0, max_value=25.0, value=11.0, step=0.5)
+        renta_mensual = st.number_input("Renta que cobrarías al Mes ($)", min_value=0.0, value=12000.0, step=1000.0)
+        meses_muertos = st.number_input("Meses vacantes/Año", min_value=0, max_value=12, value=2, step=1)
+        plusvalia_anual = st.number_input("Plusvalía Anual (%)", min_value=0.0, max_value=20.0, value=4.0, step=0.5)
+        predial_anual = st.number_input("Predial Anual (%)", min_value=0.0, max_value=5.0, value=0.3, step=0.1)
+        mant_mensual = st.number_input("Mantenimiento mensual ($)", min_value=0.0, value=1000.0, step=500.0)
+        
+        st.markdown("<hr style='opacity: 0.2;'>", unsafe_allow_html=True)
         horizonte_anos = st.number_input("Horizonte de Inversión (Años)", min_value=1, max_value=50, value=25, step=1)
         st.markdown("<hr style='opacity: 0.2;'>", unsafe_allow_html=True)
         
@@ -2490,63 +2500,17 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     </div>
     """, unsafe_allow_html=True)
 
-    # El input central (Capacidad de pago de la persona)
-    st.markdown("<h4 style='text-align: center; color: white; opacity: 0.8;'>💰 CAPACIDAD DE APORTACIÓN MENSUAL (BASE)</h4>", unsafe_allow_html=True)
-    c_pad1, c_mid, c_pad2 = st.columns([1, 1, 1])
-    with c_mid:
-        aportacion_user = st.number_input("Ingresa cuánto pagas o aportarías de tu bolsa al mes ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # LAYOUT 3 COLUMNAS PARA COMPARACIÓN (CASA / EMPTY / BOLSA)
-    c_casa, c_gap, c_fondos = st.columns([1.5, 0.1, 1.5])
-
-    with c_casa:
-        st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>🏠 ESCENARIO: CASA (INMUEBLE)</h3>", unsafe_allow_html=True)
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        
-        valor_casa = st.number_input("Valor Actual de la Casa ($)", min_value=100000.0, value=2500000.0, step=100000.0)
-        
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            enganche_pct = st.number_input("Tu Enganche Inicial (%)", min_value=0.0, max_value=100.0, value=20.0, step=5.0)
-            tasa_hipoteca = st.number_input("Tasa Hipotecaria (%)", min_value=1.0, max_value=25.0, value=11.0, step=0.5)
-        with col_c2:
-            renta_mensual = st.number_input("Renta que cobrarías al Mes ($)", min_value=0.0, value=12000.0, step=1000.0)
-            meses_muertos = st.number_input("Meses muertos (sin rentar)/Año", min_value=0, max_value=12, value=2, step=1)
-            
-        col_c3, col_c4 = st.columns(2)
-        with col_c3:
-            plusvalia_anual = st.number_input("Plusvalía Anual Estimada (%)", min_value=0.0, max_value=20.0, value=4.0, step=0.5)
-        with col_c4:
-            predial_anual = st.number_input("Predial Anual (%)", min_value=0.0, max_value=5.0, value=0.3, step=0.1)
-        
-        mant_mensual = st.number_input("Mantenimiento de la casa por mes ($)", min_value=0.0, value=1000.0, step=500.0)
-
-    with c_fondos:
-        st.markdown(f"<h3 style='text-align: center; color: #34D399;'>📈 ESCENARIO: FONDOS INDEXADOS (S&P 500)</h3>", unsafe_allow_html=True)
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        
-        rendimiento_fondos = st.number_input("Rendimiento Anual Histórico (%)", min_value=1.0, max_value=30.0, value=10.0, step=0.5)
-        inflacion_fondos = st.number_input("Inflación Esperada (Descuento Neto) (%)", min_value=0.0, max_value=15.0, value=4.0, step=0.5)
-        
-        st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); margin-top: 35px;">
-            <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase;">Misma Aportación Mensual</p>
-            <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0;">${aportacion_user:,.0f}</div>
-            <div style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.7;">INVERSIÓN DISCIPLINA EN LA BOLSA</div>
-        </div>
-        """, unsafe_allow_html=True)
-
     # --- LÓGICA DE CÁLCULOS MATEMÁTICOS ---
-    
+    # Valores por defecto para Fondos Indexados (ya que se quitaron del sidebar/main para simplificar)
+    rendimiento_fondos = 10.0
+    inflacion_fondos = 4.0
+
     # 1. CÁLCULO DE LA CASA
     n_meses_hipoteca = horizonte_anos * 12
     r_mensual_h = (tasa_hipoteca / 100.0) / 12.0
     enganche_efectivo = valor_casa * (enganche_pct / 100.0)
     credito_estimado = valor_casa - enganche_efectivo
     
-    # Pago Hipotecario Mensual Neto
     if r_mensual_h > 0 and credito_estimado > 0:
         pago_hipoteca_mes = (credito_estimado * r_mensual_h) / (1 - (1 + r_mensual_h)**(-n_meses_hipoteca))
     elif credito_estimado > 0:
@@ -2554,80 +2518,83 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     else:
         pago_hipoteca_mes = 0.0
 
-    # Gastos Asignados a la Casa
-    # Predial anual dividido en 12 + Mantenimiento mensual
     gasto_predial_mes = (valor_casa * (predial_anual / 100.0)) / 12.0
-    # Renta Neta Recibida (Bruta anual desquitando meses muertos) dividida en 12
     ingreso_renta_anio = renta_mensual * (12 - meses_muertos)
     ingreso_renta_mes_promedio = ingreso_renta_anio / 12.0
-    
-    # ¿Cuánto dinero sale de la bolsa del cliente cada mes por tener esa casa?
     flujo_bolsa = pago_hipoteca_mes + gasto_predial_mes + mant_mensual - ingreso_renta_mes_promedio
-    
-    # Valor Futuro de la Casa
     valor_casa_final = valor_casa * ((1 + (plusvalia_anual/100.0))**horizonte_anos)
-    
-    # Validaciones comparativas:
-    # Mostraremos un aviso si el "Flujo neto" inmobiliario es mayor o menor a la aportación original central.
     diferencia_flujos = flujo_bolsa - aportacion_user
 
     # 2. CÁLCULO DE LOS FONDOS INDEXADOS
-    # Utilizamos el saldo inicial "Enganche" para manzanas con manzanas: ¡Si compra casa, suelta el enganche hoy!
-    # Si invierte en bolsa, invierte ese enganche en bolsa hoy + sus mensualidades.
     r_anual_neto = (rendimiento_fondos - inflacion_fondos) / 100.0
     r_m_fondos = r_anual_neto / 12.0
-    if r_m_fondos > 0:
-        fv_aportaciones = aportacion_user * ( ((1 + r_m_fondos)**n_meses_hipoteca - 1) / r_m_fondos )
-        fv_enganche = enganche_efectivo * ((1 + r_anual_neto)**horizonte_anos)
-        valor_fondos_final = fv_aportaciones + fv_enganche
-    else:
-        valor_fondos_final = enganche_efectivo + (aportacion_user * n_meses_hipoteca)
-
-    # --- INTERFAZ RESULTADOS FINALES ---
-    st.markdown("<hr style='opacity:0.2;'>", unsafe_allow_html=True)
-    st.markdown(f"<h2 style='text-align: center; color: #A855F7; letter-spacing: 2px;'>RESULTADO VALOR NETO EN {horizonte_anos} AÑOS</h2>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
     
-    r1, r2 = st.columns(2)
-    with r1:
-        color_alert = "#ef4444" if diferencia_flujos > 0 else "#10b981"
-        signo_diff = "+" if diferencia_flujos > 0 else ""
+    # Generar datos año por año para la columna de la derecha
+    fondos_data = []
+    saldo_actual = enganche_efectivo
+    for anio in range(1, horizonte_anos + 1):
+        for mes in range(12):
+            saldo_actual = (saldo_actual + aportacion_user) * (1 + r_m_fondos)
+        fondos_data.append({"Año": anio, "Saldo": saldo_actual})
+    
+    valor_fondos_final = saldo_actual
+
+    # --- DISEÑO DE 3 COLUMNAS ---
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_casa, col_monto, col_fondos = st.columns([1.2, 1, 1.2])
+
+    with col_casa:
         st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
-            <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase;">Valor del Inmueble (Con Plusvalía)</p>
-            <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0;">${valor_casa_final:,.0f}</div>
-            <div style="color: {TEXT_COLOR}; font-size: 0.8rem; margin: 10px 0; opacity: 0.8;">
-                Hipoteca mensual: ${pago_hipoteca_mes:,.0f} | Rentas Netas: ${ingreso_renta_mes_promedio:,.0f}
-            </div>
-            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                <p style="color: {color_alert}; margin: 0; font-weight: bold; font-size: 0.95rem;">
-                Tuviste que sacar de tu bolsa: ${flujo_bolsa:,.0f} al mes.
-                </p>
-                <p style="color: {TEXT_COLOR}; margin: 0; font-size: 0.8rem; opacity: 0.7;">
-                (Diferencia vs aportación base: {signo_diff}${diferencia_flujos:,.0f})
-                </p>
+        <div style="background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column; justify-content: center;">
+            <h3 style="color: {GOLD_COLOR}; margin-bottom: 15px;">🏠 DATOS DE CASA</h3>
+            <p style="color: {TEXT_COLOR}; font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px;">VALOR FUTURO (EST.)</p>
+            <div style="color: {GOLD_COLOR}; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">${valor_casa_final:,.0f}</div>
+            <div style="text-align: left; font-size: 0.85rem; color: {TEXT_COLOR}; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <p>• Hipoteca: <b>${pago_hipoteca_mes:,.0f}/mes</b></p>
+                <p>• Renta Neta: <b>${ingreso_renta_mes_promedio:,.0f}/mes</b></p>
+                <p>• Gastos: <b>${gasto_predial_mes + mant_mensual:,.0f}/mes</b></p>
+                <p style="margin-top: 10px; color: {GOLD_COLOR};">Flujo Real: <b>${flujo_bolsa:,.0f}/mes</b></p>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
-    with r2:
-        # Se asume que el enganche también fue invertido
+
+    with col_monto:
         st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
-            <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase;">Capital Acumulado en Bolsa</p>
-            <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0;">${valor_fondos_final:,.0f}</div>
-            <div style="color: {TEXT_COLOR}; font-size: 0.8rem; margin: 10px 0; opacity: 0.8;">
-                Inver. Inicial (Enganche equivalente): ${enganche_efectivo:,.0f}
+        <div style="height: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Capacidad de Aportación</p>
+            <div style="font-size: 4.5rem; font-weight: 800; color: {ACCENT_COLOR}; text-shadow: 0 0 30px {ACCENT_COLOR}66; margin: 10px 0;">
+                ${aportacion_user:,.0f}
             </div>
-            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                <p style="color: #34D399; margin: 0; font-weight: bold; font-size: 0.95rem;">
-                Invertido constantemente: ${aportacion_user:,.0f} al mes.
-                </p>
-                <p style="color: {TEXT_COLOR}; margin: 0; font-size: 0.8rem; opacity: 0.7;">
-                (Tasa de interés libre de cobros, libre de mantenimientos)
-                </p>
-            </div>
+            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">MENSUAL</p>
         </div>
         """, unsafe_allow_html=True)
+
+    with col_fondos:
+        # Mini tabla de crecimiento año a año
+        tabla_rows = ""
+        # Mostrar solo algunos años clave para no saturar (ej cada 5 años + final)
+        años_clave = list(range(5, horizonte_anos, 5)) + [horizonte_anos]
+        if 1 not in años_clave: años_clave = [1] + años_clave
         
+        for a in sorted(list(set(años_clave))):
+            val = next(x["Saldo"] for x in fondos_data if x["Año"] == a)
+            tabla_rows += f"""
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(52, 211, 153, 0.1);">
+                <span style="color: {TEXT_COLOR}; opacity: 0.7;">Año {a}</span>
+                <span style="color: #34D399; font-weight: bold;">${val:,.0f}</span>
+            </div>
+            """
+
+        st.markdown(f"""
+        <div style="background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column;">
+            <h3 style="color: #34D399; margin-bottom: 10px;">📈 FONDO INDEXADO</h3>
+            <p style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px;">TOTAL ACUMULADO</p>
+            <div style="color: #34D399; font-size: 2.2rem; font-weight: bold; margin-bottom: 15px;">${valor_fondos_final:,.0f}</div>
+            <div style="flex: 1; overflow-y: auto; text-align: left; padding: 0 10px;">
+                {tabla_rows}
+            </div>
+            <p style="font-size: 0.75rem; opacity: 0.5; margin-top: 10px; color: {TEXT_COLOR};">Cálculo basado en 10% anual neto</p>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("<br><br><br>", unsafe_allow_html=True)
