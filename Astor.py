@@ -2110,14 +2110,12 @@ if edad <= 39:
         id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
         seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
         
-        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle Proyectado a los 65 - Escenario ${seleccion65['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
+        # Filtrar solo periodos posteriores al año 25
+        df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > 25]
         
-        cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-        if frecuencia_vista != "Anual":
-            cols_to_show_65.insert(0, eje_x_data_col)
-
+        # --- TABLA HTML PERSONALIZADA (65 años) ---
         html_table_65 = (
-            seleccion65["df_65_display"].style
+            df_65_show[cols_to_show_65].style
             .format({
                 "Aportación Anual": "${:,.0f}",
                 "Aportación Acumulada": "${:,.0f}", 
@@ -2132,32 +2130,12 @@ if edad <= 39:
             .hide(axis="index")
             .to_html()
         )
-            # Filtrar solo periodos posteriores al año 25
-            df_65_show = df_65_show[df_65_show["Año"] > 25]
-            
-            # --- TABLA HTML PERSONALIZADA (65 años) ---
-            html_table_65 = (
-                df_65_show[cols_to_show].style
-                .format({
-                    "Aportación Anual": "${:,.0f}",
-                    "Aportación Acumulada": "${:,.0f}", 
-                    "Saldo de Fondo": "${:,.0f}", 
-                    "Saldo Disponible": "${:,.0f}", 
-                    "Post retención": "${:,.0f}",
-                    "Año": "{:.0f}", 
-                    "Edad": "{:.0f}"
-                })
-                .apply(highlight_age_60, axis=1)
-                .set_properties(**{'text-align': 'center'})
-                .hide(axis="index")
-                .to_html()
-            )
-            
-            st.markdown(f"""
-    <div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-    {html_table_65}
-    </div>
-    """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+{html_table_65}
+</div>
+""", unsafe_allow_html=True)
     
     
     # 3. EXPORTACIÓN CSV
