@@ -648,7 +648,7 @@ st.markdown(f"""
     }}
 
     /* BOTONES INVISIBLES (Overlay total sobre la carta) */
-    div[data-testid="column"]:has(.hud-card-content) .stButton {
+    div[data-testid="column"]:has(.hud-card-content) .stButton {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
@@ -657,8 +657,8 @@ st.markdown(f"""
         z-index: 1000 !important;
         margin: 0 !important;
         padding: 0 !important;
-    }
-    div[data-testid="column"]:has(.hud-card-content) .stButton > button {
+    }}
+    div[data-testid="column"]:has(.hud-card-content) .stButton > button {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
@@ -671,13 +671,13 @@ st.markdown(f"""
         cursor: pointer !important;
         margin: 0 !important;
         padding: 0 !important;
-    }
+    }}
     
     /* Prevenir que el hover de la columna se rompa por el botón */
-    div[data-testid="column"]:has(.hud-card-content):hover {
+    div[data-testid="column"]:has(.hud-card-content):hover {{
         transform: scale(1.05) !important;
         z-index: 1001 !important;
-    }
+    }}
     .hud-card-content {{
         display: block !important;
         width: 100% !important;
