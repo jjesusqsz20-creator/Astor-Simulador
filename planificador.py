@@ -298,18 +298,21 @@ def render_planificador():
     }
 
     /* OVERRIDE: Tabs, botones y elementos de UI de Streamlit usan fuente limpia */
-    .stTabs [data-baseweb="tab-list"] button,
-    .stTabs [data-baseweb="tab-list"] button p,
-    .stTabs [data-baseweb="tab-list"] button span,
-    .stTabs [data-baseweb="tab-list"] button div,
-    [data-baseweb="tab"] p,
-    [data-baseweb="tab"] span,
-    [data-testid="stTab"] p,
-    [data-testid="stTab"] span {
+    button[role="tab"],
+    button[role="tab"] *,
+    [role="tablist"],
+    [role="tablist"] *,
+    [data-baseweb="tab-list"],
+    [data-baseweb="tab-list"] *,
+    [data-baseweb="tab"],
+    [data-baseweb="tab"] *,
+    [data-testid="stTabs"] button,
+    [data-testid="stTabs"] button * {
         font-family: 'Inter', 'Segoe UI', sans-serif !important;
         font-size: 0.95rem !important;
         font-weight: 600 !important;
         letter-spacing: 0.3px !important;
+        text-transform: none !important;
     }
 
     /* 4. LIMPIEZA TOTAL DE COMPONENTES NEGROS */
