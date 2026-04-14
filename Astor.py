@@ -597,14 +597,14 @@ st.markdown(f"""
     }}
 
     /* --- MASTER HUD BUTTON DESIGN (Directly on Native Buttons) --- */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {{
         position: relative !important;
         width: 100% !important;
         height: 400px !important;
         margin-top: 10px !important;
-    }
+    }}
 
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {{
         background: #0a0d12 !important; /* Base ultra-oscura */
         border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 20px !important;
@@ -621,10 +621,10 @@ st.markdown(f"""
         box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
         position: relative !important;
         z-index: 1 !important;
-    }
+    }}
 
     /* CAPA DE LÁSER ROTATIVO (Background layer) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
         content: "ASTOR"; /* Texto base para HUD Superior */
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -638,21 +638,21 @@ st.markdown(f"""
         color: rgba(255,255,255,0.7);
         z-index: -1;
         transition: all 0.5s;
-    }
+    }}
 
     /* Fondo de láser rotativo dinámico */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
         background-image: conic-gradient(from 0deg, transparent, {ACCENT_COLOR}33, transparent 30%);
         animation: rotate-laser 4s linear infinite;
         opacity: 0;
-    }
+    }}
     
-    div[data-testid="column"]:has(button[key^="hub_btn_"]):hover div[data-testid="stButton"] button::before {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]):hover div[data-testid="stButton"] button::before {{
         opacity: 1;
-    }
+    }}
 
     /* CAPA DE ESCÁNER Y SUBTÍTULO (Overlay layer) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {{
         content: ""; /* Se llena específicamente abajo */
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -672,10 +672,10 @@ st.markdown(f"""
         padding-left: 20px;
         padding-right: 20px;
         opacity: 0.6;
-    }
+    }}
 
     /* Título principal del botón */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {{
         font-family: 'Cinzel', serif !important;
         font-size: 2.1rem !important;
         font-weight: 800 !important;
@@ -684,38 +684,38 @@ st.markdown(f"""
         margin: 0 !important;
         z-index: 3 !important;
         color: white !important;
-    }
+    }}
 
     /* VARIANTES DE COLOR Y TEXTO POR MÓDULO */
     /* Simulador principales */
-    div[data-testid="column"]:has(button[key*="sim"]) div[data-testid="stButton"] button::after { content: "¿Cuánto dinero puedo ahorrar al mes?"; }
+    div[data-testid="column"]:has(button[key*="sim"]) div[data-testid="stButton"] button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; }}
     
     /* Costos (Gualda/Oro) */
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::before { content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::after { content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}22, transparent 5%); }
-    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button p { text-shadow: 0 0 20px {GOLD_COLOR}66 !important; }
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::before {{ content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }}
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}22, transparent 5%); }}
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button p {{ text-shadow: 0 0 20px {GOLD_COLOR}66 !important; }}
 
     /* Planificador (Verde/Teal) */
-    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::before { content: "PLANIFICADOR"; }
-    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::after { content: "¿Administro bien mis gastos diarios?"; }
+    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::before {{ content: "PLANIFICADOR"; }}
+    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::after {{ content: "¿Administro bien mis gastos diarios?"; }}
 
     /* Comparación (Purple/Púrpura) */
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::before { content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::after { content: "¿Me conviene más casa o bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F722, transparent 5%); }
-    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button p { text-shadow: 0 0 20px #A855F766 !important; }
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::before {{ content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }}
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::after {{ content: "¿Me conviene más casa o bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F722, transparent 5%); }}
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button p {{ text-shadow: 0 0 20px #A855F766 !important; }}
 
     /* Hover State refinements */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {{
         transform: scale(1.05) translateY(-5px) !important;
         border-color: rgba(255,255,255,0.3) !important;
         box-shadow: 0 0 60px rgba(107, 164, 164, 0.3) !important;
         background-color: #11151c !important;
-    }
+    }}
 
     /* Marcos angulares neon (Pseudo-elementos finales) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
         box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); /* Borde interno sutil */
-    }
+    }}
 
     </style>
 """, unsafe_allow_html=True)
