@@ -1097,27 +1097,29 @@ if st.session_state.modulo_activo == "Hub":
 
         if st.session_state.show_sim_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            # Inputs de Streamlit
-            nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-            m_h_val = st.session_state.get("hub_monto_input", 3000)
-            monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
-                st.session_state.hub_nombre = nombre_h
-                st.session_state.hub_monto = monto_h
-                st.session_state.hub_edad = edad_h
-                st.session_state.num_escenarios = 3
-                st.session_state.monto_0 = float(monto_h)
-                st.session_state.monto_1 = float(monto_h + 1000)
-                st.session_state.monto_2 = float(monto_h + 2000)
+            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
+            with col_main:
+                # Inputs de Streamlit
+                nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
+                m_h_val = st.session_state.get("hub_monto_input", 3000)
+                monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                edad_h = st.number_input("Edad", min_value=18, max_value=70, value=35, key="hub_edad_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
+                    st.session_state.hub_nombre = nombre_h
+                    st.session_state.hub_monto = monto_h
+                    st.session_state.hub_edad = edad_h
+                    st.session_state.num_escenarios = 3
+                    st.session_state.monto_0 = float(monto_h)
+                    st.session_state.monto_1 = float(monto_h + 1000)
+                    st.session_state.monto_2 = float(monto_h + 2000)
     with c4:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
         st.markdown(f"""
@@ -1145,36 +1147,38 @@ if st.session_state.modulo_activo == "Hub":
 
         if st.session_state.show_costos_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            # Inputs de Proyecto Costos
-            nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
-            r_c_val = st.session_state.get("costos_renta_input", 50000)
-            renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=1, key="costos_retiro_age_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-                r_anual_retiro = 0.10 
-                r_m = r_anual_retiro / 12.0
-                n_meses_pago = 25 * 12
-                if r_m > 0:
-                    meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
-                else:
-                    meta_calculada = renta_c * n_meses_pago
-                st.session_state.hub_nombre_costos = nombre_c
-                st.session_state.renta_costos_sync = float(renta_c)
-                st.session_state.meta_retiro_val = float(meta_calculada)
-                st.session_state.costos_edad_inicial = int(edad_c)
-                st.session_state.costos_edad_retiro = int(retiro_c)
-                st.session_state.modulo_activo = "✨ Nuevo Simulador"
-                st.rerun()
+            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
+            with col_main:
+                # Inputs de Proyecto Costos
+                nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
+                r_c_val = st.session_state.get("costos_renta_input", 50000)
+                renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=35, key="costos_edad_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=1, key="costos_retiro_age_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
+                    r_anual_retiro = 0.10 
+                    r_m = r_anual_retiro / 12.0
+                    n_meses_pago = 25 * 12
+                    if r_m > 0:
+                        meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
+                    else:
+                        meta_calculada = renta_c * n_meses_pago
+                    st.session_state.hub_nombre_costos = nombre_c
+                    st.session_state.renta_costos_sync = float(renta_c)
+                    st.session_state.meta_retiro_val = float(meta_calculada)
+                    st.session_state.costos_edad_inicial = int(edad_c)
+                    st.session_state.costos_edad_retiro = int(retiro_c)
+                    st.session_state.modulo_activo = "✨ Nuevo Simulador"
+                    st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
