@@ -301,7 +301,7 @@ def render_planificador():
     p, label {
         color: var(--primary-blue) !important;
         font-family: 'Inter', 'Segoe UI', sans-serif !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
     }
 
     /* 4. LIMPIEZA TOTAL DE COMPONENTES NEGROS */
