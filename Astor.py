@@ -1127,7 +1127,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
                 <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
                 <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
                 <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
                 <div style="text-align: center; padding: 60px 20px;">
@@ -1187,7 +1187,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
                 <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
                 <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
                 <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
                 <div style="text-align: center; padding: 60px 20px;">
@@ -1210,7 +1210,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="hud-corner corner-tr" style="border-color: #A855F7;"></div>
                 <div class="hud-corner corner-bl" style="border-color: #A855F7;"></div>
                 <div class="hud-corner corner-br" style="border-color: #A855F7;"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: #A855F7; opacity: 0.6;">MODULE: PENDING</div>
                 <div class="status-label stat-br" style="color: #A855F7; opacity: 0.6;">MOD: NEBULA_V1</div>
                 <div style="text-align: center; padding: 60px 20px;">
