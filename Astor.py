@@ -2586,23 +2586,18 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
         
         for a in sorted(list(set(años_clave))):
             val = next(x["Saldo"] for x in fondos_data if x["Año"] == a)
-            tabla_rows += f"""
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(52, 211, 153, 0.1);">
-                <span style="color: {TEXT_COLOR}; opacity: 0.7;">Año {a}</span>
-                <span style="color: #34D399; font-weight: bold;">${val:,.0f}</span>
-            </div>
-            """
+            tabla_rows += f'<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(52, 211, 153, 0.1);"><span style="color: {TEXT_COLOR}; opacity: 0.7;">Año {a}</span><span style="color: #34D399; font-weight: bold;">${val:,.0f}</span></div>'
 
         st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column;">
-            <h3 style="color: #34D399; margin-bottom: 10px;">📈 FONDO INDEXADO</h3>
-            <p style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px;">TOTAL ACUMULADO</p>
-            <div style="color: #34D399; font-size: 2.2rem; font-weight: bold; margin-bottom: 15px;">${valor_fondos_final:,.0f}</div>
-            <div style="flex: 1; overflow-y: auto; text-align: left; padding: 0 10px;">
-                {tabla_rows}
-            </div>
-            <p style="font-size: 0.75rem; opacity: 0.5; margin-top: 10px; color: {TEXT_COLOR};">Cálculo basado en 10% anual neto</p>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column;">
+    <h3 style="color: #34D399; margin-bottom: 10px;">📈 FONDO INDEXADO</h3>
+    <p style="color: {TEXT_COLOR}; font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px;">TOTAL ACUMULADO</p>
+    <div style="color: #34D399; font-size: 2.2rem; font-weight: bold; margin-bottom: 15px;">${valor_fondos_final:,.0f}</div>
+    <div style="flex: 1; overflow-y: auto; text-align: left; padding: 0 10px;">
+        {tabla_rows}
+    </div>
+    <p style="font-size: 0.75rem; opacity: 0.5; margin-top: 10px; color: {TEXT_COLOR};">Cálculo basado en 10% anual neto</p>
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
