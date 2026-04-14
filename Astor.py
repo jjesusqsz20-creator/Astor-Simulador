@@ -1965,161 +1965,125 @@ for idx in range(len(resultados)):
             </div>
             """, unsafe_allow_html=True)
 
-# --- SECCIÓN 3: RETIRO ---
-proy_edad_retiro = edad + anios_para_65
-st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
-
-cols_retiro = st.columns(cols_spec)
-for idx in range(len(resultados)):
-    res = resultados[idx]
-    r65 = resultados_65[idx]
-    with cols_retiro[idx * 2]:
-        monto_m19_val_retiro = r65.get('monto_mes_19')
-        texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
-
-        st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
-            <div style="flex: 0;">
-                <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
-                {texto_mes_19}
-            </div>
-            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
-            </div>
-            <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
-                <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
-                <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    # --- SECCIÓN 3: RETIRO ---
+    proy_edad_retiro = edad + anios_para_65
+    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
     
-    # Divisor Retiro
-    if idx < len(resultados) - 1:
-        with cols_retiro[idx * 2 + 1]:
+    cols_retiro = st.columns(cols_spec)
+    for idx in range(len(resultados)):
+        res = resultados[idx]
+        r65 = resultados_65[idx]
+        with cols_retiro[idx * 2]:
+            monto_m19_val_retiro = r65.get('monto_mes_19')
+            texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
+    
             st.markdown(f"""
-            <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+            <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
+                <div style="flex: 0;">
+                    <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
+                    {texto_mes_19}
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                    <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
+                </div>
+                <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
+                    <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
+                    <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
+                </div>
             </div>
             """, unsafe_allow_html=True)
-
-st.write("---")
-tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
-if edad <= 39:
-    tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
-
-tabs = st.tabs(tabs_nombres)
-tab_grafica = tabs[0]
-tab_tabla = tabs[1]
-if edad <= 39:
-    tab_tabla_65 = tabs[2]
-
-with tab_grafica:
-    st.subheader("Crecimiento de Capital en el Tiempo")
-    fig = go.Figure()
-    for res in resultados:
-        fig.add_trace(go.Scatter(
-            x=res["df_display"][eje_x_data_col].tolist(), 
-            y=res["df_display"]["Saldo de Fondo"].tolist(),
-            mode='lines', 
-            name=f'<b>Escenario de inversión {res["id"]}</b>',
-            line=dict(color=res["color"], width=3)
-        ))
-    fig.update_layout(
-        xaxis_title=x_axis_title, 
-        yaxis_title="Saldo Acumulado",
-        hovermode="x unified", 
-        template="plotly_dark", 
-        paper_bgcolor=BG_COLOR,
-        plot_bgcolor=BG_COLOR,
-        height=450,
-        legend=dict(
-            orientation="h", 
-            y=1.1, 
-            x=0.5, 
-            xanchor="center",
-            font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
-        ),
-        margin=dict(l=20, r=20, t=40, b=20),
-        font=dict(size=14, color=TEXT_COLOR),
-        xaxis=dict(
-            title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-            gridcolor="#0a3a42"
-        ),
-        yaxis=dict(
-            title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-            tickprefix="$",
-            gridcolor="#0a3a42"
+        
+        # Divisor Retiro
+        if idx < len(resultados) - 1:
+            with cols_retiro[idx * 2 + 1]:
+                st.markdown(f"""
+                <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    st.write("---")
+    tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
+    if edad <= 39:
+        tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
+    
+    tabs = st.tabs(tabs_nombres)
+    tab_grafica = tabs[0]
+    tab_tabla = tabs[1]
+    if edad <= 39:
+        tab_tabla_65 = tabs[2]
+    
+    with tab_grafica:
+        st.subheader("Crecimiento de Capital en el Tiempo")
+        fig = go.Figure()
+        for res in resultados:
+            fig.add_trace(go.Scatter(
+                x=res["df_display"][eje_x_data_col].tolist(), 
+                y=res["df_display"]["Saldo de Fondo"].tolist(),
+                mode='lines', 
+                name=f'<b>Escenario de inversión {res["id"]}</b>',
+                line=dict(color=res["color"], width=3)
+            ))
+        fig.update_layout(
+            xaxis_title=x_axis_title, 
+            yaxis_title="Saldo Acumulado",
+            hovermode="x unified", 
+            template="plotly_dark", 
+            paper_bgcolor=BG_COLOR,
+            plot_bgcolor=BG_COLOR,
+            height=450,
+            legend=dict(
+                orientation="h", 
+                y=1.1, 
+                x=0.5, 
+                xanchor="center",
+                font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
+            ),
+            margin=dict(l=20, r=20, t=40, b=20),
+            font=dict(size=14, color=TEXT_COLOR),
+            xaxis=dict(
+                title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+                gridcolor="#0a3a42"
+            ),
+            yaxis=dict(
+                title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+                tickprefix="$",
+                gridcolor="#0a3a42"
+            )
         )
-    )
-    st.plotly_chart(fig, use_container_width=True, theme=None)
-
-
-    def highlight_age_60(row):
-        is_age_60 = row["Edad"] == 60
-        # Regresando al verde suave que el usuario prefiere
-        return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
-
-with tab_tabla:
-    col_sel, col_dump = st.columns([1, 3])
-    opciones_select = [r['id'] for r in resultados]
-    id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
-    seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
-    color_ver = seleccion["color"]
+        st.plotly_chart(fig, use_container_width=True, theme=None)
     
-    st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
     
-    # Columnas específicas solicitadas
-    # ELIMINADA: "Saldo Disponible Neto"
-    cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        def highlight_age_60(row):
+            is_age_60 = row["Edad"] == 60
+            # Regresando al verde suave que el usuario prefiere
+            return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
     
-    # Si es mensual o semestral, añadimos la columna de periodo
-    if frecuencia_vista != "Anual":
-        # Insertar al principio
-        cols_to_show.insert(0, eje_x_data_col)
-    # --- TABLA BONITA CON BARRAS DE PROGRESO ---
-    # --- TABLA HTML PERSONALIZADA ---
-    # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
-    html_table = (
-        seleccion["df_display"][cols_to_show].style
-        .format({
-            "Aportación Anual": "${:,.0f}",
-            "Aportación Acumulada": "${:,.0f}", 
-            "Saldo de Fondo": "${:,.0f}", 
-            "Saldo Disponible": "${:,.0f}", 
-            "Post retención": "${:,.0f}",
-            "Año": "{:.0f}", 
-            "Edad": "{:.0f}"
-        })
-        .apply(highlight_age_60, axis=1)
-        .set_properties(**{'text-align': 'center'})
-        .hide(axis="index")
-        .to_html()
-    )
-    
-    st.markdown(f"""
-<div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-{html_table}
-</div>
-""", unsafe_allow_html=True)
-
-if edad <= 39:
-    with tab_tabla_65:
-        col_sel_65, col_dump_65 = st.columns([1, 3])
-        id_sel_65 = col_sel_65.selectbox("Ver detalle extra de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
-        sel_65 = next(item for item in resultados if item["id"] == id_sel_65)
+    with tab_tabla:
+        col_sel, col_dump = st.columns([1, 3])
+        opciones_select = [r['id'] for r in resultados]
+        id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
+        seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
+        color_ver = seleccion["color"]
         
-        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle edad {edad + 25} a 65 años - Escenario de inversión ${sel_65['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
         
-        df_65_show = sel_65["df_65_display"]
-        # Filtrar solo periodos posteriores al año 25
-        df_65_show = df_65_show[df_65_show["Año"] > 25]
+        # Columnas específicas solicitadas
+        # ELIMINADA: "Saldo Disponible Neto"
+        cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
         
-        # --- TABLA HTML PERSONALIZADA (65 años) ---
-        html_table_65 = (
-            df_65_show[cols_to_show].style
+        # Si es mensual o semestral, añadimos la columna de periodo
+        if frecuencia_vista != "Anual":
+            # Insertar al principio
+            cols_to_show.insert(0, eje_x_data_col)
+        # --- TABLA BONITA CON BARRAS DE PROGRESO ---
+        # --- TABLA HTML PERSONALIZADA ---
+        # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
+        html_table = (
+            seleccion["df_display"][cols_to_show].style
             .format({
                 "Aportación Anual": "${:,.0f}",
                 "Aportación Acumulada": "${:,.0f}", 
@@ -2136,335 +2100,371 @@ if edad <= 39:
         )
         
         st.markdown(f"""
-<div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-{html_table_65}
-</div>
-""", unsafe_allow_html=True)
-
-
-# 3. EXPORTACIÓN CSV
-
-
-# 3. EXPORTACIÓN CSV
-# 3. EXPORTACIÓN EXCEL PROFESIONAL (Multi-Hoja)
-def generar_excel(res_list, nombre_cte):
-    output = io.BytesIO()
-    # Usaremos xlsxwriter obligatoriamente para el formato avanzado
-    try:
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    except:
-        # Fallback básico si explota algo o no está instalado
-        writer = pd.ExcelWriter(output, engine='openpyxl')
+    <div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+    {html_table}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if edad <= 39:
+        with tab_tabla_65:
+            col_sel_65, col_dump_65 = st.columns([1, 3])
+            id_sel_65 = col_sel_65.selectbox("Ver detalle extra de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
+            sel_65 = next(item for item in resultados if item["id"] == id_sel_65)
+            
+            st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle edad {edad + 25} a 65 años - Escenario de inversión ${sel_65['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
+            
+            df_65_show = sel_65["df_65_display"]
+            # Filtrar solo periodos posteriores al año 25
+            df_65_show = df_65_show[df_65_show["Año"] > 25]
+            
+            # --- TABLA HTML PERSONALIZADA (65 años) ---
+            html_table_65 = (
+                df_65_show[cols_to_show].style
+                .format({
+                    "Aportación Anual": "${:,.0f}",
+                    "Aportación Acumulada": "${:,.0f}", 
+                    "Saldo de Fondo": "${:,.0f}", 
+                    "Saldo Disponible": "${:,.0f}", 
+                    "Post retención": "${:,.0f}",
+                    "Año": "{:.0f}", 
+                    "Edad": "{:.0f}"
+                })
+                .apply(highlight_age_60, axis=1)
+                .set_properties(**{'text-align': 'center'})
+                .hide(axis="index")
+                .to_html()
+            )
+            
+            st.markdown(f"""
+    <div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+    {html_table_65}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    
+    # 3. EXPORTACIÓN CSV
+    
+    
+    # 3. EXPORTACIÓN CSV
+    # 3. EXPORTACIÓN EXCEL PROFESIONAL (Multi-Hoja)
+    def generar_excel(res_list, nombre_cte):
+        output = io.BytesIO()
+        # Usaremos xlsxwriter obligatoriamente para el formato avanzado
+        try:
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        except:
+            # Fallback básico si explota algo o no está instalado
+            writer = pd.ExcelWriter(output, engine='openpyxl')
+            
+        workbook = writer.book
         
-    workbook = writer.book
+        # ---------------------------------------------------------
+        # MODO IMPORTANTE: SI NO TENEMOS XLSXWRITER, MODO SIMPLE
+        # ---------------------------------------------------------
+        if writer.engine != 'xlsxwriter':
+            # Exportación simple para evitar errores
+            for r in res_list:
+                cols_export_basic = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+                if frecuencia_vista != "Anual": cols_export_basic.insert(0, eje_x_data_col)
+                r['df_display'][cols_export_basic].to_excel(writer, sheet_name=f"Escenario {r['id']}", index=False)
+            writer.close()
+            return output.getvalue()
     
-    # ---------------------------------------------------------
-    # MODO IMPORTANTE: SI NO TENEMOS XLSXWRITER, MODO SIMPLE
-    # ---------------------------------------------------------
-    if writer.engine != 'xlsxwriter':
-        # Exportación simple para evitar errores
-        for r in res_list:
-            cols_export_basic = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-            if frecuencia_vista != "Anual": cols_export_basic.insert(0, eje_x_data_col)
-            r['df_display'][cols_export_basic].to_excel(writer, sheet_name=f"Escenario {r['id']}", index=False)
-        writer.close()
-        return output.getvalue()
-
-    # --- SÍ TENEMOS XLSXWRITER: FORMATOS AVANZADOS ---
-    
-    # --- CONFIGURACIÓN DINÁMICA DE COLORES EXCEL ---
-    if is_dark:
-        COLOR_FONDO = '#050505'       # Negro Profundo
-        COLOR_GRADIENTE_1 = '#092B30' # Petrol Oscuro
-        COLOR_GRADIENTE_2 = '#050505' # Transición a Negro
-        COLOR_TEXTO_MAIN = '#FFFFFF'  # Blanco
-        COLOR_ORO = '#E6C200'         # Oro Atenuado
-        COLOR_ACCENTO = '#1a3a42'     # Cian Oscuro
-        BORDER_EXCEL = COLOR_ORO
-        HEADER_BG = COLOR_GRADIENTE_1
-        LOGO_FILE = "1-06.png"
-    else:
-        # Modo Claro (Identidad Astor Original)
-        COLOR_FONDO = '#FFFFFF'       # Blanco Puro
-        COLOR_GRADIENTE_1 = '#1E3A8A' # Azul Astor (Primary)
-        COLOR_GRADIENTE_2 = '#FFFFFF' 
-        COLOR_TEXTO_MAIN = '#FFFFFF'  # Para textos sobre fondo azul
-        COLOR_TEXTO_DARK = '#1E3A8A'  # Para textos sobre fondo blanco
-        COLOR_ORO = '#1E3A8A'         # Azul Marino en lugar de Oro en claro
-        COLOR_ACCENTO = '#F0F2F5'     # Gris suave de fondo
-        BORDER_EXCEL = '#1E3A8A'
-        HEADER_BG = '#1E3A8A'
-        LOGO_FILE = "1-06 copy.png"
-    
-    # --- ESTILOS COMPLEJOS (BOXED DESIGN) ---
-    # Título Principal con Color Sólido Premium
-    fmt_title_main = workbook.add_format({
-        'bold': True, 'font_size': 24, 'font_color': COLOR_TEXTO_MAIN,
-        'bg_color': HEADER_BG,
-        'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
-        'font_name': 'Georgia'
-    })
-    
-    # Título de Escenario (Borde Oro, Texto Blanco)
-    fmt_title_scenario = workbook.add_format({
-        'bold': True, 'font_size': 18, 'font_color': COLOR_TEXTO_MAIN,
-        'bg_color': HEADER_BG,
-        'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
-        'text_wrap': True,
-        'font_name': 'Georgia'
-    })
-    
-    # Encabezados de Sección (Totalmente transparente para ver marca de agua)
-    fmt_section_header = workbook.add_format({
-        'bold': True, 'font_size': 14, 'font_color': COLOR_TEXTO_MAIN, 
-        'bg_color': HEADER_BG,
-        'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL
-    })
-    
-    fmt_box_label = workbook.add_format({
-        'font_size': 11, 'font_color': '#64748B' if not is_dark else '#9ca3af', 'align': 'center', 'valign': 'top', 'bold': True,
-        'bg_color': COLOR_FONDO
-    })
-    
-    fmt_box_data = workbook.add_format({
-        'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
-        'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
-    })
-    
-    fmt_box_data_currency = workbook.add_format({
-        'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
-        'border': 2, 'border_color': BORDER_EXCEL, 'bold': True, 'num_format': '$#,##0'
-    })
-    
-    # NUEVO: Formato específico para la fila del cliente (Dorado en oscuro)
-    fmt_client_info = workbook.add_format({
-        'font_size': 16, 'font_color': COLOR_ORO if is_dark else COLOR_TEXTO_DARK, 'align': 'center', 'valign': 'vcenter',
-        'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
-    })
-
-    # Encabezado de Tabla Principal (Transparente, Texto Blanco, Borde Oro)
-    fmt_header_table = workbook.add_format({
-        'bold': True, 'font_size': 12, 'font_color': COLOR_TEXTO_MAIN,
-        'bg_color': HEADER_BG,
-        'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'valign': 'vcenter'
-    })
-    
-    # Celdas de Datos (Sin bg_color para que la marca de agua sea visible "dentro")
-    fmt_cell_text = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-    fmt_cell_num = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-    fmt_cell_currency = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'num_format': '$#,##0', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-    
-    # Formatos con Highlight (Edad 60) - Manteniendo el verde suave para legibilidad sobre el oscuro
-    fmt_cell_text_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-    fmt_cell_num_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-    fmt_cell_currency_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'num_format': '$#,##0', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-
-    fmt_bold_label = workbook.add_format({'bold': True, 'font_size': 12, 'font_color': BORDER_EXCEL, 'bg_color': COLOR_FONDO})
-    
-    # --- HOJA 1: PORTADA / RESUMEN EJECUTIVO ---
-    ws_portada = workbook.add_worksheet("Portada")
-    ws_portada.hide_gridlines(2) # Ocultar gridlines para que brille el fondo oscuro
-    
-    # --- MARCA DE AGUA ---
-    watermark_file = get_watermark_excel(is_dark=is_dark)
-    if watermark_file:
-        ws_portada.set_background(watermark_file)
-    
-    # --- PROTECCIÓN ---
-    # Bloquear objetos (logo) para que no se puedan mover o borrar
-    ws_portada.protect()
-
-    # --- CONFIGURACIÓN DE ESPACIOS (Garantizar que nada se vea aplastado) ---
-    for r_idx in range(0, 10):
-        ws_portada.set_row(r_idx, 25) # Altura generosa para la cabecera
-    
-    # --- SECCIÓN 0: CABECERA Y LOGO ---
-    logo_portada = get_asset_path(LOGO_FILE)
-    if os.path.exists(logo_portada):
-        # Logo en esquina A1/B1 con escala clara
-        ws_portada.insert_image('A1', logo_portada, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
-
-    # Título Principal centrado respecto a la zona de datos
-    ws_portada.merge_range('D3:F6', "Astor simulador", fmt_title_main)
-    
-    # --- SECCIÓN 1: DATOS DEL CLIENTE ---
-    row = 25 # MÁXIMO AIRE: Bajamos hasta la fila 25 para que nada se encime
-    ws_portada.merge_range(row, 1, row, 6, "Información del Cliente", fmt_section_header)
-    row += 2
-    
-    # Fila de etiquetas
-    ws_portada.merge_range(row, 1, row, 2, "Nombre del Cliente", fmt_box_label) # Merge para que quepa el label
-    ws_portada.merge_range(row, 3, row, 5, "Plan Seleccionado", fmt_box_label)
-    ws_portada.write(row, 6, "Edad Actual", fmt_box_label)
-    row += 1
-    
-    # Fila de valores (Boxed)
-    ws_portada.set_row(row, 45) 
-    # MERGE para el nombre del cliente para que no se corte NUNCA
-    ws_portada.merge_range(row, 1, row, 2, nombre_cte.title(), fmt_client_info)
-    ws_portada.merge_range(row, 3, row, 5, tipo_plan, fmt_client_info)
-    ws_portada.write(row, 6, f"{edad} años", fmt_client_info)
-    
-    # --- SECCIÓN 3: RESUMEN COMPARATIVO ---
-    row += 6 
-    ws_portada.merge_range(row, 1, row, 6, "Resumen de Escenarios Proyectados", fmt_section_header)
-    
-    # Aplicar a Portada (hasta fila 80 para cubrir todo el resumen)
-    # Ya no se requiere aplicar_patron_watermark manual
-    row += 2
-    
-    # Encabezados Tabla Resumen
-    headers_res = ["Escenario De Inversión", "Aportación Mensual", "Aportación Mes 19+", "Saldo Final", "Bono Inicial"]
-    for col, h in enumerate(headers_res):
-        ws_portada.write(row, 1 + col, h, fmt_header_table)
-    
-    # Filas Tabla Resumen
-    row += 1
-    for r in res_list:
-        ws_portada.set_row(row, 20)
-        ws_portada.write(row, 1, f"Escenario {r['id']}", fmt_cell_text)
-        ws_portada.write(row, 2, r['monto_inicial'], fmt_cell_currency)
+        # --- SÍ TENEMOS XLSXWRITER: FORMATOS AVANZADOS ---
         
-        # Monto Mes 19
-        if r.get('monto_mes_19') and r['monto_mes_19'] > 0:
-             ws_portada.write(row, 3, r['monto_mes_19'], fmt_cell_currency)
+        # --- CONFIGURACIÓN DINÁMICA DE COLORES EXCEL ---
+        if is_dark:
+            COLOR_FONDO = '#050505'       # Negro Profundo
+            COLOR_GRADIENTE_1 = '#092B30' # Petrol Oscuro
+            COLOR_GRADIENTE_2 = '#050505' # Transición a Negro
+            COLOR_TEXTO_MAIN = '#FFFFFF'  # Blanco
+            COLOR_ORO = '#E6C200'         # Oro Atenuado
+            COLOR_ACCENTO = '#1a3a42'     # Cian Oscuro
+            BORDER_EXCEL = COLOR_ORO
+            HEADER_BG = COLOR_GRADIENTE_1
+            LOGO_FILE = "1-06.png"
         else:
-             ws_portada.write(row, 3, "-", fmt_cell_text)
-
-        ws_portada.write(row, 4, r['saldo_final'], fmt_cell_currency)
-        ws_portada.write(row, 5, f"{r['bono_pct']*100:.0f}%", fmt_cell_num)
+            # Modo Claro (Identidad Astor Original)
+            COLOR_FONDO = '#FFFFFF'       # Blanco Puro
+            COLOR_GRADIENTE_1 = '#1E3A8A' # Azul Astor (Primary)
+            COLOR_GRADIENTE_2 = '#FFFFFF' 
+            COLOR_TEXTO_MAIN = '#FFFFFF'  # Para textos sobre fondo azul
+            COLOR_TEXTO_DARK = '#1E3A8A'  # Para textos sobre fondo blanco
+            COLOR_ORO = '#1E3A8A'         # Azul Marino en lugar de Oro en claro
+            COLOR_ACCENTO = '#F0F2F5'     # Gris suave de fondo
+            BORDER_EXCEL = '#1E3A8A'
+            HEADER_BG = '#1E3A8A'
+            LOGO_FILE = "1-06 copy.png"
+        
+        # --- ESTILOS COMPLEJOS (BOXED DESIGN) ---
+        # Título Principal con Color Sólido Premium
+        fmt_title_main = workbook.add_format({
+            'bold': True, 'font_size': 24, 'font_color': COLOR_TEXTO_MAIN,
+            'bg_color': HEADER_BG,
+            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
+            'font_name': 'Georgia'
+        })
+        
+        # Título de Escenario (Borde Oro, Texto Blanco)
+        fmt_title_scenario = workbook.add_format({
+            'bold': True, 'font_size': 18, 'font_color': COLOR_TEXTO_MAIN,
+            'bg_color': HEADER_BG,
+            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
+            'text_wrap': True,
+            'font_name': 'Georgia'
+        })
+        
+        # Encabezados de Sección (Totalmente transparente para ver marca de agua)
+        fmt_section_header = workbook.add_format({
+            'bold': True, 'font_size': 14, 'font_color': COLOR_TEXTO_MAIN, 
+            'bg_color': HEADER_BG,
+            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL
+        })
+        
+        fmt_box_label = workbook.add_format({
+            'font_size': 11, 'font_color': '#64748B' if not is_dark else '#9ca3af', 'align': 'center', 'valign': 'top', 'bold': True,
+            'bg_color': COLOR_FONDO
+        })
+        
+        fmt_box_data = workbook.add_format({
+            'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
+            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
+        })
+        
+        fmt_box_data_currency = workbook.add_format({
+            'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
+            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True, 'num_format': '$#,##0'
+        })
+        
+        # NUEVO: Formato específico para la fila del cliente (Dorado en oscuro)
+        fmt_client_info = workbook.add_format({
+            'font_size': 16, 'font_color': COLOR_ORO if is_dark else COLOR_TEXTO_DARK, 'align': 'center', 'valign': 'vcenter',
+            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
+        })
+    
+        # Encabezado de Tabla Principal (Transparente, Texto Blanco, Borde Oro)
+        fmt_header_table = workbook.add_format({
+            'bold': True, 'font_size': 12, 'font_color': COLOR_TEXTO_MAIN,
+            'bg_color': HEADER_BG,
+            'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'valign': 'vcenter'
+        })
+        
+        # Celdas de Datos (Sin bg_color para que la marca de agua sea visible "dentro")
+        fmt_cell_text = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+        fmt_cell_num = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+        fmt_cell_currency = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'num_format': '$#,##0', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+        
+        # Formatos con Highlight (Edad 60) - Manteniendo el verde suave para legibilidad sobre el oscuro
+        fmt_cell_text_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+        fmt_cell_num_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+        fmt_cell_currency_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'num_format': '$#,##0', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+    
+        fmt_bold_label = workbook.add_format({'bold': True, 'font_size': 12, 'font_color': BORDER_EXCEL, 'bg_color': COLOR_FONDO})
+        
+        # --- HOJA 1: PORTADA / RESUMEN EJECUTIVO ---
+        ws_portada = workbook.add_worksheet("Portada")
+        ws_portada.hide_gridlines(2) # Ocultar gridlines para que brille el fondo oscuro
+        
+        # --- MARCA DE AGUA ---
+        watermark_file = get_watermark_excel(is_dark=is_dark)
+        if watermark_file:
+            ws_portada.set_background(watermark_file)
+        
+        # --- PROTECCIÓN ---
+        # Bloquear objetos (logo) para que no se puedan mover o borrar
+        ws_portada.protect()
+    
+        # --- CONFIGURACIÓN DE ESPACIOS (Garantizar que nada se vea aplastado) ---
+        for r_idx in range(0, 10):
+            ws_portada.set_row(r_idx, 25) # Altura generosa para la cabecera
+        
+        # --- SECCIÓN 0: CABECERA Y LOGO ---
+        logo_portada = get_asset_path(LOGO_FILE)
+        if os.path.exists(logo_portada):
+            # Logo en esquina A1/B1 con escala clara
+            ws_portada.insert_image('A1', logo_portada, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
+    
+        # Título Principal centrado respecto a la zona de datos
+        ws_portada.merge_range('D3:F6', "Astor simulador", fmt_title_main)
+        
+        # --- SECCIÓN 1: DATOS DEL CLIENTE ---
+        row = 25 # MÁXIMO AIRE: Bajamos hasta la fila 25 para que nada se encime
+        ws_portada.merge_range(row, 1, row, 6, "Información del Cliente", fmt_section_header)
+        row += 2
+        
+        # Fila de etiquetas
+        ws_portada.merge_range(row, 1, row, 2, "Nombre del Cliente", fmt_box_label) # Merge para que quepa el label
+        ws_portada.merge_range(row, 3, row, 5, "Plan Seleccionado", fmt_box_label)
+        ws_portada.write(row, 6, "Edad Actual", fmt_box_label)
         row += 1
         
-    # Ajustar anchos Portada (Más grandes y centrados)
-    ws_portada.set_column(0, 0, 5)   # A: Margen
-    ws_portada.set_column(1, 1, 25)  # B: Escenario (Widen from 15)
-    ws_portada.set_column(2, 2, 25)  # C
-    ws_portada.set_column(3, 3, 25)  # D
-    ws_portada.set_column(4, 4, 30)  # E
-    ws_portada.set_column(5, 5, 20)  # F
-    ws_portada.set_column(6, 6, 20)  # G
-    
-    # Ocultar sobrante en Portada para efecto Dashboard limpio
-    ws_portada.set_column('H:XFD', None, None, {'hidden': True})
-    ws_portada.set_default_row(hide_unused_rows=True) 
-    ws_portada.write(row + 2, 1, "") 
-
-
-    # ---------------------------------------------------------
-    # HOJAS DE DETALLE (UNA POR OPCIÓN)
-    # ---------------------------------------------------------
-    cols_export = ["Año", "Edad", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-    if frecuencia_vista != "Anual": cols_export.insert(0, eje_x_data_col)
-    
-    for r in res_list:
-        sh_name = f"Escenario {r['id']}"
-        ws_detail = workbook.add_worksheet(sh_name)
-        ws_detail.hide_gridlines(2)
-        if watermark_file:
-            ws_detail.set_background(watermark_file)
-        ws_detail.protect() # Bloquear el logo
-
-        # --- AJUSTE DE ESPACIOS (Igual que la Portada) ---
-        for r_idx in range(0, 10):
-            ws_detail.set_row(r_idx, 22) # Altura balanceada para cabecera
+        # Fila de valores (Boxed)
+        ws_portada.set_row(row, 45) 
+        # MERGE para el nombre del cliente para que no se corte NUNCA
+        ws_portada.merge_range(row, 1, row, 2, nombre_cte.title(), fmt_client_info)
+        ws_portada.merge_range(row, 3, row, 5, tipo_plan, fmt_client_info)
+        ws_portada.write(row, 6, f"{edad} años", fmt_client_info)
+        
+        # --- SECCIÓN 3: RESUMEN COMPARATIVO ---
+        row += 6 
+        ws_portada.merge_range(row, 1, row, 6, "Resumen de Escenarios Proyectados", fmt_section_header)
+        
+        # Aplicar a Portada (hasta fila 80 para cubrir todo el resumen)
+        # Ya no se requiere aplicar_patron_watermark manual
+        row += 2
+        
+        # Encabezados Tabla Resumen
+        headers_res = ["Escenario De Inversión", "Aportación Mensual", "Aportación Mes 19+", "Saldo Final", "Bono Inicial"]
+        for col, h in enumerate(headers_res):
+            ws_portada.write(row, 1 + col, h, fmt_header_table)
+        
+        # Filas Tabla Resumen
+        row += 1
+        for r in res_list:
+            ws_portada.set_row(row, 20)
+            ws_portada.write(row, 1, f"Escenario {r['id']}", fmt_cell_text)
+            ws_portada.write(row, 2, r['monto_inicial'], fmt_cell_currency)
             
-        # --- LOGO EN ESCENARIOS ---
-        logo_escenario = get_asset_path(LOGO_FILE)
-        if os.path.exists(logo_escenario):
-            # Logo en esquina A1 como en Portada
-            ws_detail.insert_image('A1', logo_escenario, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
+            # Monto Mes 19
+            if r.get('monto_mes_19') and r['monto_mes_19'] > 0:
+                 ws_portada.write(row, 3, r['monto_mes_19'], fmt_cell_currency)
+            else:
+                 ws_portada.write(row, 3, "-", fmt_cell_text)
+    
+            ws_portada.write(row, 4, r['saldo_final'], fmt_cell_currency)
+            ws_portada.write(row, 5, f"{r['bono_pct']*100:.0f}%", fmt_cell_num)
+            row += 1
+            
+        # Ajustar anchos Portada (Más grandes y centrados)
+        ws_portada.set_column(0, 0, 5)   # A: Margen
+        ws_portada.set_column(1, 1, 25)  # B: Escenario (Widen from 15)
+        ws_portada.set_column(2, 2, 25)  # C
+        ws_portada.set_column(3, 3, 25)  # D
+        ws_portada.set_column(4, 4, 30)  # E
+        ws_portada.set_column(5, 5, 20)  # F
+        ws_portada.set_column(6, 6, 20)  # G
         
-        # Título de la Hoja (Dos líneas: Título arriba, cifra abajo)
-        ws_detail.merge_range('D3:E5', f"PROYECCIÓN:\n${r['monto_inicial']:,.0f}", fmt_title_scenario)
+        # Ocultar sobrante en Portada para efecto Dashboard limpio
+        ws_portada.set_column('H:XFD', None, None, {'hidden': True})
+        ws_portada.set_default_row(hide_unused_rows=True) 
+        ws_portada.write(row + 2, 1, "") 
+    
+    
+        # ---------------------------------------------------------
+        # HOJAS DE DETALLE (UNA POR OPCIÓN)
+        # ---------------------------------------------------------
+        cols_export = ["Año", "Edad", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        if frecuencia_vista != "Anual": cols_export.insert(0, eje_x_data_col)
         
-        # Cajas de resumen rápido (Buscamos balance - Fila 12)
-        row_brief = 12
-        ws_detail.write(row_brief, 1, "Aportación Mensual", fmt_box_label)
-        ws_detail.write(row_brief, 2, "Aportación 19+", fmt_box_label)
-        ws_detail.write(row_brief, 3, "Saldo Final Estimado", fmt_box_label)
-        
-        row_brief += 1
-        ws_detail.set_row(row_brief, 40)
-        ws_detail.write(row_brief, 1, r['monto_inicial'], fmt_box_data_currency)
-        m19_val = r.get('monto_mes_19') if r.get('monto_mes_19') else r['monto_inicial']
-        ws_detail.write(row_brief, 2, m19_val, fmt_box_data_currency)
-        ws_detail.write(row_brief, 3, r['saldo_final'], fmt_box_data_currency)
-        
-        # Espacio final antes de la tabla (Suficiente respiro - Fila 20)
-        start_row = 20
-
-        
-        # Escribir Headers
-        for col_num, value in enumerate(cols_export):
-            ws_detail.write(start_row, col_num, value, fmt_header_table)
-
-        # Escribir Datos
-        data_row = start_row + 1
-        df_display = r['df_display'][cols_export]
-        
-        def write_rows(ws, df, start_r):
-            curr_r = start_r
-            for _, row_data in df.iterrows():
-                is_age_60 = row_data.get("Edad") == 60
+        for r in res_list:
+            sh_name = f"Escenario {r['id']}"
+            ws_detail = workbook.add_worksheet(sh_name)
+            ws_detail.hide_gridlines(2)
+            if watermark_file:
+                ws_detail.set_background(watermark_file)
+            ws_detail.protect() # Bloquear el logo
+    
+            # --- AJUSTE DE ESPACIOS (Igual que la Portada) ---
+            for r_idx in range(0, 10):
+                ws_detail.set_row(r_idx, 22) # Altura balanceada para cabecera
                 
-                for col_num, col_name in enumerate(cols_export):
-                    val = row_data[col_name]
-                    
-                    if col_name in ["Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]:
-                        fmt = fmt_cell_currency_highlight if is_age_60 else fmt_cell_currency
-                        ws.write(curr_r, col_num, val, fmt)
-                    elif col_name in ["Año", "Edad"]:
-                        fmt = fmt_cell_num_highlight if is_age_60 else fmt_cell_num
-                        ws.write(curr_r, col_num, val, fmt)
-                    else:
-                        fmt = fmt_cell_text_highlight if is_age_60 else fmt_cell_text
-                        ws.write(curr_r, col_num, val, fmt)
-                curr_r += 1
-            return curr_r
-
-        data_row = write_rows(ws_detail, df_display, data_row)
+            # --- LOGO EN ESCENARIOS ---
+            logo_escenario = get_asset_path(LOGO_FILE)
+            if os.path.exists(logo_escenario):
+                # Logo en esquina A1 como en Portada
+                ws_detail.insert_image('A1', logo_escenario, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
             
-        # --- TABLA EXTRA (25-65) SI EXISTE ---
-        if r.get('df_65_display') is not None:
-            data_row += 2
-            ws_detail.merge_range(data_row, 0, data_row, len(cols_export) - 1, f"Proyección a Retiro (Edad {edad + 25} a 65)", fmt_section_header)
-            data_row += 1
-            # Headers otra vez
+            # Título de la Hoja (Dos líneas: Título arriba, cifra abajo)
+            ws_detail.merge_range('D3:E5', f"PROYECCIÓN:\n${r['monto_inicial']:,.0f}", fmt_title_scenario)
+            
+            # Cajas de resumen rápido (Buscamos balance - Fila 12)
+            row_brief = 12
+            ws_detail.write(row_brief, 1, "Aportación Mensual", fmt_box_label)
+            ws_detail.write(row_brief, 2, "Aportación 19+", fmt_box_label)
+            ws_detail.write(row_brief, 3, "Saldo Final Estimado", fmt_box_label)
+            
+            row_brief += 1
+            ws_detail.set_row(row_brief, 40)
+            ws_detail.write(row_brief, 1, r['monto_inicial'], fmt_box_data_currency)
+            m19_val = r.get('monto_mes_19') if r.get('monto_mes_19') else r['monto_inicial']
+            ws_detail.write(row_brief, 2, m19_val, fmt_box_data_currency)
+            ws_detail.write(row_brief, 3, r['saldo_final'], fmt_box_data_currency)
+            
+            # Espacio final antes de la tabla (Suficiente respiro - Fila 20)
+            start_row = 20
+    
+            
+            # Escribir Headers
             for col_num, value in enumerate(cols_export):
-                ws_detail.write(data_row, col_num, value, fmt_header_table)
-            data_row += 1
+                ws_detail.write(start_row, col_num, value, fmt_header_table)
+    
+            # Escribir Datos
+            data_row = start_row + 1
+            df_display = r['df_display'][cols_export]
             
-            df_65_export = r['df_65_display'][r['df_65_display']["Año"] > 25][cols_export]
-            data_row = write_rows(ws_detail, df_65_export, data_row)
+            def write_rows(ws, df, start_r):
+                curr_r = start_r
+                for _, row_data in df.iterrows():
+                    is_age_60 = row_data.get("Edad") == 60
+                    
+                    for col_num, col_name in enumerate(cols_export):
+                        val = row_data[col_name]
+                        
+                        if col_name in ["Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]:
+                            fmt = fmt_cell_currency_highlight if is_age_60 else fmt_cell_currency
+                            ws.write(curr_r, col_num, val, fmt)
+                        elif col_name in ["Año", "Edad"]:
+                            fmt = fmt_cell_num_highlight if is_age_60 else fmt_cell_num
+                            ws.write(curr_r, col_num, val, fmt)
+                        else:
+                            fmt = fmt_cell_text_highlight if is_age_60 else fmt_cell_text
+                            ws.write(curr_r, col_num, val, fmt)
+                    curr_r += 1
+                return curr_r
+    
+            data_row = write_rows(ws_detail, df_display, data_row)
+                
+            # --- TABLA EXTRA (25-65) SI EXISTE ---
+            if r.get('df_65_display') is not None:
+                data_row += 2
+                ws_detail.merge_range(data_row, 0, data_row, len(cols_export) - 1, f"Proyección a Retiro (Edad {edad + 25} a 65)", fmt_section_header)
+                data_row += 1
+                # Headers otra vez
+                for col_num, value in enumerate(cols_export):
+                    ws_detail.write(data_row, col_num, value, fmt_header_table)
+                data_row += 1
+                
+                df_65_export = r['df_65_display'][r['df_65_display']["Año"] > 25][cols_export]
+                data_row = write_rows(ws_detail, df_65_export, data_row)
+                
+                
+            # Ajustar anchos Detalle (Más cómodos)
+            ws_detail.set_column(0, 0, 20)  # A: Logo / Col 1
+            ws_detail.set_column(1, 1, 12)  # B
+            ws_detail.set_column(2, 2, 25)  # C
+            ws_detail.set_column(3, 3, 25)  # D
+            ws_detail.set_column(4, 4, 25)  # E
+            ws_detail.set_column(5, 5, 25)  # F
             
-            
-        # Ajustar anchos Detalle (Más cómodos)
-        ws_detail.set_column(0, 0, 20)  # A: Logo / Col 1
-        ws_detail.set_column(1, 1, 12)  # B
-        ws_detail.set_column(2, 2, 25)  # C
-        ws_detail.set_column(3, 3, 25)  # D
-        ws_detail.set_column(4, 4, 25)  # E
-        ws_detail.set_column(5, 5, 25)  # F
-        
-        # Ocultar sobrante en Escenarios
-        last_col_letter = chr(ord('A') + len(cols_export))
-        ws_detail.set_column(f'{last_col_letter}:XFD', None, None, {'hidden': True})
-        ws_detail.set_default_row(hide_unused_rows=True)
-        ws_detail.write(data_row + 2, 0, "")
+            # Ocultar sobrante en Escenarios
+            last_col_letter = chr(ord('A') + len(cols_export))
+            ws_detail.set_column(f'{last_col_letter}:XFD', None, None, {'hidden': True})
+            ws_detail.set_default_row(hide_unused_rows=True)
+            ws_detail.write(data_row + 2, 0, "")
+    
+        writer.close()
+        return output.getvalue()
+    
+    excel_data = generar_excel(resultados, nombre)
+    st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
+    st.download_button(
+        label="💾 Descargar Reporte (Excel)",
+        data=excel_data,
+        file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-    writer.close()
-    return output.getvalue()
-
-excel_data = generar_excel(resultados, nombre)
-st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
-st.download_button(
-    label="💾 Descargar Reporte (Excel)",
-    data=excel_data,
-    file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
-elif st.session_state.modulo_activo == "⚖️ Simulador Comparación":
+if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     # HEADER Y ESTILOS
     logo_filename = "1-07.png" if is_dark else "1-01.png"
     logo_sidebar = get_asset_path(logo_filename)
