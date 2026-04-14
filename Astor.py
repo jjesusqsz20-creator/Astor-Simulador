@@ -1068,7 +1068,7 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5 = st.columns([1.5, 2.8, 0.4, 2.8, 1.5])
+    c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c2:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1083,9 +1083,10 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line"></div>
                 <div class="status-label stat-tl">SYSTEM: ONLINE</div>
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="text-align: center; padding: 60px 20px;">
+                <div style="text-align: center; padding: 45px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px;">¿Cuánto dinero puedo ahorrar al mes?</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1130,9 +1131,10 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
                 <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; padding: 60px 20px;">
+                <div style="text-align: center; padding: 45px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px;">¿Con cuánto dinero me quiero pensionar?</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1175,7 +1177,7 @@ if st.session_state.modulo_activo == "Hub":
                 st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c_pad1, c6, c_gap, c8, c_pad2 = st.columns([1.5, 2.8, 0.4, 2.8, 1.5])
+    c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c6:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1190,9 +1192,10 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
                 <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
-                <div style="text-align: center; padding: 60px 20px;">
+                <div style="text-align: center; padding: 45px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px;">¿Administro bien mis gastos?</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1213,9 +1216,10 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move 4s ease-in-out infinite alternate;"></div>
                 <div class="status-label stat-tl" style="color: #A855F7; opacity: 0.6;">MODULE: PENDING</div>
                 <div class="status-label stat-br" style="color: #A855F7; opacity: 0.6;">MOD: NEBULA_V1</div>
-                <div style="text-align: center; padding: 60px 20px;">
+                <div style="text-align: center; padding: 45px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">SIMULADOR</div>
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px;">¿Me conviene más invertir en una casa o en fondos indexados en la bolsa?</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
