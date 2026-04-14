@@ -647,30 +647,31 @@ st.markdown(f"""
         z-index: 10000 !important;
     }}
 
-    /* BOTONES INVISIBLES (Overlay total sobre la carta) */
-    div[data-testid="column"]:has(.hud-card-content) div[data-testid="stButton"] {{
+    /* BOTONES INVISIBLES (Capa de clic total) */
+    div[data-testid="column"]:has(.hud-card-content) div[data-testid="element-container"]:has(button) {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        z-index: 1000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        z-index: 999 !important;
     }}
-    div[data-testid="column"]:has(.hud-card-content) div[data-testid="stButton"] button {{
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
+
+    div[data-testid="column"]:has(.hud-card-content) button {{
         width: 100% !important;
-        height: 100% !important;
+        height: 400px !important;
         opacity: 0 !important;
         background: transparent !important;
         border: none !important;
+        color: transparent !important;
         box-shadow: none !important;
         cursor: pointer !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    }}
+    
+    /* Hover de la carta completa */
+    div[data-testid="column"]:has(.hud-card-content):hover {{
+        transform: scale(1.04) !important;
+        z-index: 1000 !important;
     }}
     
     /* Prevenir que el hover de la columna se rompa por el botón */
@@ -1085,7 +1086,11 @@ if st.session_state.modulo_activo == "Hub":
     c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c2:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        # Botón invisible al inicio para overlay
+        if st.button("", key="btn_overlay_sim"):
+            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
+            st.rerun()
+
         st.markdown(f"""
             <div class="hud-card-content">
                 <div class="hud-tag"></div>
@@ -1104,10 +1109,6 @@ if st.session_state.modulo_activo == "Hub":
                 </div>
             </div>
         """, unsafe_allow_html=True)
-        
-        if st.button("", key="btn_overlay_sim", use_container_width=True):
-            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
-            st.rerun()
 
         if st.session_state.get('show_sim_form', False):
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
@@ -1137,7 +1138,11 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state.modulo_activo = "✨ Astor Simulador"
                     st.rerun()
     with c4:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        # Botón invisible al inicio para overlay
+        if st.button("", key="btn_overlay_costos"):
+            st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
+            st.rerun()
+
         st.markdown(f"""
             <div class="hud-card-content">
                 <div class="hud-tag"></div>
@@ -1200,7 +1205,11 @@ if st.session_state.modulo_activo == "Hub":
     c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c6:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        # Botón invisible al inicio para overlay
+        if st.button("", key="btn_overlay_planificador"):
+            st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
+            st.rerun()
+
         st.markdown(f"""
             <div class="hud-card-content">
                 <div class="hud-tag"></div>
@@ -1263,6 +1272,11 @@ if st.session_state.modulo_activo == "Hub":
                     st.rerun()
             
     with c8:
+        # Botón invisible al inicio para overlay
+        if st.button("", key="btn_overlay_comp"):
+            st.session_state.modulo_activo = "⚖️ Simulador Comparación"
+            st.rerun()
+
         st.markdown(f"""
             <div class="hud-card-content">
                 <div class="hud-tag"></div>
@@ -1282,9 +1296,6 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button("", key="btn_overlay_comp", use_container_width=True):
-            st.session_state.modulo_activo = "⚖️ Simulador Comparación"
-            st.rerun()
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
