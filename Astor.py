@@ -648,7 +648,7 @@ st.markdown(f"""
     }}
 
     /* BOTONES INVISIBLES (Overlay total sobre la carta) */
-    div[data-testid="column"]:has(.hud-card-content) .stButton {{
+    div[data-testid="column"]:has(.hud-card-content) div[data-testid="stButton"] {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
@@ -658,7 +658,7 @@ st.markdown(f"""
         margin: 0 !important;
         padding: 0 !important;
     }}
-    div[data-testid="column"]:has(.hud-card-content) .stButton > button {{
+    div[data-testid="column"]:has(.hud-card-content) div[data-testid="stButton"] button {{
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
