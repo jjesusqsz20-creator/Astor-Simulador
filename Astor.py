@@ -1586,7 +1586,8 @@ if st.session_state.modulo_activo == "📈 Planificador Financiero":
     import planificador
     planificador.render_planificador()
     st.stop()
-# --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
+if st.session_state.modulo_activo == "✨ Astor Simulador":
+    # --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
 # --- SIDEBAR ---
 with st.sidebar:
     # --- LOGO ---
@@ -2110,6 +2111,10 @@ if edad <= 39:
         id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
         seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
         
+        cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        if frecuencia_vista != "Anual":
+            cols_to_show_65.insert(0, eje_x_data_col)
+
         # Filtrar solo periodos posteriores al año 25
         df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > 25]
         
@@ -2459,6 +2464,7 @@ if edad <= 39:
         file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    st.stop() # Aseguramos que no caiga al siguiente simulador
 
 if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     # HEADER Y ESTILOS
