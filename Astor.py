@@ -597,13 +597,13 @@ st.markdown(f"""
     }}
 
     /* --- DISEÑO DE TARJETAS HUD COMO BOTONES NATIVOS --- */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {{
         position: relative !important;
         width: 100% !important;
         height: 400px !important;
-    }
+    }}
 
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {{
         background-color: #1a1e26 !important; /* Fondo tipo HUD */
         border: 1px solid rgba(107, 164, 164, 0.1) !important;
         border-radius: 18px !important;
@@ -618,10 +618,10 @@ st.markdown(f"""
         overflow: hidden !important;
         color: white !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-    }
+    }}
 
     /* Título principal del botón (El texto que pasamos a st.button) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {{
         font-family: 'Cinzel', serif !important;
         font-size: 2rem !important;
         font-weight: 800 !important;
@@ -629,10 +629,10 @@ st.markdown(f"""
         text-shadow: 0 0 20px rgba(107, 164, 164, 0.6) !important;
         margin: 0 !important;
         color: white !important;
-    }
+    }}
 
     /* Subtítulo y elementos decorativos usando pseudo-elementos */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
         content: "ASTOR";
         position: absolute;
         top: 130px;
@@ -641,16 +641,16 @@ st.markdown(f"""
         opacity: 0.8;
         letter-spacing: 5px;
         color: white;
-    }
+    }}
 
     /* Etiquetas de estado */
-    div[data-testid="column"]:has(button[key^="hub_btn_sim"]) div[data-testid="stButton"] button::after { content: "¿Cuánto dinero puedo ahorrar al mes?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }
-    div[data-testid="column"]:has(button[key^="hub_btn_costos"]) div[data-testid="stButton"] button::after { content: "¿Con cuánto dinero me quiero pensionar?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }
-    div[data-testid="column"]:has(button[key^="hub_btn_plan"]) div[data-testid="stButton"] button::after { content: "¿Administro bien mis gastos?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }
-    div[data-testid="column"]:has(button[key^="hub_btn_comp"]) div[data-testid="stButton"] button::after { content: "¿Invertir en una casa o en la bolsa?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }
+    div[data-testid="column"]:has(button[key^="hub_btn_sim"]) div[data-testid="stButton"] button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
+    div[data-testid="column"]:has(button[key^="hub_btn_costos"]) div[data-testid="stButton"] button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
+    div[data-testid="column"]:has(button[key^="hub_btn_plan"]) div[data-testid="stButton"] button::after {{ content: "¿Administro bien mis gastos?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
+    div[data-testid="column"]:has(button[key^="hub_btn_comp"]) div[data-testid="stButton"] button::after {{ content: "¿Invertir en una casa o en la bolsa?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
 
     /* Los bordes de neon (corners) */
-    .hub-corner-native {
+    .hub-corner-native {{
         position: absolute;
         width: 40px;
         height: 40px;
@@ -658,19 +658,19 @@ st.markdown(f"""
         pointer-events: none;
         z-index: 10;
         opacity: 0.7;
-    }
+    }}
     
     /* Animación de escaneo */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {{
         /* Reutilizamos el after para el texto, pero el escaneo lo haremos con un overlay separado si es necesario */
-    }
+    }}
 
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {{
         transform: scale(1.05) translateY(-5px) !important;
         border-color: #6BA4A4 !important;
         box-shadow: 0 0 50px rgba(107, 164, 164, 0.4) !important;
         background-color: #202630 !important;
-    }
+    }}
 
     </style>
 """, unsafe_allow_html=True)
