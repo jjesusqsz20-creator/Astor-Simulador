@@ -593,7 +593,7 @@ st.markdown(f"""
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         overflow: visible !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-        min-height: 350px;
+        min-height: 390px;
     }}
 
     [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"],
