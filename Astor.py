@@ -1121,6 +1121,8 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state.monto_0 = float(monto_h)
                     st.session_state.monto_1 = float(monto_h + 1000)
                     st.session_state.monto_2 = float(monto_h + 2000)
+                    st.session_state.modulo_activo = "✨ Astor Simulador"
+                    st.rerun()
     with c4:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
         st.markdown(f"""
