@@ -2502,6 +2502,12 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     </div>
     """, unsafe_allow_html=True)
 
+    # El input central (Capacidad de aportación)
+    c_pad1, c_mid_in, c_pad2 = st.columns([1, 1, 1])
+    with c_mid_in:
+        st.markdown(f"<p style='color: {TEXT_COLOR}; text-align: center; opacity: 0.6; margin-bottom: -5px;'>MODIFICAR APORTACIÓN MENSUAL</p>", unsafe_allow_html=True)
+        aportacion_user = st.number_input("Monto Mensual ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed", key="aportacion_user_comp")
+
     # --- LÓGICA DE CÁLCULOS MATEMÁTICOS ---
     # Valores por defecto para Fondos Indexados (ya que se quitaron del sidebar/main para simplificar)
     rendimiento_fondos = 10.0
@@ -2541,12 +2547,6 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     
     valor_fondos_final = saldo_actual
 
-    # El input central (Capacidad de aportación)
-    c_pad1, c_mid_in, c_pad2 = st.columns([1, 1, 1])
-    with c_mid_in:
-        st.markdown(f"<p style='color: {TEXT_COLOR}; text-align: center; opacity: 0.6; margin-bottom: -5px;'>MODIFICAR APORTACIÓN MENSUAL</p>", unsafe_allow_html=True)
-        aportacion_user = st.number_input("Monto Mensual ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed", key="aportacion_user_comp")
-    
     # --- DISEÑO DE 3 COLUMNAS ---
     st.markdown("<br>", unsafe_allow_html=True)
     col_casa, col_monto, col_fondos = st.columns([1.2, 1, 1.2])
