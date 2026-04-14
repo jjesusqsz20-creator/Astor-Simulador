@@ -911,11 +911,6 @@ def render_planificador():
 
     # --- SIDEBAR: DATOS PERSONALES ---
     with st.sidebar:
-        # Botón de cambio de tema personalizado
-        theme_label = "🌙 Modo Oscuro" if st.session_state['dark_mode'] else "☀️ Modo Claro"
-        if st.button(theme_label, use_container_width=True):
-            st.session_state['dark_mode'] = not st.session_state['dark_mode']
-            st.rerun()
 
         with st.expander("👤 Datos del Cliente", expanded=True):
             nombre = st.text_input("Nombre completo", key="nombre_cliente")
