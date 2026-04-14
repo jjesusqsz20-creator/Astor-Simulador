@@ -1066,6 +1066,7 @@ if st.session_state.modulo_activo == "Hub":
     # Inicializar estados de despliegue si no existen
     if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
+    if 'show_planificador_form' not in st.session_state: st.session_state.show_planificador_form = False
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
@@ -1198,15 +1199,44 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
                 <div style="text-align: center; padding: 45px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">FINANCIERO</div>
                     <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Administro bien mis gastos?</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
         if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
-            st.session_state.modulo_activo = "📈 Planificador Financiero"
+            st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
             st.rerun()
+            
+        if st.session_state.show_planificador_form:
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
+            with col_main:
+                nombre_p = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="plan_name_input")
+                ingreso_p = st.number_input("Ingreso mensual", min_value=1000, value=30000, step=1000, key="plan_ingreso_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                dependientes_p = st.number_input("Dependientes económicos", min_value=0, max_value=10, value=0, step=1, key="plan_dep_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                necesidades_p = st.number_input("Necesidades y servicios", min_value=0, value=10000, step=1000, key="plan_nec_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                estilo_p = st.number_input("Estilo de vida", min_value=0, value=5000, step=1000, key="plan_estilo_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                creditos_p = st.number_input("Créditos", min_value=0, value=2000, step=500, key="plan_creditos_input")
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                if st.button("📊 ABRIR PLANIFICADOR", use_container_width=True):
+                    # Guardar variables en session_state para su uso en la vista del planificador
+                    st.session_state.plan_nombre = nombre_p
+                    st.session_state.plan_ingreso = float(ingreso_p)
+                    st.session_state.plan_dependientes = int(dependientes_p)
+                    st.session_state.plan_necesidades = float(necesidades_p)
+                    st.session_state.plan_estilo = float(estilo_p)
+                    st.session_state.plan_creditos = float(creditos_p)
+                    
+                    st.session_state.modulo_activo = "📈 Planificador Financiero"
+                    st.rerun()
             
     with c8:
         st.markdown(f"""
