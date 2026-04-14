@@ -1068,7 +1068,7 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5, c6, c7 = st.columns([0.1, 2.8, 0.2, 2.8, 0.2, 2.8, 0.1])
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns([0.05, 2.2, 0.1, 2.2, 0.1, 2.2, 0.1, 2.2, 0.05])
 
     with c2:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1085,7 +1085,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1132,7 +1132,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1189,7 +1189,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.8rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1197,6 +1197,28 @@ if st.session_state.modulo_activo == "Hub":
         if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
             st.session_state.modulo_activo = "📈 Planificador Financiero"
             st.rerun()
+            
+    with c8:
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-tr" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-bl" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-br" style="border-color: #A855F7;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move-reverse 3s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: #A855F7; opacity: 0.6;">MODULE: PENDING</div>
+                <div class="status-label stat-br" style="color: #A855F7; opacity: 0.6;">MOD: NEBULA_V1</div>
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_comparacion", use_container_width=True):
+            pass # Futuro desarrollo
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
