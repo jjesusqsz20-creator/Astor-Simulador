@@ -1093,10 +1093,10 @@ if st.session_state.modulo_activo == "Hub":
         """, unsafe_allow_html=True)
         
         if st.button(" ", key="btn_toggle_sim", use_container_width=True):
-            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', True)
+            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
             st.rerun()
 
-        if st.session_state.show_sim_form:
+        if st.session_state.get('show_sim_form', False):
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
             with col_main:
@@ -1610,7 +1610,7 @@ if st.session_state.modulo_activo == "✨ Astor Simulador":
     
         st.title("Configuración")
         
-        with st.expander("👤 Datos del Cliente", expanded=True):
+        with st.expander("👤 Datos del Cliente", expanded=False):
             nombre_default = st.session_state.get('hub_nombre', "Cliente Ejemplo")
             nombre = st.text_input("Nombre", value=nombre_default)
             
