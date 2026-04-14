@@ -596,158 +596,139 @@ st.markdown(f"""
         min-height: 390px;
     }}
 
-    /* --- DEFINITIVE HUD NATIVE BUTTON DESIGN (2024 Stable Selectors) --- */
-    
-    /* Target common styles for all Hub buttons using the stable st-key class */
-    div[class*="st-key-hub_btn_"] button {{
-        background-color: #0c1016 !important;
-        border: 1px solid rgba(107, 164, 164, 0.15) !important;
-        border-radius: 18px !important;
-        height: 400px !important;
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 60px 20px !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        overflow: hidden !important;
-        color: white !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
-        position: relative !important;
-        z-index: 1 !important;
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"],
+    [data-testid="column"]:has(.hud-tag) [data-testid="stVerticalBlock"] > div,
+    [data-testid="column"]:has(.hud-tag) [data-testid="element-container"] {{
+        position: static !important;
+    }}
+
+    [data-testid="column"]:has(.hud-tag) .hud-corner {{
+        z-index: 100 !important;
+        width: 50px;
+        height: 50px;
+        position: absolute !important;
+    }}
+
+    [data-testid="column"]:has(.hud-tag) .corner-tl {{ top: -2px !important; left: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-tr {{ top: -2px !important; right: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-bl {{ bottom: -2px !important; left: -2px !important; }}
+    [data-testid="column"]:has(.hud-tag) .corner-br {{ bottom: -2px !important; right: -2px !important; }}
+
+    [data-testid="column"]:has(.hud-tag):hover {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 50px {ACCENT_COLOR}33 !important;
+        transform: translateY(-5px) !important;
+    }}
+
+    [data-testid="column"]:has(.hud-tag) .scan-line {{
+        z-index: 99 !important;
+        opacity: 0.8;
+        pointer-events: none;
+        position: absolute;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, transparent, {ACCENT_COLOR}, transparent);
+        box-shadow: 0 0 20px {ACCENT_COLOR};
+        animation: scan-move 4s linear infinite;
+        left: 0;
+    }}
+
+    /* EFECTO DE ZOOM Y PUNTERO EN LA TARJETA CLICKABLE */
+    div.stColumn:has(.hud-tag) {{
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        overflow: visible !important;
         cursor: pointer !important;
     }}
 
-    /* LASER ROTATIVO (Layer Behind Text) */
-    div[class*="st-key-hub_btn_"] button::before {{
-        content: "ASTOR";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        display: flex;
-        justify-content: center;
-        padding-top: 125px;
-        font-family: 'Cinzel', serif;
-        font-size: 1.4rem;
-        opacity: 0.6;
-        letter-spacing: 5px;
-        color: rgba(255,255,255,0.7);
-        z-index: 0;
-        transition: opacity 0.5s;
-        pointer-events: none;
-        background-image: conic-gradient(from 0deg, transparent, {ACCENT_COLOR}33, transparent 30%);
-        animation: rotate-laser 4s linear infinite;
-        opacity: 0;
+    div.stColumn:has(.hud-tag):hover {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 70px {ACCENT_COLOR}55 !important;
+        transform: scale(1.03) !important;
+        z-index: 10000 !important;
     }}
 
-    div[class*="st-key-hub_btn_"] button:hover::before {{ opacity: 1; }}
-
-    /* ESCÁNER Y SUBTÍTULO (Top Layer Overlay) */
-    div[class*="st-key-hub_btn_"] button::after {{
-        content: ""; 
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-image: linear-gradient(0deg, transparent, {ACCENT_COLOR}33, {ACCENT_COLOR}55, transparent 15%);
-        background-size: 100% 400%;
-        animation: scan-move 4s ease-in-out infinite;
-        pointer-events: none;
-        z-index: 2;
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        padding-bottom: 120px;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 0.85rem;
-        letter-spacing: 1px;
-        text-align: center;
-        opacity: 0.5;
-    }}
-
-    /* Título principal del botón */
-    div[class*="st-key-hub_btn_"] button p {{
-        font-family: 'Cinzel', serif !important;
-        font-size: 2.1rem !important;
-        font-weight: 800 !important;
-        letter-spacing: 3px !important;
-        text-shadow: 0 0 20px rgba(107, 164, 164, 0.6) !important;
+    /* BOTONES INVISIBLES (Solución nativa de Streamlit para clicks sin refresh) */
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] {{
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 9999 !important;
         margin: 0 !important;
-        z-index: 5 !important;
-        color: white !important;
-        position: relative !important;
-        pointer-events: none !important;
+    }}
+    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
+        opacity: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        cursor: pointer !important;
+    }}
+    .hud-card-content {{
+        display: block !important;
+        width: 100% !important;
     }}
 
-    /* DIBUJO DE ESQUINAS NEON (Usando background del botón) */
-    div[class*="st-key-hub_btn_"] button {{
-        background-image: 
-            linear-gradient(to right, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to bottom, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to left, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to bottom, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to right, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to top, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to left, {ACCENT_COLOR} 2px, transparent 2px),
-            linear-gradient(to top, {ACCENT_COLOR} 2px, transparent 2px);
-        background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%;
-        background-size: 30px 30px;
-        background-repeat: no-repeat;
+    /* Efecto de láser dentro del contenedor ampliado */
+    [data-testid="column"]:has(.hud-tag)::before {{
+        content: "";
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background-image: conic-gradient(transparent, {ACCENT_COLOR}, transparent 30%);
+        animation: rotate-laser 4s linear infinite;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.5s;
+        top: -25%; left: -25%;
+        pointer-events: none;
     }}
 
-    /* Overrides por módulo */
-    div.st-key-hub_btn_sim button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; }}
+    [data-testid="column"]:has(.hud-tag):hover::before {{ opacity: 0.6; }}
 
-    div.st-key-hub_btn_costos button {{
-        background-image: 
-            linear-gradient(to right, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to bottom, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to left, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to bottom, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to right, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to top, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to left, {GOLD_COLOR} 2px, transparent 2px),
-            linear-gradient(to top, {GOLD_COLOR} 2px, transparent 2px);
+    /* Asegurar que el láser y el HUD se expandan en el contenedor del expander */
+    [data-testid="stExpander"] .hud-corner {{
+        z-index: 100 !important;
+        width: 45px;
+        height: 45px;
     }}
-    div.st-key-hub_btn_costos button::before {{ content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }}
-    div.st-key-hub_btn_costos button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}33, {GOLD_COLOR}55, transparent 15%); }}
-    div.st-key-hub_btn_costos button p {{ text-shadow: 0 0 20px {GOLD_COLOR}77 !important; }}
-
-    div.st-key-hub_btn_plan button {{
-        background-image: 
-            linear-gradient(to right, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to bottom, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to left, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to bottom, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to right, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to top, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to left, #6BA4A4 2px, transparent 2px),
-            linear-gradient(to top, #6BA4A4 2px, transparent 2px);
-    }}
-    div.st-key-hub_btn_plan button::before {{ content: "FINANCIERO"; }}
-    div.st-key-hub_btn_plan button::after {{ content: "¿Administro bien mis ingresos?"; }}
-
-    div.st-key-hub_btn_comp button {{
-        background-image: 
-            linear-gradient(to right, #A855F7 2px, transparent 2px),
-            linear-gradient(to bottom, #A855F7 2px, transparent 2px),
-            linear-gradient(to left, #A855F7 2px, transparent 2px),
-            linear-gradient(to bottom, #A855F7 2px, transparent 2px),
-            linear-gradient(to right, #A855F7 2px, transparent 2px),
-            linear-gradient(to top, #A855F7 2px, transparent 2px),
-            linear-gradient(to left, #A855F7 2px, transparent 2px),
-            linear-gradient(to top, #A855F7 2px, transparent 2px);
-    }}
-    div.st-key-hub_btn_comp button::before {{ content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }}
-    div.st-key-hub_btn_comp button::after {{ content: "¿Casa propia o Inversión en Bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F733, #A855F755, transparent 15%); }}
-    div.st-key-hub_btn_comp button p {{ text-shadow: 0 0 20px #A855F777 !important; }}
-
-    /* Interacción Hover */
-    div[class*="st-key-hub_btn_"] button:hover {{
-        transform: scale(1.05) translateY(-5px) !important;
-        border-color: rgba(255,255,255,0.4) !important;
-        box-shadow: 0 0 60px rgba(107, 164, 164, 0.3) !important;
-        background-color: #121821 !important;
+    
+    [data-testid="stExpander"] .corner-bl,
+    [data-testid="stExpander"] .corner-br {{
+        bottom: 0px !important;
     }}
 
+    .scan-wrapper .stTextInput, .scan-wrapper .stNumberInput {{
+        width: 85% !important;
+        margin-bottom: -10px !important;
+    }}
+
+    .scan-wrapper .stTextInput input, .scan-wrapper .stNumberInput input {{
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid {ACCENT_COLOR}44 !important;
+        color: {TEXT_COLOR} !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-size: 0.85rem !important;
+        text-align: center !important;
+        border-radius: 4px !important;
+        transition: all 0.3s ease !important;
+    }}
+
+    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {{
+        border-color: {ACCENT_COLOR} !important;
+        box-shadow: 0 0 10px {ACCENT_COLOR}44 !important;
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }}
+
+    .scan-wrapper label {{
+        color: {ACCENT_COLOR} !important;
+        font-size: 0.6rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 2px !important;
+        text-transform: uppercase !important;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -1087,13 +1068,31 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
     if 'show_planificador_form' not in st.session_state: st.session_state.show_planificador_form = False
 
-    st.markdown('<div class="astor-hub-master">', unsafe_allow_html=True)
     st.markdown("<br><br>", unsafe_allow_html=True)
     c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c2:
-        # Módulo 1: Simulador (Botón Nativo Premium)
-        if st.button("SIMULADOR", key="hub_btn_sim", use_container_width=True):
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl"></div>
+                <div class="hud-corner corner-tr"></div>
+                <div class="hud-corner corner-bl"></div>
+                <div class="hud-corner corner-br"></div>
+                <div class="scan-line"></div>
+                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
+                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
+                <div style="text-align: center; padding: 45px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Cuánto dinero puedo ahorrar al mes?</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_sim", use_container_width=True):
             st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
             st.rerun()
 
@@ -1125,12 +1124,31 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state.modulo_activo = "✨ Astor Simulador"
                     st.rerun()
     with c4:
-        # Módulo 3: Costos (Botón Nativo Premium)
-        if st.button("COSTOS", key="hub_btn_costos", use_container_width=True):
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
+                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move 4s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
+                <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
+                <div style="text-align: center; padding: 45px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Con cuánto dinero me quiero pensionar?</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_costos", use_container_width=True):
             st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
             st.rerun()
 
-        if st.session_state.get('show_costos_form', False):
+        if st.session_state.show_costos_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
             with col_main:
@@ -1169,12 +1187,31 @@ if st.session_state.modulo_activo == "Hub":
     c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
     with c6:
-        # Módulo 2: Planificador (Botón Nativo Premium)
-        if st.button("FINANCIERO", key="hub_btn_plan", use_container_width=True):
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
+                <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
+                <div style="text-align: center; padding: 45px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">FINANCIERO</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Administro bien mis gastos?</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
             st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
             st.rerun()
-
-        if st.session_state.get('show_planificador_form', False):
+            
+        if st.session_state.show_planificador_form:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
             with col_main:
@@ -1208,16 +1245,33 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state['nombre_cliente'] = nombre_p
                     st.session_state['sidebar_ingreso'] = float(ingreso_p)
                     st.session_state['num_dependientes'] = dependientes_p
+                    
                     st.session_state.modulo_activo = "📈 Planificador Financiero"
                     st.rerun()
-
+            
     with c8:
-        # Módulo 4: Comparación (Botón Nativo Premium)
-        if st.button("COMPARACIÓN", key="hub_btn_comp", use_container_width=True):
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-tr" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-bl" style="border-color: #A855F7;"></div>
+                <div class="hud-corner corner-br" style="border-color: #A855F7;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move 4s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: #A855F7; opacity: 0.6;">MODULE: PENDING</div>
+                <div class="status-label stat-br" style="color: #A855F7; opacity: 0.6;">MOD: NEBULA_V1</div>
+                <div style="text-align: center; padding: 45px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Me conviene más invertir en una casa o en fondos indexados en la bolsa?</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_comparacion", use_container_width=True):
             st.session_state.modulo_activo = "⚖️ Simulador Comparación"
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-        
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
