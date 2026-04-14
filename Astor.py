@@ -1064,7 +1064,7 @@ if st.session_state.modulo_activo == "Hub":
         """, unsafe_allow_html=True)
     
     # Inicializar estados de despliegue si no existen
-    if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = True
+    if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = False
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
     if 'show_planificador_form' not in st.session_state: st.session_state.show_planificador_form = False
 
