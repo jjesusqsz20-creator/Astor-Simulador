@@ -65,7 +65,9 @@ def render_planificador():
 
 
     # --- INICIALIZACIÓN DE ESTADO (PERSISTENCIA ROBUSTA) ---
-    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = False
+    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = True
+    # Sincronizar con el botón global de Astor.py (st.session_state.theme)
+    st.session_state['dark_mode'] = (st.session_state.get('theme', 'dark') == 'dark')
     if 'nombre_cliente' not in st.session_state: st.session_state['nombre_cliente'] = "Cliente Ejemplo"
     if 'sidebar_ingreso' not in st.session_state: st.session_state['sidebar_ingreso'] = 25000
     if 'num_dependientes' not in st.session_state: st.session_state['num_dependientes'] = 0
