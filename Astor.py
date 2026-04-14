@@ -1588,539 +1588,503 @@ if st.session_state.modulo_activo == "📈 Planificador Financiero":
     st.stop()
 if st.session_state.modulo_activo == "✨ Astor Simulador":
     # --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
-# --- SIDEBAR ---
-with st.sidebar:
-    # --- LOGO ---
-    logo_filename = "1-07.png" if is_dark else "1-01.png"
-    logo_sidebar = get_asset_path(logo_filename)
-    try:
-        if os.path.exists(logo_sidebar):
-            st.image(logo_sidebar, use_container_width=True)
-        else:
-            st.markdown(f"""
-                <div style="text-align: center; padding: 10px; border-bottom: 2px solid {COLORES[0]}; margin-bottom: 20px;">
-                    <h2 style="color: {TEXT_COLOR}; margin:0;">ASTOR</h2>
-                    <p style="color: #6b7280; font-size: 0.8rem; margin:0;">ASESORÍA FINANCIERA Y SEGUROS</p>
-                </div>
-            """, unsafe_allow_html=True)
-    except Exception:
-        pass
-
-    st.title("Configuración")
-    
-    with st.expander("👤 Datos del Cliente", expanded=True):
-        nombre_default = st.session_state.get('hub_nombre', "Cliente Ejemplo")
-        nombre = st.text_input("Nombre", value=nombre_default)
-        
-        edad_default = st.session_state.get('hub_edad', 35)
-        edad = st.number_input("Edad Actual", 18, 70, value=int(edad_default), key="edad_actual_input")
-        tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
-
-    with st.expander("⚙️ Parámetros Globales", expanded=True):
-        frecuencia_vista = st.selectbox("Vista de Tabla/Gráfica", ["Mensual", "Semestral", "Anual"], index=2)
-        col_inf1, col_inf2 = st.columns(2)
-        opcion_inflacion = col_inf1.selectbox("Inflación", ["Activada", "Desactivada"])
-        inflacion_activa = True if opcion_inflacion == "Activada" else False
-        tasa_inflacion = col_inf2.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1)
-        # CAMBIO: Default a 10.0%
-        tasa_anual = st.number_input("Rendimiento Anual (%)", 1.0, 100.0, 10.0, 0.5) 
-        isr = st.number_input("Retención ISR Final (%)", 0.0, 35.0, 20.0)
-
-    # Lista para guardar detalles de bonos y configuración de escenarios
-    escenarios_config = []
-    detalles_bonos = []
-
-    with st.expander("💰 Comparativa de Inversión", expanded=True):
-        # Aseguramos que si venimos del Hub, tengamos al menos 3 escenarios
-        if 'hub_monto' in st.session_state and st.session_state.get('num_escenarios') < 3:
-            st.session_state.num_escenarios = 3
-
-        st.caption(f"Escenarios activos: {st.session_state.num_escenarios}/5")
-        
-        for i in range(st.session_state.num_escenarios):
-            color = COLORES[i]
-            st.markdown(f"<div style='color:{color}; font-weight:900; margin-bottom:2px;'>Escenario de inversión {i+1}</div>", unsafe_allow_html=True)
-            
-            # Valor por defecto si no existe en session_state
-            val_defecto = 3000 + (i * 1000)
-            
-            # 1. Monto Inicial
-            # ETIQUETA VIVO (Separador de miles)
-            m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
-            st.markdown(f"<div style='font-size: 0.85rem; font-weight: 900; color: {color}; margin-bottom: -15px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
-            monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_val), step=500.0, key=f"monto_{i}", label_visibility="collapsed")
-            
-            # 2. Checkbox para cambio en mes 19
-            usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", key=f"chk_m19_{i}")
-            monto_m19 = None
-            if usar_cambio_m19:
-                # ETIQUETA VIVO M19
-                m19_val = st.session_state.get(f"val_m19_{i}", float(monto))
-                st.markdown(f"<div style='font-size: 0.8rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: -15px;'>Nuevo Monto: ${m19_val:,.0f}</div>", unsafe_allow_html=True)
-                monto_m19 = st.number_input(f"Nuevo Monto Mes 19+ (Escenario de inversión {i+1})", min_value=2000, value=monto, step=500, key=f"val_m19_{i}")
-            
-            # Guardar configuración para cálculo posterior
-            escenarios_config.append({
-                "monto_inicial": monto,
-                "monto_mes_19": monto_m19
-            })
-            
-            # Calcular bono para mostrarlo en el siguiente cuadro
-            bono_calc = obtener_porcentaje_bono(monto)
-            bono_dinero = (monto * 12) * bono_calc
-            detalles_bonos.append({
-                "opcion": i + 1,
-                "color": color,
-                "pct": bono_calc,
-                "monto": bono_dinero
-            })
-            
-            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-            
-        c_add, c_del = st.columns(2)
-        with c_add:
-            if st.session_state.num_escenarios < 5: st.button("➕ Agregar", on_click=agregar_escenario)
-            else: st.button("➕ Max", disabled=True)
-        with c_del:
-            if st.session_state.num_escenarios > 1: st.button("➖ Quitar", on_click=quitar_escenario)
-            else: st.button("➖ Min", disabled=True)
-
-    # --- NUEVA SECCIÓN DE APORTACIONES EXTRA ---
-    with st.expander("💰 Aportaciones Extraordinarias"):
-        st.caption("Proyecta ingresos adicionales (aguinaldos, bonos, ventas).")
-        
-        # Formulario para agregar
-        # Opciones para el select: "Todas" + "Escenario de inversión 1", "Escenario de inversión 2", etc.
-        opciones_disponibles = ["Todas"] + [f"Escenario de inversión {i+1}" for i in range(st.session_state.num_escenarios)]
-        
-        c_opc, c_monto = st.columns([1, 1])
-        sel_opcion = c_opc.selectbox("Aplicar a:", opciones_disponibles)
-        # ETIQUETA VIVO EXTRA
-        ex_val = st.session_state.get("val_extra", 10000.0)
-        c_monto.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: -15px;'>${ex_val:,.0f}</div>", unsafe_allow_html=True)
-        val_extra = c_monto.number_input("Monto ($)", min_value=0.0, value=10000.0, step=1000.0, key="val_extra")
-        
-        sel_freq = st.selectbox("Frecuencia", ["Única vez", "Anual (Todos los años)"])
-        
-        anios_to_add = []
-        meses_to_add = []
-        dict_montos = {} # Para guardar montos por mes
-        
-        if sel_freq == "Única vez":
-            c_anio, c_mes = st.columns(2)
-            sel_anio = c_anio.number_input("Año del Plan", 1, 25, 1)
-            sel_mes = c_mes.number_input("Mes del Año", 1, 12, 12)
-            anios_to_add = [sel_anio]
-            meses_to_add = [sel_mes]
-            dict_montos[sel_mes] = val_extra
-        else:
-            meses_to_add = st.multiselect("Meses del Año", 
-                                          options=list(range(1, 13)), 
-                                          default=[12],
-                                          format_func=lambda x: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][x-1])
-            anios_to_add = list(range(1, 26))
-            
-            if meses_to_add:
-                st.markdown("<div style='font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;'>Montos por mes:</div>", unsafe_allow_html=True)
-                # Mostrar inputs en 2 columnas para que no ocupen tanto espacio vertical
-                m_cols = st.columns(2)
-                for i, m in enumerate(sorted(meses_to_add)):
-                    nom_mes_largo = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][m-1]
-                    with m_cols[i % 2]:
-                        # ETIQUETA VIVO BULK
-                        bulk_val = st.session_state.get(f"bulk_m_{m}", float(val_extra))
-                        st.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: -15px;'>${bulk_val:,.0f}</div>", unsafe_allow_html=True)
-                        dict_montos[m] = st.number_input(f"{nom_mes_largo}", min_value=0.0, value=val_extra, step=1000.0, key=f"bulk_m_{m}")
-        
-        if st.button("➕ Agregar Aportación Extra"):
-            if not meses_to_add:
-                st.error("Debes seleccionar al menos un mes.")
+    # --- SIDEBAR ---
+    with st.sidebar:
+        # --- LOGO ---
+        logo_filename = "1-07.png" if is_dark else "1-01.png"
+        logo_sidebar = get_asset_path(logo_filename)
+        try:
+            if os.path.exists(logo_sidebar):
+                st.image(logo_sidebar, use_container_width=True)
             else:
-                # Convertir la selección de texto a ID (1, 2, 3... o "Todas")
-                op_id = "Todas" if sel_opcion == "Todas" else int(sel_opcion.split(" ")[-1])
-                
-                # Agregar para cada año y mes seleccionado con su monto correspondiente
-                for a in anios_to_add:
-                    for m in meses_to_add:
-                        monto_m = dict_montos.get(m, val_extra)
-                        agregar_extra(op_id, a, m, monto_m)
-                st.rerun()
-
-        # Listado de extras agregadas
-        if st.session_state.aportaciones_extra:
-            st.markdown("---")
-            st.markdown("**Extras Agregadas:**")
-            for idx, ex in enumerate(st.session_state.aportaciones_extra):
-                target = "Todas las opciones" if ex['opcion'] == "Todas" else f"Escenario de inversión {ex['opcion']}"
                 st.markdown(f"""
-                <div style="font-size: 0.8rem; padding: 5px; border-bottom: 1px solid #eee;">
-                    <b>${ex['monto']:,.0f}</b> en Año {ex['anio']}, Mes {ex['mes']} <br>
-                    <span style="color: #6b7280;">({target})</span>
+                    <div style="text-align: center; padding: 10px; border-bottom: 2px solid {COLORES[0]}; margin-bottom: 20px;">
+                        <h2 style="color: {TEXT_COLOR}; margin:0;">ASTOR</h2>
+                        <p style="color: #6b7280; font-size: 0.8rem; margin:0;">ASESORÍA FINANCIERA Y SEGUROS</p>
+                    </div>
+                """, unsafe_allow_html=True)
+        except Exception:
+            pass
+    
+        st.title("Configuración")
+        
+        with st.expander("👤 Datos del Cliente", expanded=True):
+            nombre_default = st.session_state.get('hub_nombre', "Cliente Ejemplo")
+            nombre = st.text_input("Nombre", value=nombre_default)
+            
+            edad_default = st.session_state.get('hub_edad', 35)
+            edad = st.number_input("Edad Actual", 18, 70, value=int(edad_default), key="edad_actual_input")
+            tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
+    
+        with st.expander("⚙️ Parámetros Globales", expanded=True):
+            frecuencia_vista = st.selectbox("Vista de Tabla/Gráfica", ["Mensual", "Semestral", "Anual"], index=2)
+            col_inf1, col_inf2 = st.columns(2)
+            opcion_inflacion = col_inf1.selectbox("Inflación", ["Activada", "Desactivada"])
+            inflacion_activa = True if opcion_inflacion == "Activada" else False
+            tasa_inflacion = col_inf2.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1)
+            # CAMBIO: Default a 10.0%
+            tasa_anual = st.number_input("Rendimiento Anual (%)", 1.0, 100.0, 10.0, 0.5) 
+            isr = st.number_input("Retención ISR Final (%)", 0.0, 35.0, 20.0)
+    
+        # Lista para guardar detalles de bonos y configuración de escenarios
+        escenarios_config = []
+        detalles_bonos = []
+    
+        with st.expander("💰 Comparativa de Inversión", expanded=True):
+            # Aseguramos que si venimos del Hub, tengamos al menos 3 escenarios
+            if 'hub_monto' in st.session_state and st.session_state.get('num_escenarios') < 3:
+                st.session_state.num_escenarios = 3
+    
+            st.caption(f"Escenarios activos: {st.session_state.num_escenarios}/5")
+            
+            for i in range(st.session_state.num_escenarios):
+                color = COLORES[i]
+                st.markdown(f"<div style='color:{color}; font-weight:900; margin-bottom:2px;'>Escenario de inversión {i+1}</div>", unsafe_allow_html=True)
+                
+                # Valor por defecto si no existe en session_state
+                val_defecto = 3000 + (i * 1000)
+                
+                # 1. Monto Inicial
+                # ETIQUETA VIVO (Separador de miles)
+                m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
+                st.markdown(f"<div style='font-size: 0.85rem; font-weight: 900; color: {color}; margin-bottom: -15px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
+                monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_val), step=500.0, key=f"monto_{i}", label_visibility="collapsed")
+                
+                # 2. Checkbox para cambio en mes 19
+                usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", key=f"chk_m19_{i}")
+                monto_m19 = None
+                if usar_cambio_m19:
+                    # ETIQUETA VIVO M19
+                    m19_val = st.session_state.get(f"val_m19_{i}", float(monto))
+                    st.markdown(f"<div style='font-size: 0.8rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: -15px;'>Nuevo Monto: ${m19_val:,.0f}</div>", unsafe_allow_html=True)
+                    monto_m19 = st.number_input(f"Nuevo Monto Mes 19+ (Escenario de inversión {i+1})", min_value=2000, value=monto, step=500, key=f"val_m19_{i}")
+                
+                # Guardar configuración para cálculo posterior
+                escenarios_config.append({
+                    "monto_inicial": monto,
+                    "monto_mes_19": monto_m19
+                })
+                
+                # Calcular bono para mostrarlo en el siguiente cuadro
+                bono_calc = obtener_porcentaje_bono(monto)
+                bono_dinero = (monto * 12) * bono_calc
+                detalles_bonos.append({
+                    "opcion": i + 1,
+                    "color": color,
+                    "pct": bono_calc,
+                    "monto": bono_dinero
+                })
+                
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                
+            c_add, c_del = st.columns(2)
+            with c_add:
+                if st.session_state.num_escenarios < 5: st.button("➕ Agregar", on_click=agregar_escenario)
+                else: st.button("➕ Max", disabled=True)
+            with c_del:
+                if st.session_state.num_escenarios > 1: st.button("➖ Quitar", on_click=quitar_escenario)
+                else: st.button("➖ Min", disabled=True)
+    
+        # --- NUEVA SECCIÓN DE APORTACIONES EXTRA ---
+        with st.expander("💰 Aportaciones Extraordinarias"):
+            st.caption("Proyecta ingresos adicionales (aguinaldos, bonos, ventas).")
+            
+            # Formulario para agregar
+            # Opciones para el select: "Todas" + "Escenario de inversión 1", "Escenario de inversión 2", etc.
+            opciones_disponibles = ["Todas"] + [f"Escenario de inversión {i+1}" for i in range(st.session_state.num_escenarios)]
+            
+            c_opc, c_monto = st.columns([1, 1])
+            sel_opcion = c_opc.selectbox("Aplicar a:", opciones_disponibles)
+            # ETIQUETA VIVO EXTRA
+            ex_val = st.session_state.get("val_extra", 10000.0)
+            c_monto.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: -15px;'>${ex_val:,.0f}</div>", unsafe_allow_html=True)
+            val_extra = c_monto.number_input("Monto ($)", min_value=0.0, value=10000.0, step=1000.0, key="val_extra")
+            
+            sel_freq = st.selectbox("Frecuencia", ["Única vez", "Anual (Todos los años)"])
+            
+            anios_to_add = []
+            meses_to_add = []
+            dict_montos = {} # Para guardar montos por mes
+            
+            if sel_freq == "Única vez":
+                c_anio, c_mes = st.columns(2)
+                sel_anio = c_anio.number_input("Año del Plan", 1, 25, 1)
+                sel_mes = c_mes.number_input("Mes del Año", 1, 12, 12)
+                anios_to_add = [sel_anio]
+                meses_to_add = [sel_mes]
+                dict_montos[sel_mes] = val_extra
+            else:
+                meses_to_add = st.multiselect("Meses del Año", 
+                                              options=list(range(1, 13)), 
+                                              default=[12],
+                                              format_func=lambda x: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][x-1])
+                anios_to_add = list(range(1, 26))
+                
+                if meses_to_add:
+                    st.markdown("<div style='font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;'>Montos por mes:</div>", unsafe_allow_html=True)
+                    # Mostrar inputs en 2 columnas para que no ocupen tanto espacio vertical
+                    m_cols = st.columns(2)
+                    for i, m in enumerate(sorted(meses_to_add)):
+                        nom_mes_largo = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][m-1]
+                        with m_cols[i % 2]:
+                            # ETIQUETA VIVO BULK
+                            bulk_val = st.session_state.get(f"bulk_m_{m}", float(val_extra))
+                            st.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: -15px;'>${bulk_val:,.0f}</div>", unsafe_allow_html=True)
+                            dict_montos[m] = st.number_input(f"{nom_mes_largo}", min_value=0.0, value=val_extra, step=1000.0, key=f"bulk_m_{m}")
+            
+            if st.button("➕ Agregar Aportación Extra"):
+                if not meses_to_add:
+                    st.error("Debes seleccionar al menos un mes.")
+                else:
+                    # Convertir la selección de texto a ID (1, 2, 3... o "Todas")
+                    op_id = "Todas" if sel_opcion == "Todas" else int(sel_opcion.split(" ")[-1])
+                    
+                    # Agregar para cada año y mes seleccionado con su monto correspondiente
+                    for a in anios_to_add:
+                        for m in meses_to_add:
+                            monto_m = dict_montos.get(m, val_extra)
+                            agregar_extra(op_id, a, m, monto_m)
+                    st.rerun()
+    
+            # Listado de extras agregadas
+            if st.session_state.aportaciones_extra:
+                st.markdown("---")
+                st.markdown("**Extras Agregadas:**")
+                for idx, ex in enumerate(st.session_state.aportaciones_extra):
+                    target = "Todas las opciones" if ex['opcion'] == "Todas" else f"Escenario de inversión {ex['opcion']}"
+                    st.markdown(f"""
+                    <div style="font-size: 0.8rem; padding: 5px; border-bottom: 1px solid #eee;">
+                        <b>${ex['monto']:,.0f}</b> en Año {ex['anio']}, Mes {ex['mes']} <br>
+                        <span style="color: #6b7280;">({target})</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                if st.button("🗑️ Borrar Todas"):
+                    borrar_extras()
+    
+    # --- PROCESAMIENTO ---
+    resultados = []
+    resultados_65 = [] 
+    
+    eje_x_data_col = "Año" 
+    x_axis_title = "Año"
+    
+    anios_para_65 = max(65 - edad, 25)
+    
+    for idx, config in enumerate(escenarios_config):
+        opcion_actual_id = idx + 1
+        monto_inicial = config["monto_inicial"]
+        monto_mes_19 = config["monto_mes_19"]
+        
+        # 1. Cálculo PRINCIPAL (25 años)
+        df_raw, bono_pct = calcular_escenario(
+            monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
+            plazo_anos=25, 
+            opcion_id=opcion_actual_id, 
+            extras=st.session_state.aportaciones_extra,
+            monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro
+        )
+        
+        # 2. Cálculo RETIRO A LOS 65
+        df_65, _ = calcular_escenario(
+            monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
+            plazo_anos=anios_para_65,
+            opcion_id=opcion_actual_id, 
+            extras=st.session_state.aportaciones_extra,
+            monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro también aquí
+        )
+        
+        # Pre-calcular Aportación Anual (Total del año actual para cada fila)
+        df_raw['Aportación Anual'] = df_raw.groupby('Año')['Aportación'].transform('sum')
+        df_65['Aportación Anual'] = df_65.groupby('Año')['Aportación'].transform('sum')
+    
+        # --- LOGICA DE AGRUPACIÓN ---
+        if frecuencia_vista == "Mensual":
+            df_display = df_raw.copy()
+            eje_x_data_col = "Mes Global"
+            x_axis_title = "Meses"
+        elif frecuencia_vista == "Semestral":
+            df_raw["Semestre"] = (df_raw["Mes Global"] - 1) // 6 + 1
+            df_display = df_raw.groupby("Semestre").agg({
+                "Año": "last", "Edad": "max",
+                "Aportación Anual": "max", 
+                "Aportación Acumulada": "last",
+                "Saldo de Fondo": "last",
+                "Saldo Disponible": "last",
+                "Saldo Disponible Neto": "last",
+                "Post retención": "last"
+            }).reset_index()
+            eje_x_data_col = "Semestre"
+            x_axis_title = "Semestres"
+        else: # Anual
+            df_display = df_raw.groupby("Año").agg({
+                "Edad": "max", 
+                "Aportación Anual": "max",
+                "Aportación Acumulada": "last",
+                "Saldo de Fondo": "last",
+                "Saldo Disponible": "last",
+                "Saldo Disponible Neto": "last",
+                "Post retención": "last"
+            }).reset_index()
+            eje_x_data_col = "Año"
+            x_axis_title = "Años"
+    
+        resultados.append({
+            "id": opcion_actual_id, "monto_inicial": monto_inicial, "color": COLORES[idx],
+            "df_display": df_display, 
+            "df_65_display": None, # Se llenará si aplica
+            "saldo_final": df_display.iloc[-1]["Post retención"], "bono_pct": bono_pct,
+            "monto_mes_19": monto_mes_19 
+        })
+        
+        # --- LOGICA DE AGRUPACIÓN PARA 65 AÑOS (Si aplica) ---
+        if edad <= 39:
+            if frecuencia_vista == "Anual":
+                df_65_display = df_65.groupby("Año").agg({
+                    "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
+                    "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
+                }).reset_index()
+            elif frecuencia_vista == "Semestral":
+                df_65["Semestre"] = (df_65["Mes Global"] - 1) // 6 + 1
+                df_65_display = df_65.groupby("Semestre").agg({
+                    "Año": "last", "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
+                    "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
+                }).reset_index()
+            else: # Mensual
+                df_65_display = df_65.copy()
+                
+            resultados[-1]["df_65_display"] = df_65_display
+    
+        saldo_65 = df_65.iloc[-1]["Saldo Final"]
+        aportado_65 = df_65.iloc[-1]["Aportación Acumulada"]
+        resultados_65.append({
+            "id": opcion_actual_id, "monto_inicial": monto_inicial, "color": COLORES[idx],
+            "saldo_final_65": saldo_65,
+            "total_aportado_65": aportado_65,
+            "rendimiento_65": saldo_65 - aportado_65,
+            "monto_mes_19": monto_mes_19 
+        })
+    
+    # --- DASHBOARD ---
+    logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
+    logo_dash = get_asset_path(logo_filename_dash)
+    if os.path.exists(logo_dash):
+        bin_str_logo = get_base64_of_bin_file(logo_dash)
+        st.markdown(f"""
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+            </style>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="width: 180px; margin-bottom: 20px;">
+                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">ASTOR SIMULADOR</h1>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.title("Simulador")
+    st.markdown(f"Proyección para <span style='color: {TEXT_COLOR}; font-size: 1.2rem; font-weight: bold;'>{nombre.title()}</span> | Plan: **{tipo_plan}**", unsafe_allow_html=True)
+    
+    # --- DASHBOARD UNIFICADO ---
+    # Columnas con divisores continuos (Reutilizaremos la especificación de columnas)
+    cols_spec = []
+    for i in range(len(resultados)):
+        cols_spec.append(1)
+        if i < len(resultados) - 1:
+            cols_spec.append(0.05) 
+    
+    # --- SECCIÓN 1: BONO DE BIENVENIDA ---
+    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 20px; margin-bottom: 25px;">🎁 Bono de bienvenida</h3>', unsafe_allow_html=True)
+    
+    cols_bono = st.columns(cols_spec)
+    for idx in range(len(resultados)):
+        res = resultados[idx]
+        with cols_bono[idx * 2]:
+            # Buscar el bono correspondiente
+            item_bono = next((b for b in detalles_bonos if b['opcion'] == res['id']), None)
+            if item_bono:
+                # Obtener el monto inicial del escenario para mostrarlo arriba como en las otras secciones
+                monto_escenario = res['monto_inicial']
+                st.markdown(f"""
+                <div style="background-color: {CARD_BG}; border: 1px solid {item_bono['color']}; border-radius: 10px; padding: 20px; text-align: center; border-top: 5px solid {item_bono['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); margin-bottom: 15px;">
+                <h4 style="color: {item_bono['color']}; font-weight: bold; margin-bottom: 10px;">${monto_escenario:,.0f} Al mes</h4>
+                <p style="color: {TEXT_COLOR if not is_dark else ACCENT_COLOR}; font-size: 1.0rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Bono acreditado:</p>
+                <div style="color: {item_bono['color']}; font-size: 2.5rem; font-weight: bold; margin: 5px 0; text-shadow: {('0 0 10px ' + item_bono['color'] + '44') if is_dark else 'none'};">${item_bono['monto']:,.0f}</div>
+                <div style="color: {item_bono['color']}; font-weight: bold; font-size: 1.15rem;">({item_bono['pct']*100:.0f}%)</div>
+                <div style="color: {item_bono['color']}; font-size: 1.15rem; font-weight: bold; margin-top: 8px;">+${item_bono['monto']/12:,.0f} al mes</div>
                 </div>
                 """, unsafe_allow_html=True)
+            else:
+                st.markdown('<div style="height: 120px;"></div>', unsafe_allow_html=True)
+        
+        # Divisor Bono (Altura ajustada)
+        if idx < len(resultados) - 1:
+            with cols_bono[idx * 2 + 1]:
+                st.markdown(f"""
+                <div style="display: flex; justify-content: center; gap: 6px; height: 160px; margin: 5px auto;">
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    # --- SECCIÓN 2: 25 AÑOS ---
+    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{edad + 25} años</h3>', unsafe_allow_html=True)
+    
+    cols_25 = st.columns(cols_spec)
+    for idx in range(len(resultados)):
+        res = resultados[idx]
+        with cols_25[idx * 2]:
+            # Logica 25 Años
+            last_row = res['df_display'].iloc[-1]
+            total_aportado = last_row['Aportación Acumulada']
+            rendimiento = res['saldo_final'] - total_aportado
             
-            if st.button("🗑️ Borrar Todas"):
-                borrar_extras()
-
-# --- PROCESAMIENTO ---
-resultados = []
-resultados_65 = [] 
-
-eje_x_data_col = "Año" 
-x_axis_title = "Año"
-
-anios_para_65 = max(65 - edad, 25)
-
-for idx, config in enumerate(escenarios_config):
-    opcion_actual_id = idx + 1
-    monto_inicial = config["monto_inicial"]
-    monto_mes_19 = config["monto_mes_19"]
+            monto_m19_val = res.get('monto_mes_19')
+            texto_mes_19_25 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val:,.0f}' + '</b>' if monto_m19_val is not None else ''}</div>"
     
-    # 1. Cálculo PRINCIPAL (25 años)
-    df_raw, bono_pct = calcular_escenario(
-        monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
-        plazo_anos=25, 
-        opcion_id=opcion_actual_id, 
-        extras=st.session_state.aportaciones_extra,
-        monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro
-    )
+            st.markdown(f"""
+            <div style="background-color: {CARD_BG}; border: 1px solid {res['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {res['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); margin-bottom: 15px; min-height: 280px; display: flex; flex-direction: column;">
+                <div style="flex: 0;">
+                    <h4 style="color: {res['color']}; font-weight: bold; margin-bottom: 5px;">${res['monto_inicial']:,.0f} Al mes</h4>
+                    {texto_mes_19_25}
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                    <div style="color: {res['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + res['color'] + '44') if is_dark else 'none'};">${res['saldo_final']:,.0f}</div>
+                </div>
+                <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
+                    <div style="color: {TEXT_COLOR}; font-weight: bold;">Aportado: ${total_aportado:,.0f}</div>
+                    <div style="color: {res['color']}; font-weight: bold;">Rendimiento: +${rendimiento:,.0f}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # 2. Cálculo RETIRO A LOS 65
-    df_65, _ = calcular_escenario(
-        monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
-        plazo_anos=anios_para_65,
-        opcion_id=opcion_actual_id, 
-        extras=st.session_state.aportaciones_extra,
-        monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro también aquí
-    )
+        # Divisor 25 Años
+        if idx < len(resultados) - 1:
+            with cols_25[idx * 2 + 1]:
+                st.markdown(f"""
+                <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                </div>
+                """, unsafe_allow_html=True)
     
-    # Pre-calcular Aportación Anual (Total del año actual para cada fila)
-    df_raw['Aportación Anual'] = df_raw.groupby('Año')['Aportación'].transform('sum')
-    df_65['Aportación Anual'] = df_65.groupby('Año')['Aportación'].transform('sum')
-
-    # --- LOGICA DE AGRUPACIÓN ---
-    if frecuencia_vista == "Mensual":
-        df_display = df_raw.copy()
-        eje_x_data_col = "Mes Global"
-        x_axis_title = "Meses"
-    elif frecuencia_vista == "Semestral":
-        df_raw["Semestre"] = (df_raw["Mes Global"] - 1) // 6 + 1
-        df_display = df_raw.groupby("Semestre").agg({
-            "Año": "last", "Edad": "max",
-            "Aportación Anual": "max", 
-            "Aportación Acumulada": "last",
-            "Saldo de Fondo": "last",
-            "Saldo Disponible": "last",
-            "Saldo Disponible Neto": "last",
-            "Post retención": "last"
-        }).reset_index()
-        eje_x_data_col = "Semestre"
-        x_axis_title = "Semestres"
-    else: # Anual
-        df_display = df_raw.groupby("Año").agg({
-            "Edad": "max", 
-            "Aportación Anual": "max",
-            "Aportación Acumulada": "last",
-            "Saldo de Fondo": "last",
-            "Saldo Disponible": "last",
-            "Saldo Disponible Neto": "last",
-            "Post retención": "last"
-        }).reset_index()
-        eje_x_data_col = "Año"
-        x_axis_title = "Años"
-
-    resultados.append({
-        "id": opcion_actual_id, "monto_inicial": monto_inicial, "color": COLORES[idx],
-        "df_display": df_display, 
-        "df_65_display": None, # Se llenará si aplica
-        "saldo_final": df_display.iloc[-1]["Post retención"], "bono_pct": bono_pct,
-        "monto_mes_19": monto_mes_19 
-    })
+    # --- SECCIÓN 3: RETIRO ---
+    proy_edad_retiro = edad + anios_para_65
+    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
     
-    # --- LOGICA DE AGRUPACIÓN PARA 65 AÑOS (Si aplica) ---
+    cols_retiro = st.columns(cols_spec)
+    for idx in range(len(resultados)):
+        res = resultados[idx]
+        r65 = resultados_65[idx]
+        with cols_retiro[idx * 2]:
+            monto_m19_val_retiro = r65.get('monto_mes_19')
+            texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
+    
+            st.markdown(f"""
+            <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
+                <div style="flex: 0;">
+                    <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
+                    {texto_mes_19}
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                    <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
+                </div>
+                <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
+                    <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
+                    <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Divisor Retiro
+        if idx < len(resultados) - 1:
+            with cols_retiro[idx * 2 + 1]:
+                st.markdown(f"""
+                <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    st.write("---")
+    tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
     if edad <= 39:
-        if frecuencia_vista == "Anual":
-            df_65_display = df_65.groupby("Año").agg({
-                "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
-                "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
-            }).reset_index()
-        elif frecuencia_vista == "Semestral":
-            df_65["Semestre"] = (df_65["Mes Global"] - 1) // 6 + 1
-            df_65_display = df_65.groupby("Semestre").agg({
-                "Año": "last", "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
-                "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
-            }).reset_index()
-        else: # Mensual
-            df_65_display = df_65.copy()
-            
-        resultados[-1]["df_65_display"] = df_65_display
-
-    saldo_65 = df_65.iloc[-1]["Saldo Final"]
-    aportado_65 = df_65.iloc[-1]["Aportación Acumulada"]
-    resultados_65.append({
-        "id": opcion_actual_id, "monto_inicial": monto_inicial, "color": COLORES[idx],
-        "saldo_final_65": saldo_65,
-        "total_aportado_65": aportado_65,
-        "rendimiento_65": saldo_65 - aportado_65,
-        "monto_mes_19": monto_mes_19 
-    })
-
-# --- DASHBOARD ---
-logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
-logo_dash = get_asset_path(logo_filename_dash)
-if os.path.exists(logo_dash):
-    bin_str_logo = get_base64_of_bin_file(logo_dash)
-    st.markdown(f"""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-        </style>
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px;">
-            <img src="data:image/png;base64,{bin_str_logo}" style="width: 180px; margin-bottom: 20px;">
-            <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">ASTOR SIMULADOR</h1>
-        </div>
-    """, unsafe_allow_html=True)
-else:
-    st.title("Simulador")
-st.markdown(f"Proyección para <span style='color: {TEXT_COLOR}; font-size: 1.2rem; font-weight: bold;'>{nombre.title()}</span> | Plan: **{tipo_plan}**", unsafe_allow_html=True)
-
-# --- DASHBOARD UNIFICADO ---
-# Columnas con divisores continuos (Reutilizaremos la especificación de columnas)
-cols_spec = []
-for i in range(len(resultados)):
-    cols_spec.append(1)
-    if i < len(resultados) - 1:
-        cols_spec.append(0.05) 
-
-# --- SECCIÓN 1: BONO DE BIENVENIDA ---
-st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 20px; margin-bottom: 25px;">🎁 Bono de bienvenida</h3>', unsafe_allow_html=True)
-
-cols_bono = st.columns(cols_spec)
-for idx in range(len(resultados)):
-    res = resultados[idx]
-    with cols_bono[idx * 2]:
-        # Buscar el bono correspondiente
-        item_bono = next((b for b in detalles_bonos if b['opcion'] == res['id']), None)
-        if item_bono:
-            # Obtener el monto inicial del escenario para mostrarlo arriba como en las otras secciones
-            monto_escenario = res['monto_inicial']
-            st.markdown(f"""
-            <div style="background-color: {CARD_BG}; border: 1px solid {item_bono['color']}; border-radius: 10px; padding: 20px; text-align: center; border-top: 5px solid {item_bono['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); margin-bottom: 15px;">
-            <h4 style="color: {item_bono['color']}; font-weight: bold; margin-bottom: 10px;">${monto_escenario:,.0f} Al mes</h4>
-            <p style="color: {TEXT_COLOR if not is_dark else ACCENT_COLOR}; font-size: 1.0rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Bono acreditado:</p>
-            <div style="color: {item_bono['color']}; font-size: 2.5rem; font-weight: bold; margin: 5px 0; text-shadow: {('0 0 10px ' + item_bono['color'] + '44') if is_dark else 'none'};">${item_bono['monto']:,.0f}</div>
-            <div style="color: {item_bono['color']}; font-weight: bold; font-size: 1.15rem;">({item_bono['pct']*100:.0f}%)</div>
-            <div style="color: {item_bono['color']}; font-size: 1.15rem; font-weight: bold; margin-top: 8px;">+${item_bono['monto']/12:,.0f} al mes</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown('<div style="height: 120px;"></div>', unsafe_allow_html=True)
+        tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
     
-    # Divisor Bono (Altura ajustada)
-    if idx < len(resultados) - 1:
-        with cols_bono[idx * 2 + 1]:
-            st.markdown(f"""
-            <div style="display: flex; justify-content: center; gap: 6px; height: 160px; margin: 5px auto;">
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            </div>
-            """, unsafe_allow_html=True)
-
-# --- SECCIÓN 2: 25 AÑOS ---
-st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{edad + 25} años</h3>', unsafe_allow_html=True)
-
-cols_25 = st.columns(cols_spec)
-for idx in range(len(resultados)):
-    res = resultados[idx]
-    with cols_25[idx * 2]:
-        # Logica 25 Años
-        last_row = res['df_display'].iloc[-1]
-        total_aportado = last_row['Aportación Acumulada']
-        rendimiento = res['saldo_final'] - total_aportado
-        
-        monto_m19_val = res.get('monto_mes_19')
-        texto_mes_19_25 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val:,.0f}' + '</b>' if monto_m19_val is not None else ''}</div>"
-
-        st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {res['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {res['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); margin-bottom: 15px; min-height: 280px; display: flex; flex-direction: column;">
-            <div style="flex: 0;">
-                <h4 style="color: {res['color']}; font-weight: bold; margin-bottom: 5px;">${res['monto_inicial']:,.0f} Al mes</h4>
-                {texto_mes_19_25}
-            </div>
-            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <div style="color: {res['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + res['color'] + '44') if is_dark else 'none'};">${res['saldo_final']:,.0f}</div>
-            </div>
-            <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
-                <div style="color: {TEXT_COLOR}; font-weight: bold;">Aportado: ${total_aportado:,.0f}</div>
-                <div style="color: {res['color']}; font-weight: bold;">Rendimiento: +${rendimiento:,.0f}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Divisor 25 Años
-    if idx < len(resultados) - 1:
-        with cols_25[idx * 2 + 1]:
-            st.markdown(f"""
-            <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            </div>
-            """, unsafe_allow_html=True)
-
-# --- SECCIÓN 3: RETIRO ---
-proy_edad_retiro = edad + anios_para_65
-st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
-
-cols_retiro = st.columns(cols_spec)
-for idx in range(len(resultados)):
-    res = resultados[idx]
-    r65 = resultados_65[idx]
-    with cols_retiro[idx * 2]:
-        monto_m19_val_retiro = r65.get('monto_mes_19')
-        texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
-
-        st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
-            <div style="flex: 0;">
-                <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
-                {texto_mes_19}
-            </div>
-            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
-            </div>
-            <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
-                <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
-                <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    tabs = st.tabs(tabs_nombres)
+    tab_grafica = tabs[0]
+    tab_tabla = tabs[1]
+    if edad <= 39:
+        tab_tabla_65 = tabs[2]
     
-    # Divisor Retiro
-    if idx < len(resultados) - 1:
-        with cols_retiro[idx * 2 + 1]:
-            st.markdown(f"""
-            <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-            </div>
-            """, unsafe_allow_html=True)
-
-st.write("---")
-tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
-if edad <= 39:
-    tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
-
-tabs = st.tabs(tabs_nombres)
-tab_grafica = tabs[0]
-tab_tabla = tabs[1]
-if edad <= 39:
-    tab_tabla_65 = tabs[2]
-
-with tab_grafica:
-    st.subheader("Crecimiento de Capital en el Tiempo")
-    fig = go.Figure()
-    for res in resultados:
-        fig.add_trace(go.Scatter(
-            x=res["df_display"][eje_x_data_col].tolist(), 
-            y=res["df_display"]["Saldo de Fondo"].tolist(),
-            mode='lines', 
-            name=f'<b>Escenario de inversión {res["id"]}</b>',
-            line=dict(color=res["color"], width=3)
-        ))
-    fig.update_layout(
-        xaxis_title=x_axis_title, 
-        yaxis_title="Saldo Acumulado",
-        hovermode="x unified", 
-        template="plotly_dark", 
-        paper_bgcolor=BG_COLOR,
-        plot_bgcolor=BG_COLOR,
-        height=450,
-        legend=dict(
-            orientation="h", 
-            y=1.1, 
-            x=0.5, 
-            xanchor="center",
-            font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
-        ),
-        margin=dict(l=20, r=20, t=40, b=20),
-        font=dict(size=14, color=TEXT_COLOR),
-        xaxis=dict(
-            title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-            gridcolor="#0a3a42"
-        ),
-        yaxis=dict(
-            title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-            tickprefix="$",
-            gridcolor="#0a3a42"
+    with tab_grafica:
+        st.subheader("Crecimiento de Capital en el Tiempo")
+        fig = go.Figure()
+        for res in resultados:
+            fig.add_trace(go.Scatter(
+                x=res["df_display"][eje_x_data_col].tolist(), 
+                y=res["df_display"]["Saldo de Fondo"].tolist(),
+                mode='lines', 
+                name=f'<b>Escenario de inversión {res["id"]}</b>',
+                line=dict(color=res["color"], width=3)
+            ))
+        fig.update_layout(
+            xaxis_title=x_axis_title, 
+            yaxis_title="Saldo Acumulado",
+            hovermode="x unified", 
+            template="plotly_dark", 
+            paper_bgcolor=BG_COLOR,
+            plot_bgcolor=BG_COLOR,
+            height=450,
+            legend=dict(
+                orientation="h", 
+                y=1.1, 
+                x=0.5, 
+                xanchor="center",
+                font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
+            ),
+            margin=dict(l=20, r=20, t=40, b=20),
+            font=dict(size=14, color=TEXT_COLOR),
+            xaxis=dict(
+                title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+                gridcolor="#0a3a42"
+            ),
+            yaxis=dict(
+                title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+                tickprefix="$",
+                gridcolor="#0a3a42"
+            )
         )
-    )
-    st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_comparacion_escenarios")
-
-
-    def highlight_age_60(row):
-        is_age_60 = row["Edad"] == 60
-        # Regresando al verde suave que el usuario prefiere
-        return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
-
-with tab_tabla:
-    col_sel, col_dump = st.columns([1, 3])
-    opciones_select = [r['id'] for r in resultados]
-    id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
-    seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
-    color_ver = seleccion["color"]
+        st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_comparacion_escenarios")
     
-    st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
     
-    # Columnas específicas solicitadas
-    # ELIMINADA: "Saldo Disponible Neto"
-    cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        def highlight_age_60(row):
+            is_age_60 = row["Edad"] == 60
+            # Regresando al verde suave que el usuario prefiere
+            return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
     
-    # Si es mensual o semestral, añadimos la columna de periodo
-    if frecuencia_vista != "Anual":
-        # Insertar al principio
-        cols_to_show.insert(0, eje_x_data_col)
-    # --- TABLA BONITA CON BARRAS DE PROGRESO ---
-    # --- TABLA HTML PERSONALIZADA ---
-    # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
-    html_table = (
-        seleccion["df_display"][cols_to_show].style
-        .format({
-            "Aportación Anual": "${:,.0f}",
-            "Aportación Acumulada": "${:,.0f}", 
-            "Saldo de Fondo": "${:,.0f}", 
-            "Saldo Disponible": "${:,.0f}", 
-            "Post retención": "${:,.0f}",
-            "Año": "{:.0f}", 
-            "Edad": "{:.0f}"
-        })
-        .apply(highlight_age_60, axis=1)
-        .set_properties(**{'text-align': 'center'})
-        .hide(axis="index")
-        .to_html()
-    )
-    st.markdown(f"""
-<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-{html_table}
-</div>
-""", unsafe_allow_html=True)
-
-if edad <= 39:
-    with tab_tabla_65:
-        col_sel65, col_dump65 = st.columns([1, 3])
-        id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
-        seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
+    with tab_tabla:
+        col_sel, col_dump = st.columns([1, 3])
+        opciones_select = [r['id'] for r in resultados]
+        id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
+        seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
+        color_ver = seleccion["color"]
         
-        cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
+        
+        # Columnas específicas solicitadas
+        # ELIMINADA: "Saldo Disponible Neto"
+        cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        
+        # Si es mensual o semestral, añadimos la columna de periodo
         if frecuencia_vista != "Anual":
-            cols_to_show_65.insert(0, eje_x_data_col)
-
-        # Filtrar solo periodos posteriores al año 25
-        df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > 25]
-        
-        # --- TABLA HTML PERSONALIZADA (65 años) ---
-        html_table_65 = (
-            df_65_show[cols_to_show_65].style
+            # Insertar al principio
+            cols_to_show.insert(0, eje_x_data_col)
+        # --- TABLA BONITA CON BARRAS DE PROGRESO ---
+        # --- TABLA HTML PERSONALIZADA ---
+        # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
+        html_table = (
+            seleccion["df_display"][cols_to_show].style
             .format({
                 "Aportación Anual": "${:,.0f}",
                 "Aportación Acumulada": "${:,.0f}", 
@@ -2135,335 +2099,371 @@ if edad <= 39:
             .hide(axis="index")
             .to_html()
         )
-        
         st.markdown(f"""
-<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-{html_table_65}
-</div>
-""", unsafe_allow_html=True)
+    <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+    {html_table}
+    </div>
+    """, unsafe_allow_html=True)
     
-    
-    # 3. EXPORTACIÓN CSV
-    
-    
-    # 3. EXPORTACIÓN CSV
-    # 3. EXPORTACIÓN EXCEL PROFESIONAL (Multi-Hoja)
-    def generar_excel(res_list, nombre_cte):
-        output = io.BytesIO()
-        # Usaremos xlsxwriter obligatoriamente para el formato avanzado
-        try:
-            writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        except:
-            # Fallback básico si explota algo o no está instalado
-            writer = pd.ExcelWriter(output, engine='openpyxl')
+    if edad <= 39:
+        with tab_tabla_65:
+            col_sel65, col_dump65 = st.columns([1, 3])
+            id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
+            seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
             
-        workbook = writer.book
-        
-        # ---------------------------------------------------------
-        # MODO IMPORTANTE: SI NO TENEMOS XLSXWRITER, MODO SIMPLE
-        # ---------------------------------------------------------
-        if writer.engine != 'xlsxwriter':
-            # Exportación simple para evitar errores
-            for r in res_list:
-                cols_export_basic = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-                if frecuencia_vista != "Anual": cols_export_basic.insert(0, eje_x_data_col)
-                r['df_display'][cols_export_basic].to_excel(writer, sheet_name=f"Escenario {r['id']}", index=False)
-            writer.close()
-            return output.getvalue()
+            cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+            if frecuencia_vista != "Anual":
+                cols_to_show_65.insert(0, eje_x_data_col)
     
-        # --- SÍ TENEMOS XLSXWRITER: FORMATOS AVANZADOS ---
-        
-        # --- CONFIGURACIÓN DINÁMICA DE COLORES EXCEL ---
-        if is_dark:
-            COLOR_FONDO = '#050505'       # Negro Profundo
-            COLOR_GRADIENTE_1 = '#092B30' # Petrol Oscuro
-            COLOR_GRADIENTE_2 = '#050505' # Transición a Negro
-            COLOR_TEXTO_MAIN = '#FFFFFF'  # Blanco
-            COLOR_ORO = '#E6C200'         # Oro Atenuado
-            COLOR_ACCENTO = '#1a3a42'     # Cian Oscuro
-            BORDER_EXCEL = COLOR_ORO
-            HEADER_BG = COLOR_GRADIENTE_1
-            LOGO_FILE = "1-06.png"
-        else:
-            # Modo Claro (Identidad Astor Original)
-            COLOR_FONDO = '#FFFFFF'       # Blanco Puro
-            COLOR_GRADIENTE_1 = '#1E3A8A' # Azul Astor (Primary)
-            COLOR_GRADIENTE_2 = '#FFFFFF' 
-            COLOR_TEXTO_MAIN = '#FFFFFF'  # Para textos sobre fondo azul
-            COLOR_TEXTO_DARK = '#1E3A8A'  # Para textos sobre fondo blanco
-            COLOR_ORO = '#1E3A8A'         # Azul Marino en lugar de Oro en claro
-            COLOR_ACCENTO = '#F0F2F5'     # Gris suave de fondo
-            BORDER_EXCEL = '#1E3A8A'
-            HEADER_BG = '#1E3A8A'
-            LOGO_FILE = "1-06 copy.png"
-        
-        # --- ESTILOS COMPLEJOS (BOXED DESIGN) ---
-        # Título Principal con Color Sólido Premium
-        fmt_title_main = workbook.add_format({
-            'bold': True, 'font_size': 24, 'font_color': COLOR_TEXTO_MAIN,
-            'bg_color': HEADER_BG,
-            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
-            'font_name': 'Georgia'
-        })
-        
-        # Título de Escenario (Borde Oro, Texto Blanco)
-        fmt_title_scenario = workbook.add_format({
-            'bold': True, 'font_size': 18, 'font_color': COLOR_TEXTO_MAIN,
-            'bg_color': HEADER_BG,
-            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
-            'text_wrap': True,
-            'font_name': 'Georgia'
-        })
-        
-        # Encabezados de Sección (Totalmente transparente para ver marca de agua)
-        fmt_section_header = workbook.add_format({
-            'bold': True, 'font_size': 14, 'font_color': COLOR_TEXTO_MAIN, 
-            'bg_color': HEADER_BG,
-            'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL
-        })
-        
-        fmt_box_label = workbook.add_format({
-            'font_size': 11, 'font_color': '#64748B' if not is_dark else '#9ca3af', 'align': 'center', 'valign': 'top', 'bold': True,
-            'bg_color': COLOR_FONDO
-        })
-        
-        fmt_box_data = workbook.add_format({
-            'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
-            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
-        })
-        
-        fmt_box_data_currency = workbook.add_format({
-            'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
-            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True, 'num_format': '$#,##0'
-        })
-        
-        # NUEVO: Formato específico para la fila del cliente (Dorado en oscuro)
-        fmt_client_info = workbook.add_format({
-            'font_size': 16, 'font_color': COLOR_ORO if is_dark else COLOR_TEXTO_DARK, 'align': 'center', 'valign': 'vcenter',
-            'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
-        })
-    
-        # Encabezado de Tabla Principal (Transparente, Texto Blanco, Borde Oro)
-        fmt_header_table = workbook.add_format({
-            'bold': True, 'font_size': 12, 'font_color': COLOR_TEXTO_MAIN,
-            'bg_color': HEADER_BG,
-            'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'valign': 'vcenter'
-        })
-        
-        # Celdas de Datos (Sin bg_color para que la marca de agua sea visible "dentro")
-        fmt_cell_text = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-        fmt_cell_num = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-        fmt_cell_currency = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'num_format': '$#,##0', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
-        
-        # Formatos con Highlight (Edad 60) - Manteniendo el verde suave para legibilidad sobre el oscuro
-        fmt_cell_text_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-        fmt_cell_num_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-        fmt_cell_currency_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'num_format': '$#,##0', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
-    
-        fmt_bold_label = workbook.add_format({'bold': True, 'font_size': 12, 'font_color': BORDER_EXCEL, 'bg_color': COLOR_FONDO})
-        
-        # --- HOJA 1: PORTADA / RESUMEN EJECUTIVO ---
-        ws_portada = workbook.add_worksheet("Portada")
-        ws_portada.hide_gridlines(2) # Ocultar gridlines para que brille el fondo oscuro
-        
-        # --- MARCA DE AGUA ---
-        watermark_file = get_watermark_excel(is_dark=is_dark)
-        if watermark_file:
-            ws_portada.set_background(watermark_file)
-        
-        # --- PROTECCIÓN ---
-        # Bloquear objetos (logo) para que no se puedan mover o borrar
-        ws_portada.protect()
-    
-        # --- CONFIGURACIÓN DE ESPACIOS (Garantizar que nada se vea aplastado) ---
-        for r_idx in range(0, 10):
-            ws_portada.set_row(r_idx, 25) # Altura generosa para la cabecera
-        
-        # --- SECCIÓN 0: CABECERA Y LOGO ---
-        logo_portada = get_asset_path(LOGO_FILE)
-        if os.path.exists(logo_portada):
-            # Logo en esquina A1/B1 con escala clara
-            ws_portada.insert_image('A1', logo_portada, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
-    
-        # Título Principal centrado respecto a la zona de datos
-        ws_portada.merge_range('D3:F6', "Astor simulador", fmt_title_main)
-        
-        # --- SECCIÓN 1: DATOS DEL CLIENTE ---
-        row = 25 # MÁXIMO AIRE: Bajamos hasta la fila 25 para que nada se encime
-        ws_portada.merge_range(row, 1, row, 6, "Información del Cliente", fmt_section_header)
-        row += 2
-        
-        # Fila de etiquetas
-        ws_portada.merge_range(row, 1, row, 2, "Nombre del Cliente", fmt_box_label) # Merge para que quepa el label
-        ws_portada.merge_range(row, 3, row, 5, "Plan Seleccionado", fmt_box_label)
-        ws_portada.write(row, 6, "Edad Actual", fmt_box_label)
-        row += 1
-        
-        # Fila de valores (Boxed)
-        ws_portada.set_row(row, 45) 
-        # MERGE para el nombre del cliente para que no se corte NUNCA
-        ws_portada.merge_range(row, 1, row, 2, nombre_cte.title(), fmt_client_info)
-        ws_portada.merge_range(row, 3, row, 5, tipo_plan, fmt_client_info)
-        ws_portada.write(row, 6, f"{edad} años", fmt_client_info)
-        
-        # --- SECCIÓN 3: RESUMEN COMPARATIVO ---
-        row += 6 
-        ws_portada.merge_range(row, 1, row, 6, "Resumen de Escenarios Proyectados", fmt_section_header)
-        
-        # Aplicar a Portada (hasta fila 80 para cubrir todo el resumen)
-        # Ya no se requiere aplicar_patron_watermark manual
-        row += 2
-        
-        # Encabezados Tabla Resumen
-        headers_res = ["Escenario De Inversión", "Aportación Mensual", "Aportación Mes 19+", "Saldo Final", "Bono Inicial"]
-        for col, h in enumerate(headers_res):
-            ws_portada.write(row, 1 + col, h, fmt_header_table)
-        
-        # Filas Tabla Resumen
-        row += 1
-        for r in res_list:
-            ws_portada.set_row(row, 20)
-            ws_portada.write(row, 1, f"Escenario {r['id']}", fmt_cell_text)
-            ws_portada.write(row, 2, r['monto_inicial'], fmt_cell_currency)
+            # Filtrar solo periodos posteriores al año 25
+            df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > 25]
             
-            # Monto Mes 19
-            if r.get('monto_mes_19') and r['monto_mes_19'] > 0:
-                 ws_portada.write(row, 3, r['monto_mes_19'], fmt_cell_currency)
+            # --- TABLA HTML PERSONALIZADA (65 años) ---
+            html_table_65 = (
+                df_65_show[cols_to_show_65].style
+                .format({
+                    "Aportación Anual": "${:,.0f}",
+                    "Aportación Acumulada": "${:,.0f}", 
+                    "Saldo de Fondo": "${:,.0f}", 
+                    "Saldo Disponible": "${:,.0f}", 
+                    "Post retención": "${:,.0f}",
+                    "Año": "{:.0f}", 
+                    "Edad": "{:.0f}"
+                })
+                .apply(highlight_age_60, axis=1)
+                .set_properties(**{'text-align': 'center'})
+                .hide(axis="index")
+                .to_html()
+            )
+            
+            st.markdown(f"""
+    <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+    {html_table_65}
+    </div>
+    """, unsafe_allow_html=True)
+        
+        
+        # 3. EXPORTACIÓN CSV
+        
+        
+        # 3. EXPORTACIÓN CSV
+        # 3. EXPORTACIÓN EXCEL PROFESIONAL (Multi-Hoja)
+        def generar_excel(res_list, nombre_cte):
+            output = io.BytesIO()
+            # Usaremos xlsxwriter obligatoriamente para el formato avanzado
+            try:
+                writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            except:
+                # Fallback básico si explota algo o no está instalado
+                writer = pd.ExcelWriter(output, engine='openpyxl')
+                
+            workbook = writer.book
+            
+            # ---------------------------------------------------------
+            # MODO IMPORTANTE: SI NO TENEMOS XLSXWRITER, MODO SIMPLE
+            # ---------------------------------------------------------
+            if writer.engine != 'xlsxwriter':
+                # Exportación simple para evitar errores
+                for r in res_list:
+                    cols_export_basic = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+                    if frecuencia_vista != "Anual": cols_export_basic.insert(0, eje_x_data_col)
+                    r['df_display'][cols_export_basic].to_excel(writer, sheet_name=f"Escenario {r['id']}", index=False)
+                writer.close()
+                return output.getvalue()
+        
+            # --- SÍ TENEMOS XLSXWRITER: FORMATOS AVANZADOS ---
+            
+            # --- CONFIGURACIÓN DINÁMICA DE COLORES EXCEL ---
+            if is_dark:
+                COLOR_FONDO = '#050505'       # Negro Profundo
+                COLOR_GRADIENTE_1 = '#092B30' # Petrol Oscuro
+                COLOR_GRADIENTE_2 = '#050505' # Transición a Negro
+                COLOR_TEXTO_MAIN = '#FFFFFF'  # Blanco
+                COLOR_ORO = '#E6C200'         # Oro Atenuado
+                COLOR_ACCENTO = '#1a3a42'     # Cian Oscuro
+                BORDER_EXCEL = COLOR_ORO
+                HEADER_BG = COLOR_GRADIENTE_1
+                LOGO_FILE = "1-06.png"
             else:
-                 ws_portada.write(row, 3, "-", fmt_cell_text)
-    
-            ws_portada.write(row, 4, r['saldo_final'], fmt_cell_currency)
-            ws_portada.write(row, 5, f"{r['bono_pct']*100:.0f}%", fmt_cell_num)
+                # Modo Claro (Identidad Astor Original)
+                COLOR_FONDO = '#FFFFFF'       # Blanco Puro
+                COLOR_GRADIENTE_1 = '#1E3A8A' # Azul Astor (Primary)
+                COLOR_GRADIENTE_2 = '#FFFFFF' 
+                COLOR_TEXTO_MAIN = '#FFFFFF'  # Para textos sobre fondo azul
+                COLOR_TEXTO_DARK = '#1E3A8A'  # Para textos sobre fondo blanco
+                COLOR_ORO = '#1E3A8A'         # Azul Marino en lugar de Oro en claro
+                COLOR_ACCENTO = '#F0F2F5'     # Gris suave de fondo
+                BORDER_EXCEL = '#1E3A8A'
+                HEADER_BG = '#1E3A8A'
+                LOGO_FILE = "1-06 copy.png"
+            
+            # --- ESTILOS COMPLEJOS (BOXED DESIGN) ---
+            # Título Principal con Color Sólido Premium
+            fmt_title_main = workbook.add_format({
+                'bold': True, 'font_size': 24, 'font_color': COLOR_TEXTO_MAIN,
+                'bg_color': HEADER_BG,
+                'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
+                'font_name': 'Georgia'
+            })
+            
+            # Título de Escenario (Borde Oro, Texto Blanco)
+            fmt_title_scenario = workbook.add_format({
+                'bold': True, 'font_size': 18, 'font_color': COLOR_TEXTO_MAIN,
+                'bg_color': HEADER_BG,
+                'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL,
+                'text_wrap': True,
+                'font_name': 'Georgia'
+            })
+            
+            # Encabezados de Sección (Totalmente transparente para ver marca de agua)
+            fmt_section_header = workbook.add_format({
+                'bold': True, 'font_size': 14, 'font_color': COLOR_TEXTO_MAIN, 
+                'bg_color': HEADER_BG,
+                'align': 'center', 'valign': 'vcenter', 'border': 2, 'border_color': BORDER_EXCEL
+            })
+            
+            fmt_box_label = workbook.add_format({
+                'font_size': 11, 'font_color': '#64748B' if not is_dark else '#9ca3af', 'align': 'center', 'valign': 'top', 'bold': True,
+                'bg_color': COLOR_FONDO
+            })
+            
+            fmt_box_data = workbook.add_format({
+                'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
+                'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
+            })
+            
+            fmt_box_data_currency = workbook.add_format({
+                'font_size': 16, 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN, 'align': 'center', 'valign': 'vcenter',
+                'border': 2, 'border_color': BORDER_EXCEL, 'bold': True, 'num_format': '$#,##0'
+            })
+            
+            # NUEVO: Formato específico para la fila del cliente (Dorado en oscuro)
+            fmt_client_info = workbook.add_format({
+                'font_size': 16, 'font_color': COLOR_ORO if is_dark else COLOR_TEXTO_DARK, 'align': 'center', 'valign': 'vcenter',
+                'border': 2, 'border_color': BORDER_EXCEL, 'bold': True
+            })
+        
+            # Encabezado de Tabla Principal (Transparente, Texto Blanco, Borde Oro)
+            fmt_header_table = workbook.add_format({
+                'bold': True, 'font_size': 12, 'font_color': COLOR_TEXTO_MAIN,
+                'bg_color': HEADER_BG,
+                'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'valign': 'vcenter'
+            })
+            
+            # Celdas de Datos (Sin bg_color para que la marca de agua sea visible "dentro")
+            fmt_cell_text = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+            fmt_cell_num = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+            fmt_cell_currency = workbook.add_format({'font_size': 12, 'border': 1, 'border_color': BORDER_EXCEL, 'align': 'center', 'num_format': '$#,##0', 'font_color': COLOR_TEXTO_DARK if not is_dark else COLOR_TEXTO_MAIN})
+            
+            # Formatos con Highlight (Edad 60) - Manteniendo el verde suave para legibilidad sobre el oscuro
+            fmt_cell_text_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+            fmt_cell_num_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+            fmt_cell_currency_highlight = workbook.add_format({'font_size': 12, 'border': 1, 'align': 'center', 'num_format': '$#,##0', 'bg_color': '#dcfce7', 'font_color': '#166534', 'bold': True})
+        
+            fmt_bold_label = workbook.add_format({'bold': True, 'font_size': 12, 'font_color': BORDER_EXCEL, 'bg_color': COLOR_FONDO})
+            
+            # --- HOJA 1: PORTADA / RESUMEN EJECUTIVO ---
+            ws_portada = workbook.add_worksheet("Portada")
+            ws_portada.hide_gridlines(2) # Ocultar gridlines para que brille el fondo oscuro
+            
+            # --- MARCA DE AGUA ---
+            watermark_file = get_watermark_excel(is_dark=is_dark)
+            if watermark_file:
+                ws_portada.set_background(watermark_file)
+            
+            # --- PROTECCIÓN ---
+            # Bloquear objetos (logo) para que no se puedan mover o borrar
+            ws_portada.protect()
+        
+            # --- CONFIGURACIÓN DE ESPACIOS (Garantizar que nada se vea aplastado) ---
+            for r_idx in range(0, 10):
+                ws_portada.set_row(r_idx, 25) # Altura generosa para la cabecera
+            
+            # --- SECCIÓN 0: CABECERA Y LOGO ---
+            logo_portada = get_asset_path(LOGO_FILE)
+            if os.path.exists(logo_portada):
+                # Logo en esquina A1/B1 con escala clara
+                ws_portada.insert_image('A1', logo_portada, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
+        
+            # Título Principal centrado respecto a la zona de datos
+            ws_portada.merge_range('D3:F6', "Astor simulador", fmt_title_main)
+            
+            # --- SECCIÓN 1: DATOS DEL CLIENTE ---
+            row = 25 # MÁXIMO AIRE: Bajamos hasta la fila 25 para que nada se encime
+            ws_portada.merge_range(row, 1, row, 6, "Información del Cliente", fmt_section_header)
+            row += 2
+            
+            # Fila de etiquetas
+            ws_portada.merge_range(row, 1, row, 2, "Nombre del Cliente", fmt_box_label) # Merge para que quepa el label
+            ws_portada.merge_range(row, 3, row, 5, "Plan Seleccionado", fmt_box_label)
+            ws_portada.write(row, 6, "Edad Actual", fmt_box_label)
             row += 1
             
-        # Ajustar anchos Portada (Más grandes y centrados)
-        ws_portada.set_column(0, 0, 5)   # A: Margen
-        ws_portada.set_column(1, 1, 25)  # B: Escenario (Widen from 15)
-        ws_portada.set_column(2, 2, 25)  # C
-        ws_portada.set_column(3, 3, 25)  # D
-        ws_portada.set_column(4, 4, 30)  # E
-        ws_portada.set_column(5, 5, 20)  # F
-        ws_portada.set_column(6, 6, 20)  # G
-        
-        # Ocultar sobrante en Portada para efecto Dashboard limpio
-        ws_portada.set_column('H:XFD', None, None, {'hidden': True})
-        ws_portada.set_default_row(hide_unused_rows=True) 
-        ws_portada.write(row + 2, 1, "") 
-    
-    
-        # ---------------------------------------------------------
-        # HOJAS DE DETALLE (UNA POR OPCIÓN)
-        # ---------------------------------------------------------
-        cols_export = ["Año", "Edad", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-        if frecuencia_vista != "Anual": cols_export.insert(0, eje_x_data_col)
-        
-        for r in res_list:
-            sh_name = f"Escenario {r['id']}"
-            ws_detail = workbook.add_worksheet(sh_name)
-            ws_detail.hide_gridlines(2)
-            if watermark_file:
-                ws_detail.set_background(watermark_file)
-            ws_detail.protect() # Bloquear el logo
-    
-            # --- AJUSTE DE ESPACIOS (Igual que la Portada) ---
-            for r_idx in range(0, 10):
-                ws_detail.set_row(r_idx, 22) # Altura balanceada para cabecera
+            # Fila de valores (Boxed)
+            ws_portada.set_row(row, 45) 
+            # MERGE para el nombre del cliente para que no se corte NUNCA
+            ws_portada.merge_range(row, 1, row, 2, nombre_cte.title(), fmt_client_info)
+            ws_portada.merge_range(row, 3, row, 5, tipo_plan, fmt_client_info)
+            ws_portada.write(row, 6, f"{edad} años", fmt_client_info)
+            
+            # --- SECCIÓN 3: RESUMEN COMPARATIVO ---
+            row += 6 
+            ws_portada.merge_range(row, 1, row, 6, "Resumen de Escenarios Proyectados", fmt_section_header)
+            
+            # Aplicar a Portada (hasta fila 80 para cubrir todo el resumen)
+            # Ya no se requiere aplicar_patron_watermark manual
+            row += 2
+            
+            # Encabezados Tabla Resumen
+            headers_res = ["Escenario De Inversión", "Aportación Mensual", "Aportación Mes 19+", "Saldo Final", "Bono Inicial"]
+            for col, h in enumerate(headers_res):
+                ws_portada.write(row, 1 + col, h, fmt_header_table)
+            
+            # Filas Tabla Resumen
+            row += 1
+            for r in res_list:
+                ws_portada.set_row(row, 20)
+                ws_portada.write(row, 1, f"Escenario {r['id']}", fmt_cell_text)
+                ws_portada.write(row, 2, r['monto_inicial'], fmt_cell_currency)
                 
-            # --- LOGO EN ESCENARIOS ---
-            logo_escenario = get_asset_path(LOGO_FILE)
-            if os.path.exists(logo_escenario):
-                # Logo en esquina A1 como en Portada
-                ws_detail.insert_image('A1', logo_escenario, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
+                # Monto Mes 19
+                if r.get('monto_mes_19') and r['monto_mes_19'] > 0:
+                     ws_portada.write(row, 3, r['monto_mes_19'], fmt_cell_currency)
+                else:
+                     ws_portada.write(row, 3, "-", fmt_cell_text)
+        
+                ws_portada.write(row, 4, r['saldo_final'], fmt_cell_currency)
+                ws_portada.write(row, 5, f"{r['bono_pct']*100:.0f}%", fmt_cell_num)
+                row += 1
+                
+            # Ajustar anchos Portada (Más grandes y centrados)
+            ws_portada.set_column(0, 0, 5)   # A: Margen
+            ws_portada.set_column(1, 1, 25)  # B: Escenario (Widen from 15)
+            ws_portada.set_column(2, 2, 25)  # C
+            ws_portada.set_column(3, 3, 25)  # D
+            ws_portada.set_column(4, 4, 30)  # E
+            ws_portada.set_column(5, 5, 20)  # F
+            ws_portada.set_column(6, 6, 20)  # G
             
-            # Título de la Hoja (Dos líneas: Título arriba, cifra abajo)
-            ws_detail.merge_range('D3:E5', f"PROYECCIÓN:\n${r['monto_inicial']:,.0f}", fmt_title_scenario)
+            # Ocultar sobrante en Portada para efecto Dashboard limpio
+            ws_portada.set_column('H:XFD', None, None, {'hidden': True})
+            ws_portada.set_default_row(hide_unused_rows=True) 
+            ws_portada.write(row + 2, 1, "") 
+        
+        
+            # ---------------------------------------------------------
+            # HOJAS DE DETALLE (UNA POR OPCIÓN)
+            # ---------------------------------------------------------
+            cols_export = ["Año", "Edad", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+            if frecuencia_vista != "Anual": cols_export.insert(0, eje_x_data_col)
             
-            # Cajas de resumen rápido (Buscamos balance - Fila 12)
-            row_brief = 12
-            ws_detail.write(row_brief, 1, "Aportación Mensual", fmt_box_label)
-            ws_detail.write(row_brief, 2, "Aportación 19+", fmt_box_label)
-            ws_detail.write(row_brief, 3, "Saldo Final Estimado", fmt_box_label)
-            
-            row_brief += 1
-            ws_detail.set_row(row_brief, 40)
-            ws_detail.write(row_brief, 1, r['monto_inicial'], fmt_box_data_currency)
-            m19_val = r.get('monto_mes_19') if r.get('monto_mes_19') else r['monto_inicial']
-            ws_detail.write(row_brief, 2, m19_val, fmt_box_data_currency)
-            ws_detail.write(row_brief, 3, r['saldo_final'], fmt_box_data_currency)
-            
-            # Espacio final antes de la tabla (Suficiente respiro - Fila 20)
-            start_row = 20
-    
-            
-            # Escribir Headers
-            for col_num, value in enumerate(cols_export):
-                ws_detail.write(start_row, col_num, value, fmt_header_table)
-    
-            # Escribir Datos
-            data_row = start_row + 1
-            df_display = r['df_display'][cols_export]
-            
-            def write_rows(ws, df, start_r):
-                curr_r = start_r
-                for _, row_data in df.iterrows():
-                    is_age_60 = row_data.get("Edad") == 60
+            for r in res_list:
+                sh_name = f"Escenario {r['id']}"
+                ws_detail = workbook.add_worksheet(sh_name)
+                ws_detail.hide_gridlines(2)
+                if watermark_file:
+                    ws_detail.set_background(watermark_file)
+                ws_detail.protect() # Bloquear el logo
+        
+                # --- AJUSTE DE ESPACIOS (Igual que la Portada) ---
+                for r_idx in range(0, 10):
+                    ws_detail.set_row(r_idx, 22) # Altura balanceada para cabecera
                     
-                    for col_num, col_name in enumerate(cols_export):
-                        val = row_data[col_name]
-                        
-                        if col_name in ["Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]:
-                            fmt = fmt_cell_currency_highlight if is_age_60 else fmt_cell_currency
-                            ws.write(curr_r, col_num, val, fmt)
-                        elif col_name in ["Año", "Edad"]:
-                            fmt = fmt_cell_num_highlight if is_age_60 else fmt_cell_num
-                            ws.write(curr_r, col_num, val, fmt)
-                        else:
-                            fmt = fmt_cell_text_highlight if is_age_60 else fmt_cell_text
-                            ws.write(curr_r, col_num, val, fmt)
-                    curr_r += 1
-                return curr_r
-    
-            data_row = write_rows(ws_detail, df_display, data_row)
+                # --- LOGO EN ESCENARIOS ---
+                logo_escenario = get_asset_path(LOGO_FILE)
+                if os.path.exists(logo_escenario):
+                    # Logo en esquina A1 como en Portada
+                    ws_detail.insert_image('A1', logo_escenario, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
                 
-            # --- TABLA EXTRA (25-65) SI EXISTE ---
-            if r.get('df_65_display') is not None:
-                data_row += 2
-                ws_detail.merge_range(data_row, 0, data_row, len(cols_export) - 1, f"Proyección a Retiro (Edad {edad + 25} a 65)", fmt_section_header)
-                data_row += 1
-                # Headers otra vez
+                # Título de la Hoja (Dos líneas: Título arriba, cifra abajo)
+                ws_detail.merge_range('D3:E5', f"PROYECCIÓN:\n${r['monto_inicial']:,.0f}", fmt_title_scenario)
+                
+                # Cajas de resumen rápido (Buscamos balance - Fila 12)
+                row_brief = 12
+                ws_detail.write(row_brief, 1, "Aportación Mensual", fmt_box_label)
+                ws_detail.write(row_brief, 2, "Aportación 19+", fmt_box_label)
+                ws_detail.write(row_brief, 3, "Saldo Final Estimado", fmt_box_label)
+                
+                row_brief += 1
+                ws_detail.set_row(row_brief, 40)
+                ws_detail.write(row_brief, 1, r['monto_inicial'], fmt_box_data_currency)
+                m19_val = r.get('monto_mes_19') if r.get('monto_mes_19') else r['monto_inicial']
+                ws_detail.write(row_brief, 2, m19_val, fmt_box_data_currency)
+                ws_detail.write(row_brief, 3, r['saldo_final'], fmt_box_data_currency)
+                
+                # Espacio final antes de la tabla (Suficiente respiro - Fila 20)
+                start_row = 20
+        
+                
+                # Escribir Headers
                 for col_num, value in enumerate(cols_export):
-                    ws_detail.write(data_row, col_num, value, fmt_header_table)
-                data_row += 1
+                    ws_detail.write(start_row, col_num, value, fmt_header_table)
+        
+                # Escribir Datos
+                data_row = start_row + 1
+                df_display = r['df_display'][cols_export]
                 
-                df_65_export = r['df_65_display'][r['df_65_display']["Año"] > 25][cols_export]
-                data_row = write_rows(ws_detail, df_65_export, data_row)
+                def write_rows(ws, df, start_r):
+                    curr_r = start_r
+                    for _, row_data in df.iterrows():
+                        is_age_60 = row_data.get("Edad") == 60
+                        
+                        for col_num, col_name in enumerate(cols_export):
+                            val = row_data[col_name]
+                            
+                            if col_name in ["Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]:
+                                fmt = fmt_cell_currency_highlight if is_age_60 else fmt_cell_currency
+                                ws.write(curr_r, col_num, val, fmt)
+                            elif col_name in ["Año", "Edad"]:
+                                fmt = fmt_cell_num_highlight if is_age_60 else fmt_cell_num
+                                ws.write(curr_r, col_num, val, fmt)
+                            else:
+                                fmt = fmt_cell_text_highlight if is_age_60 else fmt_cell_text
+                                ws.write(curr_r, col_num, val, fmt)
+                        curr_r += 1
+                    return curr_r
+        
+                data_row = write_rows(ws_detail, df_display, data_row)
+                    
+                # --- TABLA EXTRA (25-65) SI EXISTE ---
+                if r.get('df_65_display') is not None:
+                    data_row += 2
+                    ws_detail.merge_range(data_row, 0, data_row, len(cols_export) - 1, f"Proyección a Retiro (Edad {edad + 25} a 65)", fmt_section_header)
+                    data_row += 1
+                    # Headers otra vez
+                    for col_num, value in enumerate(cols_export):
+                        ws_detail.write(data_row, col_num, value, fmt_header_table)
+                    data_row += 1
+                    
+                    df_65_export = r['df_65_display'][r['df_65_display']["Año"] > 25][cols_export]
+                    data_row = write_rows(ws_detail, df_65_export, data_row)
+                    
+                    
+                # Ajustar anchos Detalle (Más cómodos)
+                ws_detail.set_column(0, 0, 20)  # A: Logo / Col 1
+                ws_detail.set_column(1, 1, 12)  # B
+                ws_detail.set_column(2, 2, 25)  # C
+                ws_detail.set_column(3, 3, 25)  # D
+                ws_detail.set_column(4, 4, 25)  # E
+                ws_detail.set_column(5, 5, 25)  # F
                 
-                
-            # Ajustar anchos Detalle (Más cómodos)
-            ws_detail.set_column(0, 0, 20)  # A: Logo / Col 1
-            ws_detail.set_column(1, 1, 12)  # B
-            ws_detail.set_column(2, 2, 25)  # C
-            ws_detail.set_column(3, 3, 25)  # D
-            ws_detail.set_column(4, 4, 25)  # E
-            ws_detail.set_column(5, 5, 25)  # F
-            
-            # Ocultar sobrante en Escenarios
-            last_col_letter = chr(ord('A') + len(cols_export))
-            ws_detail.set_column(f'{last_col_letter}:XFD', None, None, {'hidden': True})
-            ws_detail.set_default_row(hide_unused_rows=True)
-            ws_detail.write(data_row + 2, 0, "")
-    
-        writer.close()
-        return output.getvalue()
-    
-    excel_data = generar_excel(resultados, nombre)
-    st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
-    st.download_button(
-        label="💾 Descargar Reporte (Excel)",
-        data=excel_data,
-        file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+                # Ocultar sobrante en Escenarios
+                last_col_letter = chr(ord('A') + len(cols_export))
+                ws_detail.set_column(f'{last_col_letter}:XFD', None, None, {'hidden': True})
+                ws_detail.set_default_row(hide_unused_rows=True)
+                ws_detail.write(data_row + 2, 0, "")
+        
+            writer.close()
+            return output.getvalue()
+        
+        excel_data = generar_excel(resultados, nombre)
+        st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
+        st.download_button(
+            label="💾 Descargar Reporte (Excel)",
+            data=excel_data,
+            file_name=f"Simulacion_{nombre.replace(' ', '_')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
     st.stop() # Aseguramos que no caiga al siguiente simulador
 
 if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
@@ -2541,6 +2541,12 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     
     valor_fondos_final = saldo_actual
 
+    # El input central (Capacidad de aportación)
+    c_pad1, c_mid_in, c_pad2 = st.columns([1, 1, 1])
+    with c_mid_in:
+        st.markdown(f"<p style='color: {TEXT_COLOR}; text-align: center; opacity: 0.6; margin-bottom: -5px;'>MODIFICAR APORTACIÓN MENSUAL</p>", unsafe_allow_html=True)
+        aportacion_user = st.number_input("Monto Mensual ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed", key="aportacion_user_comp")
+    
     # --- DISEÑO DE 3 COLUMNAS ---
     st.markdown("<br>", unsafe_allow_html=True)
     col_casa, col_monto, col_fondos = st.columns([1.2, 1, 1.2])
@@ -2562,18 +2568,12 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
 
     with col_monto:
         st.markdown(f"""
-        <div style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Modificar Aportación</p>
-        </div>
-        """, unsafe_allow_html=True)
-        aportacion_user = st.number_input("Monto Mensual ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed", key="aportacion_user_comp")
-        
-        st.markdown(f"""
-        <div style="height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <div style="height: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Capacidad de Aportación</p>
             <div style="font-size: 4.5rem; font-weight: 800; color: {ACCENT_COLOR}; text-shadow: 0 0 30px {ACCENT_COLOR}66; margin: 10px 0;">
                 ${aportacion_user:,.0f}
             </div>
-            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">CAPACIDAD MENSUAL</p>
+            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">MENSUAL</p>
         </div>
         """, unsafe_allow_html=True)
 
