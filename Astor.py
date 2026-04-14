@@ -1085,7 +1085,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1132,7 +1132,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">COSTOS</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1192,7 +1192,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">ACTIVOS</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -1215,7 +1215,7 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-br" style="color: #A855F7; opacity: 0.6;">MOD: NEBULA_V1</div>
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">SIMULADOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
