@@ -1965,125 +1965,159 @@ for idx in range(len(resultados)):
             </div>
             """, unsafe_allow_html=True)
 
-    # --- SECCIÓN 3: RETIRO ---
-    proy_edad_retiro = edad + anios_para_65
-    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
+# --- SECCIÓN 3: RETIRO ---
+proy_edad_retiro = edad + anios_para_65
+st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
+
+cols_retiro = st.columns(cols_spec)
+for idx in range(len(resultados)):
+    res = resultados[idx]
+    r65 = resultados_65[idx]
+    with cols_retiro[idx * 2]:
+        monto_m19_val_retiro = r65.get('monto_mes_19')
+        texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
+
+        st.markdown(f"""
+        <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
+            <div style="flex: 0;">
+                <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
+                {texto_mes_19}
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
+            </div>
+            <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
+                <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
+                <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    cols_retiro = st.columns(cols_spec)
-    for idx in range(len(resultados)):
-        res = resultados[idx]
-        r65 = resultados_65[idx]
-        with cols_retiro[idx * 2]:
-            monto_m19_val_retiro = r65.get('monto_mes_19')
-            texto_mes_19 = f"<div style='color: {GOLD_COLOR}; font-size: 0.85rem; margin-top:-2px; margin-bottom: 5px; height: 20px;'>{'Mes 19+: <b>$' + f'{monto_m19_val_retiro:,.0f}' + '</b>' if monto_m19_val_retiro is not None else ''}</div>"
-    
+    # Divisor Retiro
+    if idx < len(resultados) - 1:
+        with cols_retiro[idx * 2 + 1]:
             st.markdown(f"""
-            <div style="background-color: {CARD_BG}; border: 1px solid {r65['color']}88; border-radius: 10px; padding: 25px 20px; text-align: center; border-top: 5px solid {r65['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); min-height: 280px; display: flex; flex-direction: column;">
-                <div style="flex: 0;">
-                    <h4 style="color: {r65['color']}; font-weight: bold; margin-bottom: 5px;">${r65['monto_inicial']:,.0f} Al mes</h4>
-                    {texto_mes_19}
-                </div>
-                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                    <div style="color: {r65['color']}; font-size: 2.5rem; font-weight: bold; text-shadow: {('0 0 15px ' + r65['color'] + '44') if is_dark else 'none'};">${r65['saldo_final_65']:,.0f}</div>
-                </div>
-                <div style="flex: 0; margin-top: 20px; border-top: 1px solid {ACCENT_COLOR if is_dark else BORDER_COLOR}; padding-top: 10px; font-size: 1.0rem;">
-                    <div style="color: {TEXT_COLOR};">Aportado: <b>${r65['total_aportado_65']:,.0f}</b></div>
-                    <div style="color: {r65['color']}; font-weight: bold;">Rendimiento: +${r65['rendimiento_65']:,.0f}</div>
-                </div>
+            <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
+            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
+            <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Divisor Retiro
-        if idx < len(resultados) - 1:
-            with cols_retiro[idx * 2 + 1]:
-                st.markdown(f"""
-                <div style="display: flex; justify-content: center; gap: 6px; height: 320px; margin: 5px auto;">
-                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-                <div style="width: 2px; height: 100%; background-color: {res['color']}; border-radius: 10px; opacity: 0.4;"></div>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    st.write("---")
-    tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
-    if edad <= 39:
-        tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
-    
-    tabs = st.tabs(tabs_nombres)
-    tab_grafica = tabs[0]
-    tab_tabla = tabs[1]
-    if edad <= 39:
-        tab_tabla_65 = tabs[2]
-    
-    with tab_grafica:
-        st.subheader("Crecimiento de Capital en el Tiempo")
-        fig = go.Figure()
-        for res in resultados:
-            fig.add_trace(go.Scatter(
-                x=res["df_display"][eje_x_data_col].tolist(), 
-                y=res["df_display"]["Saldo de Fondo"].tolist(),
-                mode='lines', 
-                name=f'<b>Escenario de inversión {res["id"]}</b>',
-                line=dict(color=res["color"], width=3)
-            ))
-        fig.update_layout(
-            xaxis_title=x_axis_title, 
-            yaxis_title="Saldo Acumulado",
-            hovermode="x unified", 
-            template="plotly_dark", 
-            paper_bgcolor=BG_COLOR,
-            plot_bgcolor=BG_COLOR,
-            height=450,
-            legend=dict(
-                orientation="h", 
-                y=1.1, 
-                x=0.5, 
-                xanchor="center",
-                font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
-            ),
-            margin=dict(l=20, r=20, t=40, b=20),
-            font=dict(size=14, color=TEXT_COLOR),
-            xaxis=dict(
-                title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-                gridcolor="#0a3a42"
-            ),
-            yaxis=dict(
-                title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
-                tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
-                tickprefix="$",
-                gridcolor="#0a3a42"
-            )
+
+st.write("---")
+tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
+if edad <= 39:
+    tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
+
+tabs = st.tabs(tabs_nombres)
+tab_grafica = tabs[0]
+tab_tabla = tabs[1]
+if edad <= 39:
+    tab_tabla_65 = tabs[2]
+
+with tab_grafica:
+    st.subheader("Crecimiento de Capital en el Tiempo")
+    fig = go.Figure()
+    for res in resultados:
+        fig.add_trace(go.Scatter(
+            x=res["df_display"][eje_x_data_col].tolist(), 
+            y=res["df_display"]["Saldo de Fondo"].tolist(),
+            mode='lines', 
+            name=f'<b>Escenario de inversión {res["id"]}</b>',
+            line=dict(color=res["color"], width=3)
+        ))
+    fig.update_layout(
+        xaxis_title=x_axis_title, 
+        yaxis_title="Saldo Acumulado",
+        hovermode="x unified", 
+        template="plotly_dark", 
+        paper_bgcolor=BG_COLOR,
+        plot_bgcolor=BG_COLOR,
+        height=450,
+        legend=dict(
+            orientation="h", 
+            y=1.1, 
+            x=0.5, 
+            xanchor="center",
+            font=dict(family="Inter, sans-serif", size=16, color=TEXT_COLOR)
+        ),
+        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(size=14, color=TEXT_COLOR),
+        xaxis=dict(
+            title=dict(text=f"<b>{x_axis_title}</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+            gridcolor="#0a3a42"
+        ),
+        yaxis=dict(
+            title=dict(text="<b>Saldo Acumulado</b>", font=dict(family="Inter, sans-serif", size=18, color=ACCENT_COLOR)),
+            tickfont=dict(family="Inter, sans-serif", size=15, color=TEXT_COLOR),
+            tickprefix="$",
+            gridcolor="#0a3a42"
         )
-        st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_comparacion_escenarios")
+    )
+    st.plotly_chart(fig, use_container_width=True, theme=None, key="chart_comparacion_escenarios")
+
+
+    def highlight_age_60(row):
+        is_age_60 = row["Edad"] == 60
+        # Regresando al verde suave que el usuario prefiere
+        return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
+
+with tab_tabla:
+    col_sel, col_dump = st.columns([1, 3])
+    opciones_select = [r['id'] for r in resultados]
+    id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
+    seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
+    color_ver = seleccion["color"]
     
+    st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
     
-        def highlight_age_60(row):
-            is_age_60 = row["Edad"] == 60
-            # Regresando al verde suave que el usuario prefiere
-            return ['background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;' if is_age_60 else '' for _ in row]
+    # Columnas específicas solicitadas
+    # ELIMINADA: "Saldo Disponible Neto"
+    cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
     
-    with tab_tabla:
-        col_sel, col_dump = st.columns([1, 3])
-        opciones_select = [r['id'] for r in resultados]
-        id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
-        seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
-        color_ver = seleccion["color"]
+    # Si es mensual o semestral, añadimos la columna de periodo
+    if frecuencia_vista != "Anual":
+        # Insertar al principio
+        cols_to_show.insert(0, eje_x_data_col)
+    # --- TABLA BONITA CON BARRAS DE PROGRESO ---
+    # --- TABLA HTML PERSONALIZADA ---
+    # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
+    html_table = (
+        seleccion["df_display"][cols_to_show].style
+        .format({
+            "Aportación Anual": "${:,.0f}",
+            "Aportación Acumulada": "${:,.0f}", 
+            "Saldo de Fondo": "${:,.0f}", 
+            "Saldo Disponible": "${:,.0f}", 
+            "Post retención": "${:,.0f}",
+            "Año": "{:.0f}", 
+            "Edad": "{:.0f}"
+        })
+        .apply(highlight_age_60, axis=1)
+        .set_properties(**{'text-align': 'center'})
+        .hide(axis="index")
+        .to_html()
+    )
+    st.markdown(f"""
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+{html_table}
+</div>
+""", unsafe_allow_html=True)
+
+if edad <= 39:
+    with tab_tabla_65:
+        col_sel65, col_dump65 = st.columns([1, 3])
+        id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
+        seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
         
-        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle {frecuencia_vista} - Escenario de inversión ${seleccion['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle Proyectado a los 65 - Escenario ${seleccion65['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
         
-        # Columnas específicas solicitadas
-        # ELIMINADA: "Saldo Disponible Neto"
-        cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
-        
-        # Si es mensual o semestral, añadimos la columna de periodo
+        cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
         if frecuencia_vista != "Anual":
-            # Insertar al principio
-            cols_to_show.insert(0, eje_x_data_col)
-        # --- TABLA BONITA CON BARRAS DE PROGRESO ---
-        # --- TABLA HTML PERSONALIZADA ---
-        # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
-        html_table = (
-            seleccion["df_display"][cols_to_show].style
+            cols_to_show_65.insert(0, eje_x_data_col)
+
+        html_table_65 = (
+            seleccion65["df_65_display"].style
             .format({
                 "Aportación Anual": "${:,.0f}",
                 "Aportación Acumulada": "${:,.0f}", 
@@ -2098,22 +2132,6 @@ for idx in range(len(resultados)):
             .hide(axis="index")
             .to_html()
         )
-        
-        st.markdown(f"""
-    <div style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-    {html_table}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if edad <= 39:
-        with tab_tabla_65:
-            col_sel_65, col_dump_65 = st.columns([1, 3])
-            id_sel_65 = col_sel_65.selectbox("Ver detalle extra de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
-            sel_65 = next(item for item in resultados if item["id"] == id_sel_65)
-            
-            st.markdown(f"<h4 style='color:{TEXT_COLOR}; text-align: center;'>Detalle edad {edad + 25} a 65 años - Escenario de inversión ${sel_65['monto_inicial']:,.0f}</h4>", unsafe_allow_html=True)
-            
-            df_65_show = sel_65["df_65_display"]
             # Filtrar solo periodos posteriores al año 25
             df_65_show = df_65_show[df_65_show["Año"] > 25]
             
@@ -2560,12 +2578,18 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
 
     with col_monto:
         st.markdown(f"""
-        <div style="height: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Capacidad de Aportación</p>
+        <div style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Modificar Aportación</p>
+        </div>
+        """, unsafe_allow_html=True)
+        aportacion_user = st.number_input("Monto Mensual ($)", min_value=1000.0, value=10000.0, step=1000.0, label_visibility="collapsed", key="aportacion_user_comp")
+        
+        st.markdown(f"""
+        <div style="height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
             <div style="font-size: 4.5rem; font-weight: 800; color: {ACCENT_COLOR}; text-shadow: 0 0 30px {ACCENT_COLOR}66; margin: 10px 0;">
                 ${aportacion_user:,.0f}
             </div>
-            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">MENSUAL</p>
+            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">CAPACIDAD MENSUAL</p>
         </div>
         """, unsafe_allow_html=True)
 
