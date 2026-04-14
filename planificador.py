@@ -595,7 +595,7 @@ def render_planificador():
     [data-testid="column"] [data-testid="stVerticalBlockBorderWrapper"]:hover {
         transform: translateY(-5px) !important;
         box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15) !important;
-        background: rgba(255, 255, 255, 0.8) !important;
+        background: var(--bg-card) !important;
     }
 
     /* Columna 1: Azul */
@@ -737,7 +737,7 @@ def render_planificador():
     .glass-card:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
-        background: rgba(255, 255, 255, 0.8) !important;
+        background: var(--bg-card) !important;
     }
 
     .glass-card strong {
