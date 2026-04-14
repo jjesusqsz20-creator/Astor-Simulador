@@ -1068,7 +1068,7 @@ if st.session_state.modulo_activo == "Hub":
     if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns([0.05, 2.2, 0.1, 2.2, 0.1, 2.2, 0.1, 2.2, 0.05])
+    c1, c2, c3, c4, c5 = st.columns([1.5, 2.8, 0.4, 2.8, 1.5])
 
     with c2:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1173,6 +1173,9 @@ if st.session_state.modulo_activo == "Hub":
                 st.session_state.costos_edad_retiro = int(retiro_c)
                 st.session_state.modulo_activo = "✨ Nuevo Simulador"
                 st.rerun()
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    c_pad1, c6, c_gap, c8, c_pad2 = st.columns([1.5, 2.8, 0.4, 2.8, 1.5])
 
     with c6:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
