@@ -596,17 +596,18 @@ st.markdown(f"""
         min-height: 390px;
     }}
 
-    /* --- DISEÑO DE TARJETAS HUD COMO BOTONES NATIVOS --- */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {{
+    /* --- MASTER HUD BUTTON DESIGN (Directly on Native Buttons) --- */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] {
         position: relative !important;
         width: 100% !important;
         height: 400px !important;
-    }}
+        margin-top: 10px !important;
+    }
 
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {{
-        background-color: #1a1e26 !important; /* Fondo tipo HUD */
-        border: 1px solid rgba(107, 164, 164, 0.1) !important;
-        border-radius: 18px !important;
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button {
+        background: #0a0d12 !important; /* Base ultra-oscura */
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 20px !important;
         height: 400px !important;
         width: 100% !important;
         display: flex !important;
@@ -614,63 +615,107 @@ st.markdown(f"""
         align-items: center !important;
         justify-content: center !important;
         padding-top: 60px !important;
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        transition: all 0.4s ease !important;
         overflow: hidden !important;
         color: white !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-    }}
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
 
-    /* Título principal del botón (El texto que pasamos a st.button) */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {{
-        font-family: 'Cinzel', serif !important;
-        font-size: 2rem !important;
-        font-weight: 800 !important;
-        letter-spacing: 2px !important;
-        text-shadow: 0 0 20px rgba(107, 164, 164, 0.6) !important;
-        margin: 0 !important;
-        color: white !important;
-    }}
-
-    /* Subtítulo y elementos decorativos usando pseudo-elementos */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {{
-        content: "ASTOR";
+    /* CAPA DE LÁSER ROTATIVO (Background layer) */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+        content: "ASTOR"; /* Texto base para HUD Superior */
         position: absolute;
-        top: 130px;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        justify-content: center;
+        padding-top: 125px;
         font-family: 'Cinzel', serif;
         font-size: 1.4rem;
         opacity: 0.8;
         letter-spacing: 5px;
-        color: white;
-    }}
+        color: rgba(255,255,255,0.7);
+        z-index: -1;
+        transition: all 0.5s;
+    }
 
-    /* Etiquetas de estado */
-    div[data-testid="column"]:has(button[key^="hub_btn_sim"]) div[data-testid="stButton"] button::after {{ content: "¿Cuánto dinero puedo ahorrar al mes?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
-    div[data-testid="column"]:has(button[key^="hub_btn_costos"]) div[data-testid="stButton"] button::after {{ content: "¿Con cuánto dinero me quiero pensionar?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
-    div[data-testid="column"]:has(button[key^="hub_btn_plan"]) div[data-testid="stButton"] button::after {{ content: "¿Administro bien mis gastos?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
-    div[data-testid="column"]:has(button[key^="hub_btn_comp"]) div[data-testid="stButton"] button::after {{ content: "¿Invertir en una casa o en la bolsa?"; position: absolute; bottom: 130px; font-family: 'Montserrat'; font-size: 0.85rem; opacity: 0.6; width: 80%; line-height: 1.4; pointer-events: none; }}
-
-    /* Los bordes de neon (corners) */
-    .hub-corner-native {{
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        border: 2px solid #6BA4A4;
-        pointer-events: none;
-        z-index: 10;
-        opacity: 0.7;
-    }}
+    /* Fondo de láser rotativo dinámico */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+        background-image: conic-gradient(from 0deg, transparent, {ACCENT_COLOR}33, transparent 30%);
+        animation: rotate-laser 4s linear infinite;
+        opacity: 0;
+    }
     
-    /* Animación de escaneo */
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {{
-        /* Reutilizamos el after para el texto, pero el escaneo lo haremos con un overlay separado si es necesario */
-    }}
+    div[data-testid="column"]:has(button[key^="hub_btn_"]):hover div[data-testid="stButton"] button::before {
+        opacity: 1;
+    }
 
-    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {{
+    /* CAPA DE ESCÁNER Y SUBTÍTULO (Overlay layer) */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::after {
+        content: ""; /* Se llena específicamente abajo */
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: linear-gradient(0deg, transparent, {ACCENT_COLOR}22, transparent 5%);
+        background-size: 100% 400%;
+        animation: scan-move 4s linear infinite;
+        pointer-events: none;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 120px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        text-align: center;
+        padding-left: 20px;
+        padding-right: 20px;
+        opacity: 0.6;
+    }
+
+    /* Título principal del botón */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button p {
+        font-family: 'Cinzel', serif !important;
+        font-size: 2.1rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 3px !important;
+        text-shadow: 0 0 20px rgba(107, 164, 164, 0.4) !important;
+        margin: 0 !important;
+        z-index: 3 !important;
+        color: white !important;
+    }
+
+    /* VARIANTES DE COLOR Y TEXTO POR MÓDULO */
+    /* Simulador principales */
+    div[data-testid="column"]:has(button[key*="sim"]) div[data-testid="stButton"] button::after { content: "¿Cuánto dinero puedo ahorrar al mes?"; }
+    
+    /* Costos (Gualda/Oro) */
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::before { content: "PROYECTO"; background-image: conic-gradient(from 0deg, transparent, {GOLD_COLOR}44, transparent 30%); }
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button::after { content: "¿Con cuánto dinero me quiero pensionar?"; background-image: linear-gradient(0deg, transparent, {GOLD_COLOR}22, transparent 5%); }
+    div[data-testid="column"]:has(button[key*="costos"]) div[data-testid="stButton"] button p { text-shadow: 0 0 20px {GOLD_COLOR}66 !important; }
+
+    /* Planificador (Verde/Teal) */
+    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::before { content: "PLANIFICADOR"; }
+    div[data-testid="column"]:has(button[key*="plan"]) div[data-testid="stButton"] button::after { content: "¿Administro bien mis gastos diarios?"; }
+
+    /* Comparación (Purple/Púrpura) */
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::before { content: "MÓDULO 4"; background-image: conic-gradient(from 0deg, transparent, #A855F744, transparent 30%); }
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button::after { content: "¿Me conviene más casa o bolsa?"; background-image: linear-gradient(0deg, transparent, #A855F722, transparent 5%); }
+    div[data-testid="column"]:has(button[key*="comp"]) div[data-testid="stButton"] button p { text-shadow: 0 0 20px #A855F766 !important; }
+
+    /* Hover State refinements */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button:hover {
         transform: scale(1.05) translateY(-5px) !important;
-        border-color: #6BA4A4 !important;
-        box-shadow: 0 0 50px rgba(107, 164, 164, 0.4) !important;
-        background-color: #202630 !important;
-    }}
+        border-color: rgba(255,255,255,0.3) !important;
+        box-shadow: 0 0 60px rgba(107, 164, 164, 0.3) !important;
+        background-color: #11151c !important;
+    }
+
+    /* Marcos angulares neon (Pseudo-elementos finales) */
+    div[data-testid="column"]:has(button[key^="hub_btn_"]) div[data-testid="stButton"] button::before {
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); /* Borde interno sutil */
+    }
 
     </style>
 """, unsafe_allow_html=True)
