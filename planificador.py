@@ -290,29 +290,18 @@ def render_planificador():
         border-right: 1px solid var(--border-color) !important;
     }
 
-    /* 3. Estética de Textos */
-    h1, h2, h3, h4, p, span, label, div {
+    /* 3. Estética de Textos - SOLO headings usan Cinzel */
+    h1, h2, h3, h4 {
         color: var(--primary-blue) !important;
-        font-family: 'Cinzel', serif;
-        font-weight: 600 !important;
+        font-family: 'Cinzel', serif !important;
+        font-weight: 700 !important;
     }
 
-    /* OVERRIDE: Tabs, botones y elementos de UI de Streamlit usan fuente limpia */
-    button[role="tab"],
-    button[role="tab"] *,
-    [role="tablist"],
-    [role="tablist"] *,
-    [data-baseweb="tab-list"],
-    [data-baseweb="tab-list"] *,
-    [data-baseweb="tab"],
-    [data-baseweb="tab"] *,
-    [data-testid="stTabs"] button,
-    [data-testid="stTabs"] button * {
+    /* Texto normal y labels: color del tema, fuente limpia */
+    p, label {
+        color: var(--primary-blue) !important;
         font-family: 'Inter', 'Segoe UI', sans-serif !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.3px !important;
-        text-transform: none !important;
+        font-weight: 500 !important;
     }
 
     /* 4. LIMPIEZA TOTAL DE COMPONENTES NEGROS */
