@@ -65,10 +65,7 @@ def render_planificador():
 
 
     # --- INICIALIZACIÓN DE ESTADO (PERSISTENCIA ROBUSTA) ---
-    # Sincronizar dark_mode con el tema global (dark por defecto, igual que los demás módulos)
-    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = True
-    # Mantener sincronía con el toggle global de Astor.py
-    st.session_state['dark_mode'] = (st.session_state.get('theme', 'dark') == 'dark')
+    if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = False
     if 'nombre_cliente' not in st.session_state: st.session_state['nombre_cliente'] = "Cliente Ejemplo"
     if 'sidebar_ingreso' not in st.session_state: st.session_state['sidebar_ingreso'] = 25000
     if 'num_dependientes' not in st.session_state: st.session_state['num_dependientes'] = 0
@@ -103,7 +100,8 @@ def render_planificador():
 
     # --- SELECCIÓN DE ACTIVOS Y COLORES POR TEMA ---
     if st.session_state['dark_mode']:
-        logo_header_file = "1-07.png"
+        logo_watermark_file = "1-07 copy.png"
+        logo_header_file = "image copy.png"
         bg_style = """
             background: 
                 radial-gradient(circle at 0% 0%, #E043431A 0%, transparent 40%),
@@ -124,7 +122,8 @@ def render_planificador():
             --main-title-color: #FFFFFF;
         """
     else:
-        logo_header_file = "1-01.png"
+        logo_watermark_file = "1-07.png"
+        logo_header_file = "image.png"
         bg_style = """
             background: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%) !important;
         """
@@ -262,6 +261,41 @@ def render_planificador():
             }
         """
 
+    # --- GENERACIÓN DE MARCA DE AGUA (UI) ---
+    watermark_html = ""
+    logo_watermark_path = get_asset_path(logo_watermark_file)
+
+    if os.path.exists(logo_watermark_path):
+        try:
+            # Optimizar imagen para marca de agua en UI
+            img_ui = Image.open(logo_watermark_path).convert("RGBA")
+            img_ui.thumbnail((150, 150), Image.Resampling.LANCZOS)
+
+            # Guardar en buffer para base64
+            buffered = io.BytesIO()
+            img_ui.save(buffered, format="PNG")
+            bin_str = base64.b64encode(buffered.getvalue()).decode()
+
+            # HTML/CSS para marca de agua (Overlay)
+            watermark_html = f"""
+            <div style="
+                position: fixed;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background-image: url('data:image/png;base64,{bin_str}');
+                background-size: 150px;
+                background-repeat: repeat;
+                transform: rotate(-30deg);
+                opacity: {'0.08' if st.session_state['dark_mode'] else '0.05'};
+                z-index: 100000;
+                pointer-events: none;
+            "></div>
+            """
+        except Exception:
+            pass
+
     # --- INYECCIÓN DE CSS PERSONALIZADO ---
     # 1. Variables dinámicas y fondo
     st.markdown(f"""
@@ -284,33 +318,16 @@ def render_planificador():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap');
 
-    /* ====================================================
-       SUPRIMIR MARCA DE AGUA DE FONDO DE ASTOR.PY
-       (el ::before con position:fixed se inyecta globalmente
-        y muestra las letras ASTOR sobre el contenido)
-    ==================================================== */
-    .stApp::before {
-        display: none !important;
-        opacity: 0 !important;
-    }
-
     /* 2. Sidebar Estilizada */
     [data-testid="stSidebar"] {
         background-color: var(--sidebar-bg) !important;
         border-right: 1px solid var(--border-color) !important;
     }
 
-    /* 3. Estética de Textos - SOLO headings usan Cinzel */
-    h1, h2, h3, h4 {
+    /* 3. Estética de Textos */
+    h1, h2, h3, h4, p, span, label, div {
         color: var(--primary-blue) !important;
-        font-family: 'Cinzel', serif !important;
-        font-weight: 700 !important;
-    }
-
-    /* Texto normal y labels: color del tema, fuente limpia */
-    p, label {
-        color: var(--primary-blue) !important;
-        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+        font-family: 'Cinzel', serif;
         font-weight: 600 !important;
     }
 
@@ -889,8 +906,17 @@ def render_planificador():
     </style>
     """, unsafe_allow_html=True)
 
+    # 12. Inyectar marca de agua fuera del estilo
+    st.markdown(watermark_html, unsafe_allow_html=True)
+
+
     # --- SIDEBAR: DATOS PERSONALES ---
     with st.sidebar:
+        # Botón de cambio de tema personalizado
+        theme_label = "🌙 Modo Oscuro" if st.session_state['dark_mode'] else "☀️ Modo Claro"
+        if st.button(theme_label, use_container_width=True):
+            st.session_state['dark_mode'] = not st.session_state['dark_mode']
+            st.rerun()
 
         with st.expander("👤 Datos del Cliente", expanded=True):
             nombre = st.text_input("Nombre completo", key="nombre_cliente")

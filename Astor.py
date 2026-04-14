@@ -149,7 +149,7 @@ if os.path.exists(logo_watermark):
         transform: rotate(-30deg);
         opacity: {0.05 if is_dark else 0.03};
         filter: brightness(0) invert({invert_val});
-        z-index: 0;
+        z-index: 99;
         pointer-events: none;
     }}
     """
