@@ -297,6 +297,21 @@ def render_planificador():
         font-weight: 600 !important;
     }
 
+    /* OVERRIDE: Tabs, botones y elementos de UI de Streamlit usan fuente limpia */
+    .stTabs [data-baseweb="tab-list"] button,
+    .stTabs [data-baseweb="tab-list"] button p,
+    .stTabs [data-baseweb="tab-list"] button span,
+    .stTabs [data-baseweb="tab-list"] button div,
+    [data-baseweb="tab"] p,
+    [data-baseweb="tab"] span,
+    [data-testid="stTab"] p,
+    [data-testid="stTab"] span {
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.3px !important;
+    }
+
     /* 4. LIMPIEZA TOTAL DE COMPONENTES NEGROS */
     /* Inputs de texto y números - LIMPIEZA Y ENFOQUE AZUL */
     .stTextInput input, .stNumberInput input {
