@@ -647,24 +647,37 @@ st.markdown(f"""
         z-index: 10000 !important;
     }}
 
-    /* BOTONES INVISIBLES (Solución nativa de Streamlit para clicks sin refresh) */
-    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] {{
+    /* BOTONES INVISIBLES (Overlay total sobre la carta) */
+    div[data-testid="column"]:has(.hud-card-content) .stButton {
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        z-index: 9999 !important;
+        z-index: 1000 !important;
         margin: 0 !important;
-    }}
-    [data-testid="column"]:has(.hud-tag) [data-testid="stButton"] button {{
+        padding: 0 !important;
+    }
+    div[data-testid="column"]:has(.hud-card-content) .stButton > button {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         opacity: 0 !important;
         background: transparent !important;
         border: none !important;
-        width: 100% !important;
-        height: 100% !important;
+        box-shadow: none !important;
         cursor: pointer !important;
-    }}
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Prevenir que el hover de la columna se rompa por el botón */
+    div[data-testid="column"]:has(.hud-card-content):hover {
+        transform: scale(1.05) !important;
+        z-index: 1001 !important;
+    }
     .hud-card-content {{
         display: block !important;
         width: 100% !important;
@@ -1092,7 +1105,7 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button(" ", key="btn_toggle_sim", use_container_width=True):
+        if st.button("", key="btn_overlay_sim", use_container_width=True):
             st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
             st.rerun()
 
@@ -1144,7 +1157,7 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button(" ", key="btn_toggle_costos", use_container_width=True):
+        if st.button("", key="btn_overlay_costos", use_container_width=True):
             st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
             st.rerun()
 
@@ -1207,7 +1220,7 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
+        if st.button("", key="btn_overlay_planificador", use_container_width=True):
             st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
             st.rerun()
             
@@ -1269,7 +1282,7 @@ if st.session_state.modulo_activo == "Hub":
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button(" ", key="btn_toggle_comparacion", use_container_width=True):
+        if st.button("", key="btn_overlay_comp", use_container_width=True):
             st.session_state.modulo_activo = "⚖️ Simulador Comparación"
             st.rerun()
             
