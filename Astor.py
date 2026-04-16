@@ -1627,7 +1627,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             fig_ret = go.Figure()
             fig_ret.add_trace(go.Scatter(
                 x=df_retiro["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_retiro) + 1)),
-                y=df_retiro["SALDO REMANENTE"].tolist(),
+                y=df_retiro["Fondo de motor de retiro"].tolist(),
                 mode='lines',
                 fill='tozeroy',
                 line=dict(color=GOLD_COLOR, width=3),
