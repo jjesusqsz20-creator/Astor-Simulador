@@ -1298,15 +1298,16 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
-        # Calcular Meta de Retiro basada en la Renta deseada (PROYECTO 5% = 5 años de protección)
-        # La proporción solicitada por el usuario es 60x (600,000 por cada 10,000)
-        n_meses_sidebar = 5 * 12 # 60 meses
-        meta_retiro = renta_mensual_sidebar * n_meses_sidebar # Multiplicador directo 60x
+        rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
+        
+        # Calcular Meta de Retiro basada en la Renta deseada (Fondo Perpetuo)
+        # El usuario solicita que con el rendimiento dado, el capital genere el retiro íntegro
+        # Meta = (Retiro Mensual * 12) / Tasa Anual
+        meta_retiro = (renta_mensual_sidebar * 12) / (rendimiento_anual / 100.0)
 
         # Guardar en session state para otros cálculos
         st.session_state.meta_retiro_val = meta_retiro
 
-        
         e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
         
@@ -1314,8 +1315,6 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         opciones_retiro = [60, 65]
         idx_retiro = opciones_retiro.index(e_retiro_default) if e_retiro_default in opciones_retiro else 0
         edad_retiro = st.selectbox("Edad a la que te quieres retirar", opciones_retiro, index=idx_retiro)
-        
-        rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         frecuencia = st.selectbox("Frecuencia de Visualización", ["Mensual", "Semestral", "Anual"], index=2)
         
