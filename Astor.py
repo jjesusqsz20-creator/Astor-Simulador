@@ -1556,39 +1556,28 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     with tab_retiro:
         st.markdown(f"<h3 style='text-align: center; color: {ACCENT_COLOR};'>Plan de Distribución: Etapa de Jubilación</h3>", unsafe_allow_html=True)
         
-        # Lógica de Retiro (Decumulación)
+        # Nueva Lógica de Retiro Perpetuo (Interés Puro)
+        # El pago mensual es simplemente el interés generado por el capital
         r_retiro_mensual = (rendimiento_retiro / 100.0) / 12.0
-        meses_retiro = años_retiro_pago * 12
-        
-        # Fórmula de Pago de Anualidad (PMT)
-        if r_retiro_mensual > 0:
-            pago_mensual_retiro = (meta_retiro * r_retiro_mensual) / (1 - (1 + r_retiro_mensual)**(-meses_retiro))
-        else:
-            pago_mensual_retiro = meta_retiro / meses_retiro
+        pago_mensual_retiro = meta_retiro * r_retiro_mensual
             
-        st.success(f"💰 Se estima una renta mensual de **${pago_mensual_retiro:,.2f}** durante {años_retiro_pago} años.")
+        st.success(f"💰 Se estima una renta **perpetua** de **${pago_mensual_retiro:,.2f}** manteniendo el capital íntegro.")
         
-        n_periodos_retiro = meses_retiro // factor_frecuencia
+        n_periodos_retiro = 25 # Mostramos 25 años por defecto en la tabla para visualizar la constancia
         datos_retiro = []
-        saldo_remanente = meta_retiro
         
         for p in range(1, n_periodos_retiro + 1):
-            monto_periodo_rec = pago_mensual_retiro * factor_frecuencia
-            m_actual_ret = p * factor_frecuencia
+            monto_periodo_rec = pago_mensual_retiro * 12 # Rendimiento Anual
             
-            # Saldo remanente después de p periodos
-            if r_retiro_mensual > 0:
-                saldo_remanente = meta_retiro * (1 + r_retiro_mensual)**m_actual_ret - \
-                                 pago_mensual_retiro * (((1 + r_retiro_mensual)**m_actual_ret - 1) / r_retiro_mensual)
-            else:
-                saldo_remanente = meta_retiro - (pago_mensual_retiro * m_actual_ret)
+            # En un fondo perpetuo, el saldo remanente es siempre el capital inicial
+            saldo_remanente = meta_retiro
                 
             datos_retiro.append({
-                "AÑO": (m_actual_ret - 1) // 12 + 1,
-                "EDAD": edad_retiro + (m_actual_ret // 12),
+                "AÑO": p,
+                "EDAD": edad_retiro + p,
                 label_dinamico_retiro: monto_periodo_rec,
                 "Rendimiento Mensual": monto_periodo_rec / 12.0,
-                "Fondo de motor de retiro": max(0, saldo_remanente)
+                "Fondo de motor de retiro": saldo_remanente
             })
             
         if datos_retiro:
