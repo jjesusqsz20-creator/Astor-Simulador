@@ -1533,7 +1533,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             fig = go.Figure()
             fig.add_trace(go.Scatter(
                 x=df_espera["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_espera) + 1)),
-                y=df_espera["SALDO FINAL"].tolist(),
+                y=df_espera["SALDO DE FONDO"].tolist(),
                 mode='lines+markers',
                 fill='tozeroy',
                 line=dict(color=ACCENT_COLOR, width=3),
