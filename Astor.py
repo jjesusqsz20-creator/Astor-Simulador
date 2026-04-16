@@ -1295,7 +1295,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # Mostrar el valor actual en el Label como pidió el usuario
         renta_actual_label = st.session_state.get("renta_sync_sidebar", renta_def)
         # Etiqueta personalizada con formato resaltado
-        st.markdown(f"<p style='margin-bottom: -15px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
         # Calcular Meta de Retiro basada en la Renta deseada (25 años, 10%)
