@@ -1332,7 +1332,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=25)
             # USAR 10.0% como solicitó el usuario para el cálculo predeterminado
             rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=10.0, step=0.5)
-            label_dinamico_retiro = f"Recepción {frecuencia}"
+            label_dinamico_retiro = f"Rendimiento {frecuencia}"
 
     # --- CÁLCULOS BASE ---
     años_inversion = edad_retiro - edad_inicial
@@ -1609,6 +1609,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             )
             
             st.markdown(f"""
+<style>
+    .tabla-espera table {{
+        width: 100% !important;
+    }}
+    .tabla-espera th, .tabla-espera td {{
+        text-align: center !important;
+    }}
+</style>
 <div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
 {html_table_ret}
 </div>
