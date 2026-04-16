@@ -1590,7 +1590,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 "AÑO": (m_actual_ret - 1) // 12 + 1,
                 "EDAD": edad_retiro + (m_actual_ret // 12),
                 label_dinamico_retiro: monto_periodo_rec,
-                "SALDO REMANENTE": max(0, saldo_remanente)
+                "Rendimiento Mensual": monto_periodo_rec / 12.0,
+                "Fondo de motor de retiro": max(0, saldo_remanente)
             })
             
         if datos_retiro:
@@ -1599,7 +1600,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 df_retiro.style
                 .format({
                     label_dinamico_retiro: "${:,.2f}",
-                    "SALDO REMANENTE": "${:,.2f}",
+                    "Rendimiento Mensual": "${:,.2f}",
+                    "Fondo de motor de retiro": "${:,.2f}",
                     "EDAD": "{:.0f}",
                     "AÑO": "{:.0f}"
                 })
