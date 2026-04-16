@@ -1298,13 +1298,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
-        # Calcular Meta de Retiro basada en la Renta deseada (25 años, 10%)
-        r_m_sidebar = 0.10 / 12.0
-        n_meses_sidebar = 25 * 12
-        if r_m_sidebar > 0:
-            meta_retiro = renta_mensual_sidebar * (1 - (1 + r_m_sidebar)**(-n_meses_sidebar)) / r_m_sidebar
-        else:
-            meta_retiro = renta_mensual_sidebar * n_meses_sidebar
+        # Calcular Meta de Retiro basada en la Renta deseada (PROYECTO 5% = 5 años de protección)
+        # La proporción solicitada por el usuario es 60x (600,000 por cada 10,000)
+        n_meses_sidebar = 5 * 12 # 60 meses
+        meta_retiro = renta_mensual_sidebar * n_meses_sidebar # Multiplicador directo 60x
 
         # Guardar en session state para otros cálculos
         st.session_state.meta_retiro_val = meta_retiro
@@ -1329,7 +1326,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         with st.expander("💰 Plan de Jubilación", expanded=False):
-            años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=25)
+            # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
+            años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=5)
             # USAR 10.0% como solicitó el usuario para el cálculo predeterminado
             rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=10.0, step=0.5)
             label_dinamico_retiro = f"Rendimiento {frecuencia}"
