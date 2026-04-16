@@ -1600,7 +1600,7 @@ if st.session_state.modulo_activo == "📈 Planificador Financiero":
     import planificador
     planificador.render_planificador()
     st.stop()
-if st.session_state.modulo_activo == "✨ Astor Simulador":
+if st.session_state.modulo_activo == "✨ Proyecto 5%":
     # --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
     # --- SIDEBAR ---
     with st.sidebar:
