@@ -1357,18 +1357,23 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     
     # Mostrar primeros 10 años, luego cada 5 años hasta la edad de retiro
     p_delays = list(range(1, 11))
-    for extra_y in range(15, (edad_retiro - edad_inicial), 5):
+    for extra_y in range(15, (edad_retiro - edad_inicial) + 5, 5):
         p_delays.append(extra_y)
         
     for p_delay in p_delays:
         edad_espera = edad_inicial + p_delay
-        if edad_espera >= edad_retiro:
+        if edad_espera > edad_retiro:
             break
+            
         meses_e = (edad_retiro - edad_espera) * 12
-        if r_mensual_dec > 0:
-            aporte_e = (meta_retiro * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
+        if meses_e > 0:
+            if r_mensual_dec > 0:
+                aporte_e = (meta_retiro * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
+            else:
+                aporte_e = meta_retiro / meses_e
         else:
-            aporte_e = meta_retiro / meses_e
+            # Si es el año de retiro, el costo es la meta completa (un solo pago)
+            aporte_e = meta_retiro
         costos_espera_list.append({
             "edad": edad_espera,
             "aporte": aporte_e,
