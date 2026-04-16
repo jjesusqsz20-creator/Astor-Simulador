@@ -1442,17 +1442,60 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             aporte_acum_total += monto_periodo
             m_actual = p * factor_frecuencia
             
+            # Cálculo de Saldo Total
             if r_mensual > 0:
-                saldo_acum = aporte_m * (((1 + r_mensual) ** m_actual) - 1) / r_mensual
+                saldo_total = aporte_m * (((1 + r_mensual) ** m_actual) - 1) / r_mensual
             else:
-                saldo_acum = aporte_m * m_actual
+                saldo_total = aporte_m * m_actual
                 
+            # --- LÓGICA DE SALDO DISPONIBLE Y POST RETENCIÓN (ALLIANZ STYLE) ---
+            # 1. Separación de Cubetas
+            if m_actual <= 18:
+                saldo_inicial = saldo_total
+                saldo_regular = 0.0
+            else:
+                # Saldo de los primeros 18 meses crecido hasta el mes actual
+                if r_mensual > 0:
+                    base_inicial = aporte_m * (((1 + r_mensual) ** 18) - 1) / r_mensual
+                    saldo_inicial = base_inicial * ((1 + r_mensual) ** (m_actual - 18))
+                else:
+                    saldo_inicial = aporte_m * 18
+                saldo_regular = max(0, saldo_total - saldo_inicial)
+                
+            # 2. Disponibilidad
+            edad_en_p = edad_inicial + (m_actual // 12)
+            anio_en_p = m_actual / 12
+            
+            if edad_en_p >= 65 or anio_en_p >= 25:
+                saldo_disponible = saldo_total
+            else:
+                saldo_disponible = saldo_regular
+                
+            # 3. Retención Allianz
+            tasa_ret_allianz = 0.0
+            if edad_en_p >= 60:
+                tasa_ret_allianz = 0.0
+            else:
+                anio_entero = int(anio_en_p) + 1
+                if anio_entero == 1: tasa_ret_allianz = 0.00
+                elif anio_entero == 2: tasa_ret_allianz = 0.0043
+                elif anio_entero == 3: tasa_ret_allianz = 0.0061
+                elif anio_entero == 4: tasa_ret_allianz = 0.0077
+                elif 5 <= anio_entero <= 9: tasa_ret_allianz = 0.0090
+                elif 10 <= anio_entero <= 14: tasa_ret_allianz = 0.0319
+                elif 15 <= anio_entero <= 19: tasa_ret_allianz = 0.0618
+                else: tasa_ret_allianz = 0.0818
+                
+            saldo_post = saldo_disponible * (1 - tasa_ret_allianz)
+            
             datos_tabla.append({
                 "AÑO": (m_actual - 1) // 12 + 1,
-                "EDAD": edad_inicial + (m_actual // 12),
-                label_dinamico: monto_periodo,
+                "EDAD": int(edad_en_p),
+                "APORTACIÓN ANUAL": monto_periodo, # Nombre estándar
                 "APORTACIÓN ACUMULADA": aporte_acum_total,
-                "SALDO FINAL": saldo_acum
+                "SALDO DE FONDO": saldo_total,
+                "SALDO DISPONIBLE": saldo_disponible,
+                "POST RETENCIÓN": saldo_post
             })
             
         if datos_tabla:
@@ -1460,9 +1503,11 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             html_table = (
                 df_espera.style
                 .format({
-                    label_dinamico: "${:,.2f}",
-                    "APORTACIÓN ACUMULADA": "${:,.2f}",
-                    "SALDO FINAL": "${:,.2f}",
+                    "APORTACIÓN ANUAL": "${:,.0f}",
+                    "APORTACIÓN ACUMULADA": "${:,.0f}",
+                    "SALDO DE FONDO": "${:,.0f}",
+                    "SALDO DISPONIBLE": "${:,.0f}",
+                    "POST RETENCIÓN": "${:,.0f}",
                     "EDAD": "{:.0f}",
                     "AÑO": "{:.0f}"
                 })
