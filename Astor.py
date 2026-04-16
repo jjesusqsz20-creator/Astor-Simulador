@@ -28,7 +28,7 @@ if 'theme' not in st.session_state:
     st.session_state.theme = 'dark'
 
 st.set_page_config(
-    page_title="Astor simulador",
+    page_title="Proyecto 5%",
     layout="wide",
     page_icon="📊",
     initial_sidebar_state="expanded"
@@ -1059,7 +1059,7 @@ if st.session_state.modulo_activo == "Hub":
         st.markdown(f"""
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 50px;">
                 <img src="data:image/png;base64,{bin_str_logo}" style="width: 250px; margin-bottom: 20px;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 5rem;">ASTOR SIMULADOR</h1>
+                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 5rem;">PROYECTO 5%</h1>
             </div>
         """, unsafe_allow_html=True)
     
@@ -1085,8 +1085,8 @@ if st.session_state.modulo_activo == "Hub":
                 <div class="status-label stat-tl">SYSTEM: ONLINE</div>
                 <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
                 <div style="text-align: center; padding: 45px 20px;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">ASTOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">SIMULADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PROYECTO</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">5%</div>
                     <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Cuánto dinero puedo ahorrar al mes?</div>
                 </div>
             </div>
@@ -1121,7 +1121,7 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state.monto_0 = float(monto_h)
                     st.session_state.monto_1 = float(monto_h + 1000)
                     st.session_state.monto_2 = float(monto_h + 2000)
-                    st.session_state.modulo_activo = "✨ Astor Simulador"
+                    st.session_state.modulo_activo = "✨ Proyecto 5%"
                     st.rerun()
     with c4:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1294,7 +1294,9 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         renta_def = st.session_state.get("renta_costos_sync", 50000.0)
         # Mostrar el valor actual en el Label como pidió el usuario
         renta_actual_label = st.session_state.get("renta_sync_sidebar", renta_def)
-        renta_mensual_sidebar = st.number_input(f"Renta Mensual Deseada (${renta_actual_label:,.0f})", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar")
+        # Etiqueta personalizada con formato resaltado
+        st.markdown(f"<p style='margin-bottom: -15px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
+        renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
         # Calcular Meta de Retiro basada en la Renta deseada (25 años, 10%)
         r_m_sidebar = 0.10 / 12.0
@@ -1306,7 +1308,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         # Guardar en session state para otros cálculos
         st.session_state.meta_retiro_val = meta_retiro
-        st.caption(f"Meta de retiro calculada: **${meta_retiro:,.0f}**")
+
         
         e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
@@ -1353,7 +1355,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     r_anual_dec = rendimiento_anual / 100.0
     r_mensual_dec = r_anual_dec / 12.0
     
-    for p_delay in range(1, 11):
+    # Mostrar primeros 10 años, luego cada 5 años hasta la edad de retiro
+    p_delays = list(range(1, 11))
+    for extra_y in range(15, (edad_retiro - edad_inicial), 5):
+        p_delays.append(extra_y)
+        
+    for p_delay in p_delays:
         edad_espera = edad_inicial + p_delay
         if edad_espera >= edad_retiro:
             break
@@ -1376,13 +1383,13 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         rows_html_unified += f'<tr style="background-color: {bg_r}; border-bottom: 1px solid rgba(255,255,255,0.05);">' \
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm["edad"]} años</td>' \
                              f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm["aporte"]:,.2f}</td>' \
-                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">(+${itm["diff"]:,.2f})</td>' \
+                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">+${itm["diff"]:,.2f}</td>' \
                              f'</tr>'
 
     # BLOQUE MAESTRO HUD UNIFICADO
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 35px; opacity: 0.9;">
-    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">ASTOR SIMULADOR</h1>
+    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">PROYECTO 5%</h1>
     <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-top: 10px;">EL COSTO DE POSTERGAR</h2>
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
