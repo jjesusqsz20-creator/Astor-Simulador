@@ -1575,11 +1575,17 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                     paper_bgcolor="rgba(0,0,0,0)",
                     font=dict(color=TEXT_COLOR),
                     margin=dict(t=20, b=40),
-                    showlegend=False
+                    showlegend=False,
+                    yaxis=dict(
+                        type="log",
+                        dtick=1, # Una marca por cada potencia de 10
+                        tickformat="$,.0f",
+                        gridcolor="rgba(128,128,128,0.1)",
+                        exponentformat="none"
+                    )
                 )
-                fig_c.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.1)", automargin=True)
                 fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)", automargin=True)
-                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_final")
+                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_log")
             else:
                 st.info("No hay suficientes datos para mostrar la progresión de costos antes de la edad de retiro.")
         
