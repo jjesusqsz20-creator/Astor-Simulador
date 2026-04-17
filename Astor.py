@@ -1751,7 +1751,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 # 1. Monto Inicial
                 # ETIQUETA VIVO (Separador de miles)
                 m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
-                st.markdown(f"<div style='font-size: 0.85rem; font-weight: 900; color: {color}; margin-bottom: 2px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 1.15rem; font-weight: 900; color: {color}; margin-bottom: 2px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
                 monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_val), step=500.0, key=f"monto_{i}", label_visibility="collapsed")
                 
                 # 2. Checkbox para cambio en mes 19
@@ -1760,7 +1760,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 if usar_cambio_m19:
                     # ETIQUETA VIVO M19
                     m19_val = st.session_state.get(f"val_m19_{i}", float(monto))
-                    st.markdown(f"<div style='font-size: 0.8rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: 2px;'>Nuevo Monto: ${m19_val:,.0f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 1.15rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: 2px;'>Nuevo Monto: ${m19_val:,.0f}</div>", unsafe_allow_html=True)
                     monto_m19 = st.number_input(f"Nuevo Monto Mes 19+ (Escenario de inversión {i+1})", min_value=2000, value=monto, step=500, key=f"val_m19_{i}")
                 
                 # Guardar configuración para cálculo posterior
@@ -1801,7 +1801,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             sel_opcion = c_opc.selectbox("Aplicar a:", opciones_disponibles)
             # ETIQUETA VIVO EXTRA
             ex_val = st.session_state.get("val_extra", 10000.0)
-            c_monto.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: 2px;'>${ex_val:,.0f}</div>", unsafe_allow_html=True)
+            c_monto.markdown(f"<div style='font-size: 1.15rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: 2px;'>${ex_val:,.0f}</div>", unsafe_allow_html=True)
             val_extra = c_monto.number_input("Monto ($)", min_value=0.0, value=10000.0, step=1000.0, key="val_extra")
             
             sel_freq = st.selectbox("Frecuencia", ["Única vez", "Anual (Todos los años)"])
@@ -1833,7 +1833,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                         with m_cols[i % 2]:
                             # ETIQUETA VIVO BULK
                             bulk_val = st.session_state.get(f"bulk_m_{m}", float(val_extra))
-                            st.markdown(f"<div style='font-size: 0.8rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: 2px;'>${bulk_val:,.0f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='font-size: 1.15rem; font-weight: bold; color: {TEXT_COLOR}; margin-bottom: 2px;'>${bulk_val:,.0f}</div>", unsafe_allow_html=True)
                             dict_montos[m] = st.number_input(f"{nom_mes_largo}", min_value=0.0, value=val_extra, step=1000.0, key=f"bulk_m_{m}")
             
             if st.button("➕ Agregar Aportación Extra"):
