@@ -1554,28 +1554,34 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Análisis del Costo de Postergar</h3>", unsafe_allow_html=True)
         
         if costos_espera_list:
+            # Filtrar para evitar que la gráfica se dispare y arruine la escala (ej. no mostrar el costo de empezar el mismo año del retiro)
             df_c = pd.DataFrame(costos_espera_list)
-            fig_c = go.Figure()
-            fig_c.add_trace(go.Scatter(
-                x=df_c["edad"],
-                y=df_c["aporte"],
-                mode='lines+markers',
-                line=dict(color="#ff4b4b", width=3),
-                marker=dict(size=8, color=GOLD_COLOR),
-                name="Aportación Mensual"
-            ))
-            fig_c.update_layout(
-                title="Aportación mensual necesaria vs. Edad de inicio",
-                xaxis_title="Edad al comenzar el plan",
-                yaxis_title="Aportación Mensual ($)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color=TEXT_COLOR),
-                margin=dict(t=50, b=40)
-            )
-            fig_c.update_yaxes(tickformat="$,.1f", gridcolor="rgba(128,128,128,0.1)")
-            fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)")
-            st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_single")
+            df_c_filtered = df_c[df_c["edad"] < edad_retiro].copy()
+            
+            if not df_c_filtered.empty:
+                fig_c = go.Figure()
+                fig_c.add_trace(go.Scatter(
+                    x=df_c_filtered["edad"],
+                    y=df_c_filtered["aporte"],
+                    mode='lines+markers',
+                    line=dict(color="#ff4b4b", width=3),
+                    marker=dict(size=8, color=GOLD_COLOR),
+                ))
+                fig_c.update_layout(
+                    title=None,
+                    xaxis_title="Edad al comenzar el plan",
+                    yaxis_title="Aportación Mensual ($)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    font=dict(color=TEXT_COLOR),
+                    margin=dict(t=20, b=40),
+                    showlegend=False
+                )
+                fig_c.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.1)", automargin=True)
+                fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)", automargin=True)
+                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_final")
+            else:
+                st.info("No hay suficientes datos para mostrar la progresión de costos antes de la edad de retiro.")
         
         st.markdown(f"""
         <div style="background-color: {CARD_BG}; border: 1px solid {BORDER_COLOR}; border-radius: 10px; padding: 20px; margin-top: 20px; text-align: center;">
