@@ -1576,37 +1576,23 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                     tick_vals.extend([base, base*2, base*5])
                 
                 fig_c.update_layout(
-                    title=None,
-                    xaxis_title="Edad al comenzar el plan",
-                    yaxis_title="Aportación Mensual ($)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    font=dict(color=TEXT_COLOR),
-                    margin=dict(t=20, b=40),
-                    showlegend=False,
+                    showlegend=False, 
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font_color=TEXT_COLOR,
+                    yaxis_title=None,
+                    xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title="Edad de Inicio"),
                     yaxis=dict(
-                        type="log",
-                        tickvals=tick_vals,
-                        tickformat="$,.0f",
-                        gridcolor="rgba(128,128,128,0.1)",
-                        exponentformat="none"
+                        showgrid=True, 
+                        gridcolor='rgba(255,255,255,0.05)', 
+                        title=None,
+                        tickformat="$,.0f"
                     )
                 )
                 fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)", automargin=True)
-                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_log_refined")
+                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_linear_focused")
             else:
                 st.info("No hay suficientes datos para mostrar la progresión de costos antes de la edad de retiro.")
         
-        st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {BORDER_COLOR}; border-radius: 10px; padding: 20px; margin-top: 20px; text-align: center;">
-            <p style="color: {TEXT_COLOR}; font-size: 1.1rem; line-height: 1.6;">
-                <span style="color: {'#ff4b4b'}; font-weight: bold;">⚠️ El Costo de la Espera:</span> 
-                Esta gráfica muestra cómo cada año que postergas el inicio de tu ahorro incrementa la aportación mensual 
-                necesaria para alcanzar tu meta. <br>
-                <b style="color: {GOLD_COLOR};">¡Empezar hoy es la decisión más inteligente!</b>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
 
     with tab_retiro:
         st.markdown(f"<h3 style='text-align: center; color: {ACCENT_COLOR};'>Plan de Distribución: Etapa de Jubilación</h3>", unsafe_allow_html=True)
@@ -2017,7 +2003,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 <div style="background-color: {CARD_BG}; border: 1px solid {item_bono['color']}; border-radius: 10px; padding: 20px; text-align: center; border-top: 5px solid {item_bono['color']}; box-shadow: 0 4px 15px rgba(0,0,0,{0.3 if is_dark else 0.1}); margin-bottom: 15px;">
                 <h4 style="color: {item_bono['color']}; font-weight: bold; margin-bottom: 10px;">${monto_escenario:,.0f} Al mes</h4>
                 <p style="color: {TEXT_COLOR if not is_dark else ACCENT_COLOR}; font-size: 1.0rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Bono acreditado:</p>
-                <div style="color: {item_bono['color']}; font-size: 2.5rem; font-weight: bold; margin: 5px 0; text-shadow: {('0 0 10px ' + item_bono['color'] + '44') if is_dark else 'none'};">${item_bono['monto']:,.0f}</div>
+                <div style="color: {item_bono['color']}; font-size: 2.5rem; font-weight: bold; margin: 5px 0;">${item_bono['monto']:,.0f}</div>
                 <div style="color: {item_bono['color']}; font-weight: bold; font-size: 1.15rem;">({item_bono['pct']*100:.0f}%)</div>
                 <div style="color: {item_bono['color']}; font-size: 1.15rem; font-weight: bold; margin-top: 8px;">+${item_bono['monto']/12:,.0f} al mes</div>
                 </div>
@@ -2210,10 +2196,10 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             .to_html()
         )
         st.markdown(f"""
-    <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-    {html_table}
-    </div>
-    """, unsafe_allow_html=True)
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+{html_table}
+</div>
+""", unsafe_allow_html=True)
     
     if edad <= 39:
         with tab_tabla_65:
@@ -2247,10 +2233,10 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             )
             
             st.markdown(f"""
-    <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
-    {html_table_65}
-    </div>
-    """, unsafe_allow_html=True)
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+{html_table_65}
+</div>
+""", unsafe_allow_html=True)
         
         
         # 3. EXPORTACIÓN CSV
@@ -2606,11 +2592,11 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
 
     # DISEÑO DEL MAIN HUB PARA COMPARACIÓN
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 25px; margin-top: 25px;">
-        <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.0rem;">ASTOR SIMULADOR</h1>
-        <h2 style="color: #A855F7; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem; margin-top: 10px;">EL COSTO DE OPORTUNIDAD: CASA VS BOLSA</h2>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 25px; margin-top: 25px;">
+    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.0rem;">ASTOR SIMULADOR</h1>
+    <h2 style="color: #A855F7; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem; margin-top: 10px;">EL COSTO DE OPORTUNIDAD: CASA VS BOLSA</h2>
+</div>
+""", unsafe_allow_html=True)
 
     # El input central (Capacidad de aportación)
     c_pad1, c_mid_in, c_pad2 = st.columns([1, 1, 1])
@@ -2663,29 +2649,29 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
 
     with col_casa:
         st.markdown(f"""
-        <div style="background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column; justify-content: center;">
-            <h3 style="color: {GOLD_COLOR}; margin-bottom: 15px;">🏠 DATOS DE CASA</h3>
-            <p style="color: {TEXT_COLOR}; font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px;">VALOR FUTURO (EST.)</p>
-            <div style="color: {GOLD_COLOR}; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">${valor_casa_final:,.0f}</div>
-            <div style="text-align: left; font-size: 0.85rem; color: {TEXT_COLOR}; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <p>• Hipoteca: <b>${pago_hipoteca_mes:,.0f}/mes</b></p>
-                <p>• Renta Neta: <b>${ingreso_renta_mes_promedio:,.0f}/mes</b></p>
-                <p>• Gastos: <b>${gasto_predial_mes + mant_mensual:,.0f}/mes</b></p>
-                <p style="margin-top: 10px; color: {GOLD_COLOR};">Flujo Real: <b>${flujo_bolsa:,.0f}/mes</b></p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 20px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.3); height: 450px; display: flex; flex-direction: column; justify-content: center;">
+    <h3 style="color: {GOLD_COLOR}; margin-bottom: 15px;">🏠 DATOS DE CASA</h3>
+    <p style="color: {TEXT_COLOR}; font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px;">VALOR FUTURO (EST.)</p>
+    <div style="color: {GOLD_COLOR}; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">${valor_casa_final:,.0f}</div>
+    <div style="text-align: left; font-size: 0.85rem; color: {TEXT_COLOR}; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+        <p>• Hipoteca: <b>${pago_hipoteca_mes:,.0f}/mes</b></p>
+        <p>• Renta Neta: <b>${ingreso_renta_mes_promedio:,.0f}/mes</b></p>
+        <p>• Gastos: <b>${gasto_predial_mes + mant_mensual:,.0f}/mes</b></p>
+        <p style="margin-top: 10px; color: {GOLD_COLOR};">Flujo Real: <b>${flujo_bolsa:,.0f}/mes</b></p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
     with col_monto:
         st.markdown(f"""
-        <div style="height: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-            <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Capacidad de Aportación</p>
-            <div style="font-size: 4.5rem; font-weight: 800; color: {ACCENT_COLOR}; text-shadow: 0 0 30px {ACCENT_COLOR}66; margin: 10px 0;">
-                ${aportacion_user:,.0f}
-            </div>
-            <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">MENSUAL</p>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="height: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <p style="color: {TEXT_COLOR}; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem;">Capacidad de Aportación</p>
+    <div style="font-size: 4.5rem; font-weight: 800; color: {ACCENT_COLOR}; text-shadow: 0 0 30px {ACCENT_COLOR}66; margin: 10px 0;">
+        ${aportacion_user:,.0f}
+    </div>
+    <p style="color: {TEXT_COLOR}; opacity: 0.8; font-size: 1rem; margin-top: 5px;">MENSUAL</p>
+</div>
+""", unsafe_allow_html=True)
 
     with col_fondos:
         # Mini tabla de crecimiento año a año
