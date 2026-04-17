@@ -1612,8 +1612,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         n_periodos_retiro = 25 # Mostramos 25 años por defecto en la tabla para visualizar la constancia
         datos_retiro = []
         
+        acumulado_recibido = 0
         for p in range(1, n_periodos_retiro + 1):
             monto_periodo_rec = pago_mensual_retiro * 12 # Rendimiento Anual
+            acumulado_recibido += monto_periodo_rec
             
             # En un fondo perpetuo, el saldo remanente es siempre el capital inicial
             saldo_remanente = meta_retiro
@@ -1622,6 +1624,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 "AÑO": p,
                 "EDAD": edad_retiro + p,
                 label_dinamico_retiro: monto_periodo_rec,
+                "Acumulado Recibido": acumulado_recibido,
                 "Rendimiento Mensual": monto_periodo_rec / 12.0,
                 "Fondo de motor de retiro": saldo_remanente
             })
@@ -1632,6 +1635,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 df_retiro.style
                 .format({
                     label_dinamico_retiro: "${:,.2f}",
+                    "Acumulado Recibido": "${:,.2f}",
                     "Rendimiento Mensual": "${:,.2f}",
                     "Fondo de motor de retiro": "${:,.2f}",
                     "EDAD": "{:.0f}",
@@ -1657,26 +1661,40 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 """, unsafe_allow_html=True)
             
             fig_ret = go.Figure()
+            
+            # Trace 1: Saldo del Fondo (Capital Intacto) - Ahora como área con opacidad baja
             fig_ret.add_trace(go.Scatter(
                 x=df_retiro["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_retiro) + 1)),
                 y=df_retiro["Fondo de motor de retiro"].tolist(),
                 mode='lines',
                 fill='tozeroy',
-                line=dict(color=GOLD_COLOR, width=3),
-                name="Saldo en Retiro"
+                fillcolor='rgba(230, 194, 0, 0.1)', # Oro muy suave
+                line=dict(color=GOLD_COLOR, width=4, dash='dash'),
+                name="Capital Protegido (Fondo Perpetuo)"
+            ))
+            
+            # Trace 2: Renta Total Recibida (Acumulada) - La línea que muestra el "beneficio"
+            fig_ret.add_trace(go.Scatter(
+                x=df_retiro["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_retiro) + 1)),
+                y=df_retiro["Acumulado Recibido"].tolist(),
+                mode='lines+markers',
+                line=dict(color="#34D399", width=4),
+                marker=dict(size=6, color="#10B981"),
+                name="Dinero Total Recibido (Acumulado)"
             ))
             
             fig_ret.update_layout(
-                title=f"Desglose de Saldo en Etapa de Retiro ({frecuencia})",
-                xaxis_title="Tiempo (Retiro)",
-                yaxis_title="Saldo Disponible ($)",
+                title=f"Distribución de Riqueza en Retiro ({frecuencia})",
+                xaxis_title="Años en Retiro",
+                yaxis_title="Monto ($)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 paper_bgcolor="rgba(0,0,0,0)",
                 font=dict(color=TEXT_COLOR),
-                margin=dict(t=50, b=40)
+                margin=dict(t=50, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             
-            fig_ret.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", automargin=True)
+            fig_ret.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.2)", rangemode="tozero", automargin=True)
             fig_ret.update_xaxes(gridcolor="rgba(128,128,128,0.2)", automargin=True)
             
             st.plotly_chart(fig_ret, use_container_width=True, theme=None, key="chart_retiro")
