@@ -1567,6 +1567,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                     line=dict(color="#ff4b4b", width=3),
                     marker=dict(size=8, color=GOLD_COLOR),
                 ))
+                # Generar tickvals "bonitos" para log scale (1, 2, 5) que cubran el rango probable
+                tick_vals = []
+                for i in range(2, 7): # De 100 (10^2) a 1,000,000 (10^6)
+                    base = 10**i
+                    tick_vals.extend([base, base*2, base*5])
+                
                 fig_c.update_layout(
                     title=None,
                     xaxis_title="Edad al comenzar el plan",
@@ -1578,14 +1584,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                     showlegend=False,
                     yaxis=dict(
                         type="log",
-                        dtick=1, # Una marca por cada potencia de 10
+                        tickvals=tick_vals,
                         tickformat="$,.0f",
                         gridcolor="rgba(128,128,128,0.1)",
                         exponentformat="none"
                     )
                 )
                 fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)", automargin=True)
-                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_log")
+                st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_log_refined")
             else:
                 st.info("No hay suficientes datos para mostrar la progresión de costos antes de la edad de retiro.")
         
