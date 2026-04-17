@@ -1107,6 +1107,9 @@ if st.session_state.modulo_activo == "Hub":
                 monto_h = st.number_input("Monto Mensual que va depositar", min_value=1000, value=3000, step=500, key="hub_monto_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 edad_h = st.number_input("Edad", min_value=18, max_value=70, value=25, key="hub_edad_input")
+                default_retiro_h = 60 if edad_h <= 35 else 65
+                st.session_state.hub_edad = edad_h
+                st.session_state.hub_retiro_default = default_retiro_h
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1160,8 +1163,17 @@ if st.session_state.modulo_activo == "Hub":
                 renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes?", min_value=1000, value=50000, step=5000, key="costos_renta_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=25, key="costos_edad_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                retiro_c = st.selectbox("¿A qué edad te quieres retirar?", [60, 65], index=0, key="costos_retiro_age_input")
+                
+                # Lógica de default: <=35 -> 60, >=36 -> 65. Tope 70.
+                opciones_c = [60, 65, 70]
+                # Filtrar opciones que sean mayores a la edad actual
+                opciones_c = [o for o in opciones_c if o > edad_c]
+                if not opciones_c: opciones_c = [70] # Failsafe
+                
+                default_val_c = 60 if edad_c <= 35 else 65
+                idx_c = opciones_c.index(default_val_c) if default_val_c in opciones_c else (len(opciones_c)-1)
+                
+                retiro_c = st.selectbox("¿A qué edad te quieres retirar?", opciones_c, index=idx_c, key="costos_retiro_age_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1313,9 +1325,23 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
         edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
         
-        e_retiro_default = st.session_state.get("costos_edad_retiro", 60)
-        opciones_retiro = [60, 65]
-        idx_retiro = opciones_retiro.index(e_retiro_default) if e_retiro_default in opciones_retiro else 0
+        # Actualizar default de retiro basado en la edad inicial
+        # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
+        opciones_retiro = [60, 65, 70]
+        # Filtrar para que solo muestre opciones mayores a la edad inicial
+        opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
+        if not opciones_retiro: opciones_retiro = [70] # Failsafe si el usuario tiene 70
+        
+        # Determinar el valor por defecto deseado
+        desired_default = 60 if edad_inicial <= 35 else 65
+        
+        # Si el valor guardado en session_state sigue siendo válido y está en las opciones, lo usamos.
+        # Si no, usamos el desired_default si está disponible.
+        e_retiro_state = st.session_state.get("costos_edad_retiro", desired_default)
+        if e_retiro_state not in opciones_retiro:
+            e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
+            
+        idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
         edad_retiro = st.selectbox("Edad a la que te quieres retirar", opciones_retiro, index=idx_retiro)
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         frecuencia = st.selectbox("Frecuencia de Visualización", ["Mensual", "Semestral", "Anual"], index=2)
@@ -1847,26 +1873,39 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
     eje_x_data_col = "Año" 
     x_axis_title = "Año"
     
-    anios_para_65 = max(65 - edad, 25)
+    # Lógica de Retiro: <=35 -> 60, >=36 -> 65. Tope a los 70.
+    retiro_objetivo = 60 if edad <= 35 else 65
+    
+    # El horizonte de inversión sugerido es de 25 años, pero topado a los 70 de edad
+    anios_horizonte = 25
+    if edad + anios_horizonte > 70:
+        anios_horizonte = max(70 - edad, 1) # Mínimo 1 año
+    
+    # Segundo cálculo: Al retiro objetivo (60 o 65) o al tope de 70
+    anios_para_retiro = max(retiro_objetivo - edad, anios_horizonte)
+    if edad + anios_para_retiro > 70:
+        anios_para_retiro = 70 - edad
+    if anios_para_retiro < anios_horizonte:
+        anios_para_retiro = anios_horizonte
     
     for idx, config in enumerate(escenarios_config):
         opcion_actual_id = idx + 1
         monto_inicial = config["monto_inicial"]
         monto_mes_19 = config["monto_mes_19"]
         
-        # 1. Cálculo PRINCIPAL (25 años)
+        # 1. Cálculo PRINCIPAL (Horizonte sugerido o topado a 70)
         df_raw, bono_pct = calcular_escenario(
             monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
-            plazo_anos=25, 
+            plazo_anos=anios_horizonte, 
             opcion_id=opcion_actual_id, 
             extras=st.session_state.aportaciones_extra,
             monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro
         )
         
-        # 2. Cálculo RETIRO A LOS 65
+        # 2. Cálculo RETIRO (60, 65 o 70)
         df_65, _ = calcular_escenario(
             monto_inicial, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr, 
-            plazo_anos=anios_para_65,
+            plazo_anos=anios_para_retiro,
             opcion_id=opcion_actual_id, 
             extras=st.session_state.aportaciones_extra,
             monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro también aquí
@@ -1915,8 +1954,8 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             "monto_mes_19": monto_mes_19 
         })
         
-        # --- LOGICA DE AGRUPACIÓN PARA 65 AÑOS (Si aplica) ---
-        if edad <= 39:
+        # --- LOGICA DE AGRUPACIÓN PARA RETIRO (Si el retiro es posterior al horizonte inicial) ---
+        if anios_para_retiro > anios_horizonte:
             if frecuencia_vista == "Anual":
                 df_65_display = df_65.groupby("Año").agg({
                     "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
@@ -2003,8 +2042,8 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 </div>
                 """, unsafe_allow_html=True)
     
-    # --- SECCIÓN 2: 25 AÑOS ---
-    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{edad + 25} años</h3>', unsafe_allow_html=True)
+    # --- SECCIÓN 2: HORIZONTE INICIAL ---
+    st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{edad + anios_horizonte} años</h3>', unsafe_allow_html=True)
     
     cols_25 = st.columns(cols_spec)
     for idx in range(len(resultados)):
@@ -2045,7 +2084,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 """, unsafe_allow_html=True)
     
     # --- SECCIÓN 3: RETIRO ---
-    proy_edad_retiro = edad + anios_para_65
+    proy_edad_retiro = edad + anios_para_retiro
     st.markdown(f'<h3 style="color: {TEXT_COLOR}; font-size: 2rem; text-align: center; margin-top: 30px; margin-bottom: 25px;">{proy_edad_retiro} años</h3>', unsafe_allow_html=True)
     
     cols_retiro = st.columns(cols_spec)
@@ -2084,8 +2123,8 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
     
     st.write("---")
     tabs_nombres = ["📊 Gráfica Comparativa", "📋 Tabla Dinámica"]
-    if edad <= 39:
-        tabs_nombres.append(f"📋 Tabla Dinámica {edad + 25}-65")
+    if anios_para_retiro > anios_horizonte:
+        tabs_nombres.append(f"📋 Tabla Dinámica {edad + anios_horizonte}-{proy_edad_retiro}")
     
     tabs = st.tabs(tabs_nombres)
     tab_grafica = tabs[0]
@@ -2183,18 +2222,18 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
 </div>
 """, unsafe_allow_html=True)
     
-    if edad <= 39:
+    if anios_para_retiro > anios_horizonte:
         with tab_tabla_65:
             col_sel65, col_dump65 = st.columns([1, 3])
-            id_seleccionado65 = col_sel65.selectbox("Ver detalle (65) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
+            id_seleccionado65 = col_sel65.selectbox(f"Ver detalle ({proy_edad_retiro}) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
             seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
             
             cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
             if frecuencia_vista != "Anual":
                 cols_to_show_65.insert(0, eje_x_data_col)
     
-            # Filtrar solo periodos posteriores al año 25
-            df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > 25]
+            # Filtrar solo periodos posteriores al horizonte inicial
+            df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > anios_horizonte]
             
             # --- TABLA HTML PERSONALIZADA (65 años) ---
             html_table_65 = (
