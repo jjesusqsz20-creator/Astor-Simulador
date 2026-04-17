@@ -1103,7 +1103,8 @@ if st.session_state.modulo_activo == "Hub":
                 # Inputs de Streamlit
                 nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
                 m_h_val = st.session_state.get("hub_monto_input", 3000)
-                monto_h = st.number_input(f"Monto Mensual que va depositar (${m_h_val:,.0f})", min_value=1000, value=3000, step=500, key="hub_monto_input")
+                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Monto Mensual que va depositar <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${m_h_val:,.0f}</span></p>", unsafe_allow_html=True)
+                monto_h = st.number_input("Monto Mensual que va depositar", min_value=1000, value=3000, step=500, key="hub_monto_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 edad_h = st.number_input("Edad", min_value=18, max_value=70, value=25, key="hub_edad_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1155,7 +1156,8 @@ if st.session_state.modulo_activo == "Hub":
                 # Inputs de Proyecto Costos
                 nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
                 r_c_val = st.session_state.get("costos_renta_input", 50000)
-                renta_c = st.number_input(f"¿Cuánto dinero necesitas para vivir al mes? (${r_c_val:,.0f})", min_value=1000, value=50000, step=5000, key="costos_renta_input")
+                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>¿Cuánto dinero necesitas para vivir al mes? <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${r_c_val:,.0f}</span></p>", unsafe_allow_html=True)
+                renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes?", min_value=1000, value=50000, step=5000, key="costos_renta_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=25, key="costos_edad_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
@@ -1295,7 +1297,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # Mostrar el valor actual en el Label como pidió el usuario
         renta_actual_label = st.session_state.get("renta_sync_sidebar", renta_def)
         # Etiqueta personalizada con formato resaltado
-        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.15rem; font-weight: 800; color: {GOLD_COLOR if is_dark else '#000'};'>(${renta_actual_label:,.0f})</span></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.25rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${renta_actual_label:,.0f}</span></p>", unsafe_allow_html=True)
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
         rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
