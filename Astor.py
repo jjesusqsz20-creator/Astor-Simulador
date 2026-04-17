@@ -1527,12 +1527,6 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Gráfica removida de aquí para ser movida a la pestaña dedicada
-
-    with tab_grafica_postergar:
-        st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Crecimiento Proyectado del Saldo</h3>", unsafe_allow_html=True)
-        
-        if 'df_espera' in locals():
             fig_g = go.Figure()
             fig_g.add_trace(go.Scatter(
                 x=df_espera["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_espera) + 1)),
@@ -1544,7 +1538,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 name="Saldo de Fondo"
             ))
             fig_g.update_layout(
-                title=f"Proyección de incremento del capital ({frecuencia})",
+                title=f"Crecimiento Proyectado del Saldo ({frecuencia})",
                 xaxis_title="Tiempo",
                 yaxis_title="Saldo Acumulado ($)",
                 plot_bgcolor="rgba(0,0,0,0)",
@@ -1554,14 +1548,42 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             )
             fig_g.update_yaxes(tickformat="$,.0f", gridcolor="rgba(128,128,128,0.1)")
             fig_g.update_xaxes(gridcolor="rgba(128,128,128,0.1)")
-            st.plotly_chart(fig_g, use_container_width=True, theme=None, key="chart_growth_tab_single")
+            st.plotly_chart(fig_g, use_container_width=True, theme=None, key="chart_growth_tab_dinamica")
+
+    with tab_grafica_postergar:
+        st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Análisis del Costo de Postergar</h3>", unsafe_allow_html=True)
+        
+        if costos_espera_list:
+            df_c = pd.DataFrame(costos_espera_list)
+            fig_c = go.Figure()
+            fig_c.add_trace(go.Scatter(
+                x=df_c["edad"],
+                y=df_c["aporte"],
+                mode='lines+markers',
+                line=dict(color="#ff4b4b", width=3),
+                marker=dict(size=8, color=GOLD_COLOR),
+                name="Aportación Mensual"
+            ))
+            fig_c.update_layout(
+                title="Aportación mensual necesaria vs. Edad de inicio",
+                xaxis_title="Edad al comenzar el plan",
+                yaxis_title="Aportación Mensual ($)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color=TEXT_COLOR),
+                margin=dict(t=50, b=40)
+            )
+            fig_c.update_yaxes(tickformat="$,.1f", gridcolor="rgba(128,128,128,0.1)")
+            fig_c.update_xaxes(gridcolor="rgba(128,128,128,0.1)")
+            st.plotly_chart(fig_c, use_container_width=True, theme=None, key="chart_costo_espera_single")
         
         st.markdown(f"""
         <div style="background-color: {CARD_BG}; border: 1px solid {BORDER_COLOR}; border-radius: 10px; padding: 20px; margin-top: 20px; text-align: center;">
             <p style="color: {TEXT_COLOR}; font-size: 1.1rem; line-height: 1.6;">
-                <span style="color: {GOLD_COLOR}; font-weight: bold;">💡 Impacto del Tiempo:</span> 
-                Esta gráfica ilustra cómo aumenta tu dinero año con año. Cada periodo de espera para iniciar representa 
-                un costo de oportunidad significativo en el saldo final acumulado.
+                <span style="color: {'#ff4b4b'}; font-weight: bold;">⚠️ El Costo de la Espera:</span> 
+                Esta gráfica muestra cómo cada año que postergas el inicio de tu ahorro incrementa la aportación mensual 
+                necesaria para alcanzar tu meta. <br>
+                <b style="color: {GOLD_COLOR};">¡Empezar hoy es la decisión más inteligente!</b>
             </p>
         </div>
         """, unsafe_allow_html=True)
