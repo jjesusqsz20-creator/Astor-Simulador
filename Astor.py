@@ -1429,7 +1429,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">CAPITAL OBJETIVO</div>
 </div>
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); height: 170px; display: flex; flex-direction: column; justify-content: center;">
-<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Renta Mensual Estimada</p>
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Retiro Mensual</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${renta_mensual_sidebar:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.8rem; opacity: 0.9;">EQUIVALENTE AL {rendimiento_anual}% ANUAL</div>
 </div>
