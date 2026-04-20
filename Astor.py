@@ -1448,12 +1448,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, {ACCENT_COLOR}15, transparent); pointer-events: none;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif;">
         Para garantizar un retiro mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${renta_mensual_sidebar:,.0f}</span>, 
-        es indispensable consolidar un fondo de inversión de <span style="color: {GOLD_COLOR}; font-weight: 800;">${meta_retiro:,.0f}</span> 
+        es indispensable consolidar un fondo de inversión de <span style="color: #34D399; font-weight: 800;">${meta_retiro:,.0f}</span> 
         que genere un rendimiento de <span style="color: {GOLD_COLOR}; font-weight: 800;">${rendimiento_anual_monto:,.0f}</span> anuales.
     </p>
     <div style="height: 1px; background: linear-gradient(90deg, transparent, {ACCENT_COLOR}44, transparent); margin: 25px auto; width: 70%;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif; opacity: 0.95;">
-        Por lo tanto, considerando que actualmente tienes <span style="color: {GOLD_COLOR}; font-weight: 800;">{edad_inicial} años</span>, 
+        Por lo tanto, considerando que actualmente tienes <span style="color: #34D399; font-weight: 800;">{edad_inicial} años</span>, 
         el plan de acción requiere una aportación mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${aporte_m_metric:,.2f}</span>.
     </p>
 </div>
