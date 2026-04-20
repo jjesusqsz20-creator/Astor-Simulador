@@ -1399,18 +1399,31 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         else:
             # Si es el año de retiro, el costo es la meta completa (un solo pago)
             aporte_e = meta_retiro
+        # Totales acumulados
+        años_restantes = (edad_retiro - edad_espera)
+        total_pago = aporte_e * 12 * años_restantes if años_restantes > 0 else meta_retiro
+        rendimiento_total = meta_retiro - total_pago
+        
         costos_espera_list.append({
             "edad": edad_espera,
             "aporte": aporte_e,
-            "diff": aporte_e - aporte_m_metric
+            "diff": aporte_e - aporte_m_metric,
+            "total_pago": total_pago,
+            "rendimiento": rendimiento_total
         })
 
     # Generar el HTML de las filas
     # Fila Especial: HOY
+    años_hoy = (edad_retiro - edad_inicial)
+    total_pago_hoy = aporte_m_metric * 12 * años_hoy
+    rendimiento_hoy = meta_retiro - total_pago_hoy
+
     rows_html_unified = f'<tr style="background-color: {ACCENT_COLOR}11; border-bottom: 2px solid {ACCENT_COLOR}33;">' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; text-transform: uppercase;">Hoy ({edad_inicial} años)</td>' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 800; text-align: center;">${aporte_m_metric:,.2f}</td>' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; letter-spacing: 1px;">-</td>' \
+                         f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center;">${total_pago_hoy:,.0f}</td>' \
+                         f'<td style="padding: 15px; color: #34D399; font-weight: 800; text-align: center;">${rendimiento_hoy:,.0f}</td>' \
                          f'</tr>'
 
     for itm in costos_espera_list:
@@ -1420,6 +1433,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm["edad"]} años</td>' \
                              f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm["aporte"]:,.2f}</td>' \
                              f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">+${itm["diff"]:,.2f}</td>' \
+                             f'<td style="padding: 15px; color: {TEXT_COLOR}; text-align: center;">${itm["total_pago"]:,.0f}</td>' \
+                             f'<td style="padding: 15px; color: #34D399; font-weight: bold; text-align: center;">${itm["rendimiento"]:,.0f}</td>' \
                              f'</tr>'
 
     # Cálculos para el resumen narrativo
@@ -1474,6 +1489,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Total</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Rendimiento Total</th>
             </tr>
         </thead>
         <tbody style="text-align: center;">{rows_html_unified}</tbody>
