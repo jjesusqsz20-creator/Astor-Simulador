@@ -1406,7 +1406,13 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         })
 
     # Generar el HTML de las filas
-    rows_html_unified = ""
+    # Fila Especial: HOY
+    rows_html_unified = f'<tr style="background-color: {ACCENT_COLOR}11; border-bottom: 2px solid {ACCENT_COLOR}33;">' \
+                         f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; text-transform: uppercase;">Hoy ({edad_inicial} años)</td>' \
+                         f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 800; text-align: center;">${aporte_m_metric:,.2f}</td>' \
+                         f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; letter-spacing: 1px;">-</td>' \
+                         f'</tr>'
+
     for itm in costos_espera_list:
         diff_clr = "#ff4b4b" if itm['diff'] > 0 else TEXT_COLOR
         bg_r = "rgba(255,255,255,0.03)" if itm['edad'] % 2 == 0 else "transparent"
@@ -1465,7 +1471,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
         <thead style="border-bottom: 2px solid {GOLD_COLOR};">
             <tr>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan a</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
             </tr>
