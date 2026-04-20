@@ -1496,6 +1496,11 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         <tbody style="text-align: center;">{rows_html_unified}</tbody>
     </table>
 </div>
+<div style="text-align: center; margin-top: -30px; margin-bottom: 50px; opacity: 0.7;">
+    <p style="color: {TEXT_COLOR}; font-size: 0.9rem; font-style: italic;">
+        * Nota: Los montos de aportación y rendimiento acumulado consideran el periodo completo desde el inicio del plan hasta la edad de retiro ({edad_retiro} años).
+    </p>
+</div>
 """, unsafe_allow_html=True)
 
     tab_grafica_postergar, tab_dinamica, tab_retiro = st.tabs(["📈 Gráfica de Costos", "📊 Tabla Dinámica", "💰 Etapa de Retiro"])
