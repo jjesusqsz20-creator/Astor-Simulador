@@ -730,21 +730,30 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Trigger (Ghost Button) - Selector de hermano corregido */
-    div:has(.ghost-trigger-container) + div[data-testid="element-container"] button {{
-        background: transparent !important;
-        border: none !important;
-        color: transparent !important;
-        width: 1px !important;
-        height: 1px !important;
-        padding: 0 !important;
-        min-height: 0 !important;
-        box-shadow: none !important;
-        outline: none !important;
-        opacity: 0 !important;
-        margin: 0 !important;
+    /* Secret Stealth Trigger (Ghost Button) - Selector por ID y relación de hermanos */
+    div[data-testid="element-container"]:has(#secret-trigger-marker) {{
+        display: none !important;
     }}
-    div:has(.ghost-trigger-container) + div[data-testid="element-container"] button:hover {{
+    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] {{
+        margin-top: -15px !important;
+        margin-bottom: -15px !important;
+    }}
+    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button {{
+        opacity: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 2px !important;
+        height: 2px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        outline: none !important;
+        cursor: default !important;
+    }}
+    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button:hover,
+    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button:active {{
         background: transparent !important;
         opacity: 0 !important;
     }}
@@ -1375,17 +1384,17 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Botón Fantasma (Activador Secreto)
+        # Disparador Secreto (Botón Fantasma Ultra-Invisible)
         if 'show_patrimonio' not in st.session_state:
             st.session_state.show_patrimonio = False
         if 'patrimonio_persist' not in st.session_state:
             st.session_state.patrimonio_persist = 0.0
             
-        st.markdown('<div class="ghost-trigger-container">', unsafe_allow_html=True)
+        # Marcador con ID para el CSS
+        st.markdown('<div id="secret-trigger-marker"></div>', unsafe_allow_html=True)
         if st.button(" ", key="secret_pat_btn"):
             st.session_state.show_patrimonio = not st.session_state.show_patrimonio
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.show_patrimonio:
             patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget")
