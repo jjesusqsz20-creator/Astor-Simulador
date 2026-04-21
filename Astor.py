@@ -1411,6 +1411,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             "edad": edad_espera,
             "aporte": aporte_e,
             "diff": aporte_e - aporte_m_metric,
+            "sobre_costo_total": (aporte_e - aporte_m_metric) * 12 * años_restantes,
             "total_pago": total_pago,
             "rendimiento": rendimiento_total
         })
@@ -1425,6 +1426,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; text-transform: uppercase;">Hoy ({edad_inicial} años)</td>' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 800; text-align: center;">${aporte_m_metric:,.2f}</td>' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; letter-spacing: 1px;">-</td>' \
+                         f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; letter-spacing: 1px;">-</td>' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center;">${total_pago_hoy:,.0f}</td>' \
                          f'<td style="padding: 15px; color: #34D399; font-weight: 800; text-align: center;">${rendimiento_hoy:,.0f}</td>' \
                          f'</tr>'
@@ -1436,6 +1438,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm["edad"]} años</td>' \
                              f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm["aporte"]:,.2f}</td>' \
                              f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">+${itm["diff"]:,.2f}</td>' \
+                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">${itm["sobre_costo_total"]:,.0f}</td>' \
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; text-align: center;">${itm["total_pago"]:,.0f}</td>' \
                              f'<td style="padding: 15px; color: #34D399; font-weight: bold; text-align: center;">${itm["rendimiento"]:,.0f}</td>' \
                              f'</tr>'
@@ -1493,6 +1496,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
+                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de sobre costo mensual</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de aportación acumulada</th>
                 <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de rendimiento acumulado</th>
             </tr>
