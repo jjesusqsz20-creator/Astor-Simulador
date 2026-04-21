@@ -730,34 +730,29 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Button - Totalmente transparente y sin bordes */
-    div:has(> .ghost-expander) + div[data-testid="stExpander"],
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] > details,
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
+    /* Secret Stealth Button - Selector corregido para hermanos en Streamlit */
+    div:has(> .ghost-expander) + div[data-testid="stExpander"] {{
         border: none !important;
-        background-color: transparent !important;
         background: transparent !important;
         box-shadow: none !important;
-        margin-bottom: -10px !important;
+        margin-bottom: -25px !important;
         padding: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }}
     div:has(> .ghost-expander) + div[data-testid="stExpander"] summary {{
-        background-color: transparent !important;
-        border: none !important;
+        background: transparent !important;
         color: transparent !important;
         padding: 0 !important;
-        width: 15px !important;
-        height: 15px !important;
+        width: 10px !important;
+        height: 10px !important;
         min-height: 0 !important;
         line-height: 0 !important;
     }}
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary:hover {{
-        background-color: transparent !important;
-    }}
     div:has(> .ghost-expander) + div[data-testid="stExpander"] summary svg {{
-        fill: rgba(255,255,255,0.02) !important;
-        width: 6px !important;
-        height: 6px !important;
+        fill: rgba(255,255,255,0.01) !important;
+        width: 5px !important;
+        height: 5px !important;
     }}
     div:has(> .ghost-expander) + div[data-testid="stExpander"] summary:hover svg {{
         fill: rgba(255,255,255,0.1) !important;
@@ -1389,13 +1384,11 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Ghost Expander (Reducido físicamente con columnas y estilizado para ser transparente)
-        col_ghost, col_filler = st.columns([0.15, 0.85])
-        with col_ghost:
-            st.markdown('<div class="ghost-expander">', unsafe_allow_html=True)
-            with st.expander("", expanded=False):
-                patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0, key="pat_input_ghost")
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Ghost Expander (Solo una pequeña flecha casi invisible)
+        st.markdown('<div class="ghost-expander">', unsafe_allow_html=True)
+        with st.expander("", expanded=False):
+            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0, key="pat_input_ghost")
+        st.markdown('</div>', unsafe_allow_html=True)
         
         with st.expander("💰 Plan de Jubilación", expanded=False):
             # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
