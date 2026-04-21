@@ -735,23 +735,25 @@ st.markdown(f"""
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        margin-bottom: -15px !important;
+        margin-bottom: -20px !important;
         padding: 0 !important;
     }}
     .ghost-expander div[data-testid="stExpander"] summary {{
         background: transparent !important;
         color: transparent !important;
         padding: 0 !important;
-        width: 25px !important;
+        width: 8px !important;
+        height: 8px !important;
         min-height: 0 !important;
+        line-height: 0 !important;
     }}
     .ghost-expander div[data-testid="stExpander"] summary svg {{
-        fill: rgba(255,255,255,0.05) !important;
-        width: 12px !important;
-        height: 12px !important;
+        fill: rgba(255,255,255,0.01) !important;
+        width: 4px !important;
+        height: 4px !important;
     }}
     .ghost-expander div[data-testid="stExpander"] summary:hover svg {{
-        fill: rgba(255,255,255,0.2) !important;
+        fill: rgba(255,255,255,0.08) !important;
     }}
     </style>
 """, unsafe_allow_html=True)
