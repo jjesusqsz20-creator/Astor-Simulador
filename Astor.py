@@ -713,22 +713,49 @@ st.markdown(f"""
         text-align: center !important;
         border-radius: 4px !important;
         transition: all 0.3s ease !important;
-    }}
+    }
 
-    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {{
+    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {
         border-color: {ACCENT_COLOR} !important;
         box-shadow: 0 0 10px {ACCENT_COLOR}44 !important;
         background-color: rgba(0, 0, 0, 0.6) !important;
-    }}
+    }
 
-    .scan-wrapper label {{
+    .scan-wrapper label {
         color: {ACCENT_COLOR} !important;
         font-size: 0.6rem !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
         margin-bottom: 2px !important;
         text-transform: uppercase !important;
-    }}
+    }
+
+    /* Secret Stealth Button */
+    .stealth-btn {
+        margin-bottom: -20px;
+        text-align: left;
+    }
+    .stealth-btn button {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: rgba(255,255,255,0.03) !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        height: 10px !important;
+        width: 10px !important;
+        font-size: 10px !important;
+        margin: 0 !important;
+    }
+    .stealth-btn button:hover {
+        color: rgba(255,255,255,0.2) !important;
+        background: transparent !important;
+    }
+    .stealth-btn button:active, .stealth-btn button:focus {
+        background: transparent !important;
+        color: rgba(255,255,255,0.2) !important;
+        outline: none !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -1356,9 +1383,17 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Mini botón casi invisible (.) para Patrimonio Actual
+        # Lógica de Botón Stealth (Casi invisible)
+        if 'show_patrimonio' not in st.session_state:
+            st.session_state.show_patrimonio = False
+            
+        st.markdown('<div class="stealth-btn">', unsafe_allow_html=True)
+        if st.button(".", key="btn_stealth_pat"):
+            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
+        st.markdown('</div>', unsafe_allow_html=True)
+        
         patrimonio_actual = 0.0
-        with st.expander(".", expanded=False):
+        if st.session_state.show_patrimonio:
             patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0)
             
         with st.expander("💰 Plan de Jubilación", expanded=False):
