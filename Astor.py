@@ -731,30 +731,27 @@ st.markdown(f"""
     }}
 
     /* Secret Stealth Button */
-    .stealth-btn {{
-        margin-bottom: -20px;
-        text-align: left;
-    }}
-    .stealth-btn button {{
-        background: transparent !important;
+    .ghost-expander div[data-testid="stExpander"] {{
         border: none !important;
+        background: transparent !important;
         box-shadow: none !important;
-        color: rgba(255,255,255,0.03) !important;
+        margin-bottom: -15px !important;
         padding: 0 !important;
+    }}
+    .ghost-expander div[data-testid="stExpander"] summary {{
+        background: transparent !important;
+        color: transparent !important;
+        padding: 0 !important;
+        width: 25px !important;
         min-height: 0 !important;
-        height: 10px !important;
-        width: 10px !important;
-        font-size: 10px !important;
-        margin: 0 !important;
     }}
-    .stealth-btn button:hover {{
-        color: rgba(255,255,255,0.2) !important;
-        background: transparent !important;
+    .ghost-expander div[data-testid="stExpander"] summary svg {{
+        fill: rgba(255,255,255,0.05) !important;
+        width: 12px !important;
+        height: 12px !important;
     }}
-    .stealth-btn button:active, .stealth-btn button:focus {{
-        background: transparent !important;
-        color: rgba(255,255,255,0.2) !important;
-        outline: none !important;
+    .ghost-expander div[data-testid="stExpander"] summary:hover svg {{
+        fill: rgba(255,255,255,0.2) !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -1383,19 +1380,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Lógica de Botón Stealth (Casi invisible)
-        if 'show_patrimonio' not in st.session_state:
-            st.session_state.show_patrimonio = False
-            
-        st.markdown('<div class="stealth-btn">', unsafe_allow_html=True)
-        if st.button(".", key="btn_stealth_pat"):
-            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
+        # Ghost Expander (Solo una pequeña flecha casi invisible)
+        st.markdown('<div class="ghost-expander">', unsafe_allow_html=True)
+        with st.expander("", expanded=False):
+            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0, key="pat_input_ghost")
         st.markdown('</div>', unsafe_allow_html=True)
         
-        patrimonio_actual = 0.0
-        if st.session_state.show_patrimonio:
-            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0)
-            
         with st.expander("💰 Plan de Jubilación", expanded=False):
             # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
             años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=5)
