@@ -730,25 +730,32 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Trigger (Ghost Button) - Ocultación total del contenedor */
-    div[data-testid="element-container"]:has(#secret-trigger-marker) {{
+    /* Secret Stealth Trigger (Shield) - Disfrazado como icono de sistema HUD */
+    div[data-testid="element-container"]:has(#secret-shield-trigger) {{
         display: none !important;
     }}
-    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] {{
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        position: relative !important;
-        z-index: 999 !important;
+    div[data-testid="element-container"]:has(#secret-shield-trigger) + div[data-testid="element-container"] {{
+        margin-top: -5px !important;
+        margin-bottom: 10px !important;
     }}
-    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button {{
-        width: 20px !important;
-        height: 20px !important;
-        cursor: default !important;
+    div[data-testid="element-container"]:has(#secret-shield-trigger) + div[data-testid="element-container"] button {{
+        background: rgba(114, 165, 165, 0.03) !important;
+        border: 1px solid rgba(114, 165, 165, 0.15) !important;
+        border-radius: 50% !important;
+        width: 30px !important;
+        height: 30px !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        opacity: 0.3 !important;
+        transition: all 0.4s ease !important;
+        box-shadow: none !important;
+    }}
+    div[data-testid="element-container"]:has(#secret-shield-trigger) + div[data-testid="element-container"] button:hover {{
+        background: rgba(114, 165, 165, 0.1) !important;
+        border-color: rgba(114, 165, 165, 0.4) !important;
+        opacity: 0.8 !important;
+        box-shadow: 0 0 15px rgba(114, 165, 165, 0.2) !important;
+        transform: scale(1.1) !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -1377,15 +1384,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Disparador Secreto (Botón Fantasma Ultra-Invisible)
+        # Disparador Secreto Disfrazado (Icono de Seguridad)
         if 'show_patrimonio' not in st.session_state:
             st.session_state.show_patrimonio = False
         if 'patrimonio_persist' not in st.session_state:
             st.session_state.patrimonio_persist = 0.0
             
-        # Marcador con ID para el CSS
-        st.markdown('<div id="secret-trigger-marker"></div>', unsafe_allow_html=True)
-        if st.button(" ", key="secret_pat_btn"):
+        st.markdown('<div id="secret-shield-trigger"></div>', unsafe_allow_html=True)
+        if st.button("🛡️", key="secret_pat_shield"):
             st.session_state.show_patrimonio = not st.session_state.show_patrimonio
             st.rerun()
         
