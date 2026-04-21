@@ -730,30 +730,32 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Button */
-    .ghost-expander div[data-testid="stExpander"] {{
+    /* Secret Stealth Button - Selector corregido para hermanos en Streamlit */
+    div:has(> .ghost-expander) + div[data-testid="stExpander"] {{
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        margin-bottom: -20px !important;
+        margin-bottom: -25px !important;
         padding: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }}
-    .ghost-expander div[data-testid="stExpander"] summary {{
+    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary {{
         background: transparent !important;
         color: transparent !important;
         padding: 0 !important;
-        width: 8px !important;
-        height: 8px !important;
+        width: 10px !important;
+        height: 10px !important;
         min-height: 0 !important;
         line-height: 0 !important;
     }}
-    .ghost-expander div[data-testid="stExpander"] summary svg {{
+    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary svg {{
         fill: rgba(255,255,255,0.01) !important;
-        width: 4px !important;
-        height: 4px !important;
+        width: 5px !important;
+        height: 5px !important;
     }}
-    .ghost-expander div[data-testid="stExpander"] summary:hover svg {{
-        fill: rgba(255,255,255,0.08) !important;
+    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary:hover svg {{
+        fill: rgba(255,255,255,0.1) !important;
     }}
     </style>
 """, unsafe_allow_html=True)
