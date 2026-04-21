@@ -1355,6 +1355,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         label_dinamico = f"Aportación {frecuencia}"
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        
+        # Mini botón casi invisible (.) para Patrimonio Actual
+        patrimonio_actual = 0.0
+        with st.expander(".", expanded=False):
+            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0)
+            
         with st.expander("💰 Plan de Jubilación", expanded=False):
             # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
             años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=5)
@@ -1365,12 +1371,19 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     # --- CÁLCULOS BASE ---
     años_inversion = edad_retiro - edad_inicial
     meses_totales = años_inversion * 12
-    r_mensual = (rendimiento_anual / 100.0) / 12.0
+    r_anual_dec = (rendimiento_anual / 100.0)
+    r_mensual = r_anual_dec / 12.0
     
+    # LÓGICA DE PATRIMONIO ACTUAL:
+    # Calculamos cuánto valdrá el dinero que el usuario ya tiene hoy cuando llegue a su retiro
+    fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
+    # La nueva meta es lo que falta por fondear
+    meta_neta = max(0.0, meta_retiro - fv_patrimonio)
+
     if r_mensual > 0:
-        aporte_m = (meta_retiro * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
+        aporte_m = (meta_neta * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
     else:
-        aporte_m = meta_retiro / meses_totales
+        aporte_m = meta_neta / meses_totales
 
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
@@ -1394,14 +1407,16 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             break
             
         meses_e = (edad_retiro - edad_espera) * 12
+        # El Patrimonio Actual crece igual hasta el retiro en todos los años de espera
+        # meta_neta ya está calculada arriba usando los años totales hasta el retiro
         if meses_e > 0:
             if r_mensual_dec > 0:
-                aporte_e = (meta_retiro * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
+                aporte_e = (meta_neta * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
             else:
-                aporte_e = meta_retiro / meses_e
+                aporte_e = meta_neta / meses_e
         else:
-            # Si es el año de retiro, el costo es la meta completa (un solo pago)
-            aporte_e = meta_retiro
+            # Si es el año de retiro, el costo es la meta neta completa (un solo pago)
+            aporte_e = meta_neta
         # Totales acumulados
         años_restantes = (edad_retiro - edad_espera)
         total_pago = aporte_e * 12 * años_restantes if años_restantes > 0 else meta_retiro
