@@ -1398,6 +1398,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # Parámetros de jubilación (fijos por ahora a petición del usuario)
         años_retiro_pago = 5
         rendimiento_retiro = 10.0
+        label_dinamico_retiro = f"Rendimiento {frecuencia}"
 
     # --- CÁLCULOS BASE ---
     años_inversion = edad_retiro - edad_inicial
