@@ -713,29 +713,29 @@ st.markdown(f"""
         text-align: center !important;
         border-radius: 4px !important;
         transition: all 0.3s ease !important;
-    }
+    }}
 
-    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {
+    .scan-wrapper .stTextInput input:focus, .scan-wrapper .stNumberInput input:focus {{
         border-color: {ACCENT_COLOR} !important;
         box-shadow: 0 0 10px {ACCENT_COLOR}44 !important;
         background-color: rgba(0, 0, 0, 0.6) !important;
-    }
+    }}
 
-    .scan-wrapper label {
+    .scan-wrapper label {{
         color: {ACCENT_COLOR} !important;
         font-size: 0.6rem !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
         margin-bottom: 2px !important;
         text-transform: uppercase !important;
-    }
+    }}
 
     /* Secret Stealth Button */
-    .stealth-btn {
+    .stealth-btn {{
         margin-bottom: -20px;
         text-align: left;
-    }
-    .stealth-btn button {
+    }}
+    .stealth-btn button {{
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
@@ -746,16 +746,16 @@ st.markdown(f"""
         width: 10px !important;
         font-size: 10px !important;
         margin: 0 !important;
-    }
-    .stealth-btn button:hover {
+    }}
+    .stealth-btn button:hover {{
         color: rgba(255,255,255,0.2) !important;
         background: transparent !important;
-    }
-    .stealth-btn button:active, .stealth-btn button:focus {
+    }}
+    .stealth-btn button:active, .stealth-btn button:focus {{
         background: transparent !important;
         color: rgba(255,255,255,0.2) !important;
         outline: none !important;
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
