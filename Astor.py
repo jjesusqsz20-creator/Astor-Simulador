@@ -1540,7 +1540,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 <div style="text-align: center; margin-bottom: 20px;">
     <h3 style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; border-bottom: 2px solid {GOLD_COLOR}; display: inline-block; padding-bottom: 5px; letter-spacing: 2px;">EL COSTO DE POSTERGAR</h3>
     <p style="color: {ACCENT_COLOR}; font-size: 1.1rem; margin-top: 10px; font-weight: bold;">¿Cuánto te cuesta cada año que esperas?</p>
-    <p style="color: {TEXT_COLOR}; font-size: 0.95rem; margin-top: 5px; opacity: 0.8; max-width: 800px; margin-left: auto; margin-right: auto;">Si eliges no comenzar este año, estarás asumiendo una penalización económica por tiempo perdido. Mira lo que realmente te cuesta la indecisión</p>
+    <p style="color: {TEXT_COLOR}; font-size: 0.95rem; margin-top: 5px; opacity: 0.8; max-width: 800px; margin-left: auto; margin-right: auto;">Como puedes ver, cada mes que pasa estás comprando el mismo retiro a un precio más caro. ¿Le ponemos pausa a esta fuga de dinero hoy o agendamos para el próximo mes con un costo todavía mayor?</p>
 </div>
 <div style="background: rgba(10, 10, 10, 0.5); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 40px;">
     <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
