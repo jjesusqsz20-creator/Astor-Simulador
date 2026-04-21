@@ -730,32 +730,25 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Trigger (Ghost Button) - Selector por ID y relación de hermanos */
+    /* Secret Stealth Trigger (Ghost Button) - Ocultación total del contenedor */
     div[data-testid="element-container"]:has(#secret-trigger-marker) {{
         display: none !important;
     }}
     div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] {{
-        margin-top: -15px !important;
-        margin-bottom: -15px !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 999 !important;
     }}
     div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button {{
-        opacity: 0 !important;
-        background: transparent !important;
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        width: 2px !important;
-        height: 2px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        min-height: 0 !important;
-        outline: none !important;
+        width: 20px !important;
+        height: 20px !important;
         cursor: default !important;
-    }}
-    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button:hover,
-    div[data-testid="element-container"]:has(#secret-trigger-marker) + div[data-testid="element-container"] button:active {{
-        background: transparent !important;
-        opacity: 0 !important;
     }}
     </style>
 """, unsafe_allow_html=True)
