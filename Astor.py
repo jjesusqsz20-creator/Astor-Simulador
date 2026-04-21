@@ -730,23 +730,31 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Trigger (Ghost Button) */
+    /* Secret Stealth Trigger (Ghost Button) - Máxima Invisibilidad */
     .ghost-trigger-container {{
-        margin-top: -15px !important;
+        margin-top: -10px !important;
         margin-bottom: -10px !important;
+        line-height: 0 !important;
     }}
     .ghost-trigger-container button {{
         background: transparent !important;
         border: none !important;
         color: transparent !important;
-        width: 15px !important;
-        height: 15px !important;
+        width: 6px !important;
+        height: 6px !important;
         padding: 0 !important;
         min-height: 0 !important;
         box-shadow: none !important;
+        outline: none !important;
     }}
-    .ghost-trigger-container button:hover {{
-        background: rgba(255,255,255,0.02) !important;
+    .ghost-trigger-container button:hover, 
+    .ghost-trigger-container button:active, 
+    .ghost-trigger-container button:focus {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        cursor: default !important;
     }}
     </style>
 """, unsafe_allow_html=True)
