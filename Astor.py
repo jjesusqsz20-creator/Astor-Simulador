@@ -1393,12 +1393,9 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         else:
             patrimonio_actual = st.session_state.patrimonio_persist
         
-        with st.expander("💰 Plan de Jubilación", expanded=False):
-            # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
-            años_retiro_pago = st.number_input("Años de recepción de dinero", min_value=1, max_value=50, value=5)
-            # USAR 10.0% como solicitó el usuario para el cálculo predeterminado
-            rendimiento_retiro = st.number_input("Rendimiento en Retiro (%)", min_value=1.0, value=10.0, step=0.5)
-            label_dinamico_retiro = f"Rendimiento {frecuencia}"
+        # Parámetros de jubilación (fijos por ahora a petición del usuario)
+        años_retiro_pago = 5
+        rendimiento_retiro = 10.0
 
     # --- CÁLCULOS BASE ---
     años_inversion = edad_retiro - edad_inicial
