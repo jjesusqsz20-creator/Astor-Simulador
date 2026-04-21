@@ -730,32 +730,23 @@ st.markdown(f"""
         text-transform: uppercase !important;
     }}
 
-    /* Secret Stealth Button - Selector corregido para hermanos en Streamlit */
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] {{
+    /* Secret Stealth Trigger (Ghost Button) */
+    .ghost-trigger-container {{
+        margin-top: -15px !important;
+        margin-bottom: -10px !important;
+    }}
+    .ghost-trigger-container button {{
+        background: transparent !important;
         border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        margin-bottom: -25px !important;
-        padding: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-    }}
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary {{
-        background: transparent !important;
         color: transparent !important;
+        width: 15px !important;
+        height: 15px !important;
         padding: 0 !important;
-        width: 10px !important;
-        height: 10px !important;
         min-height: 0 !important;
-        line-height: 0 !important;
+        box-shadow: none !important;
     }}
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary svg {{
-        fill: rgba(255,255,255,0.01) !important;
-        width: 5px !important;
-        height: 5px !important;
-    }}
-    div:has(> .ghost-expander) + div[data-testid="stExpander"] summary:hover svg {{
-        fill: rgba(255,255,255,0.1) !important;
+    .ghost-trigger-container button:hover {{
+        background: rgba(255,255,255,0.02) !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -1384,11 +1375,23 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 
         st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
         
-        # Ghost Expander (Solo una pequeña flecha casi invisible)
-        st.markdown('<div class="ghost-expander">', unsafe_allow_html=True)
-        with st.expander("", expanded=False):
-            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=0.0, step=10000.0, key="pat_input_ghost")
+        # Botón Fantasma (Activador Secreto)
+        if 'show_patrimonio' not in st.session_state:
+            st.session_state.show_patrimonio = False
+        if 'patrimonio_persist' not in st.session_state:
+            st.session_state.patrimonio_persist = 0.0
+            
+        st.markdown('<div class="ghost-trigger-container">', unsafe_allow_html=True)
+        if st.button(" ", key="secret_pat_btn"):
+            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
+            st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+        
+        if st.session_state.show_patrimonio:
+            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget")
+            st.session_state.patrimonio_persist = patrimonio_actual
+        else:
+            patrimonio_actual = st.session_state.patrimonio_persist
         
         with st.expander("💰 Plan de Jubilación", expanded=False):
             # Cambiado a 5 años por defecto siguiendo el Proyecto 5%
