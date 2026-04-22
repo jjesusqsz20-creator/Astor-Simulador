@@ -1408,8 +1408,19 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         
         rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
         
-        # --- LÓGICA DE INFLACIÓN (4%) ---
-        tasa_inf_c = 0.04
+        # --- CONFIGURACIÓN DE INFLACIÓN ---
+        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        col_inf1, col_inf2 = st.columns(2)
+        with col_inf1:
+            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>INFLACIÓN</p>", unsafe_allow_html=True)
+            inflacion_opcion = st.selectbox("Inflación", ["Activada", "Desactivada"], index=1, label_visibility="collapsed", key="inf_toggle_postergar")
+        with col_inf2:
+            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>% INFLACIÓN</p>", unsafe_allow_html=True)
+            tasa_inf_input = st.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1, label_visibility="collapsed", key="inf_val_postergar")
+        
+        inflacion_activa = (inflacion_opcion == "Activada")
+        tasa_inf_c = (tasa_inf_input / 100.0) if inflacion_activa else 0.0
+        
         anios_hasta_retiro = max(0, edad_retiro - edad_inicial)
         
         # 1. Ajustar la renta deseada por inflación hasta el inicio del retiro
@@ -1418,7 +1429,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # 2. Cálculo de Meta de Retiro (Fondo Perpetuo con Tasa Real)
         # Usamos tasa real para que el capital crezca con la inflación y el retiro mantenga su valor.
         r_nom_c = rendimiento_anual / 100.0
-        r_real_c = (1 + r_nom_c) / (1 + tasa_inf_c) - 1
+        
+        # Si la inflación está desactivada, tasa real = tasa nominal
+        if inflacion_activa:
+            r_real_c = (1 + r_nom_c) / (1 + tasa_inf_c) - 1
+        else:
+            r_real_c = r_nom_c
         
         if r_real_c > 0:
             meta_retiro = (renta_m_inflada * 12) / r_real_c
