@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import date
 import plotly.graph_objects as go
 import io
 import os
@@ -1190,7 +1191,16 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>¿Cuánto dinero necesitas para vivir al mes? <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${r_c_val:,.0f}</span></p>", unsafe_allow_html=True)
                 renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes?", min_value=1000, value=50000, step=5000, key="costos_renta_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                edad_c = st.number_input("Edad ", min_value=18, max_value=70, value=25, key="costos_edad_input")
+                today = date.today()
+                fecha_nac_c = st.date_input(
+                    "Fecha de Nacimiento ", 
+                    value=date(today.year - 25, 1, 1),
+                    min_value=date(today.year - 80, 1, 1),
+                    max_value=date(today.year - 15, 12, 31),
+                    key="costos_fecha_nac_input"
+                )
+                edad_c = today.year - fecha_nac_c.year - ((today.month, today.day) < (fecha_nac_c.month, fecha_nac_c.day))
+                st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_c} AÑOS</p>", unsafe_allow_html=True)
                 
                 # Lógica de default: <=35 -> 60, >=36 -> 65. Tope 70.
                 opciones_c = [60, 65, 70]
