@@ -1202,14 +1202,27 @@ if st.session_state.modulo_activo == "Hub":
                 edad_c = today.year - fecha_nac_c.year - ((today.month, today.day) < (fecha_nac_c.month, fecha_nac_c.day))
                 st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_c} AÑOS</p>", unsafe_allow_html=True)
                 
-                # Lógica de default: <=35 -> 60, >=36 -> 65. Tope 70.
+                # Lógica de sugerencia: <=35 -> 60, >=36 -> 65, si edad+25 > 70 -> 70.
+                if edad_c + 25 > 70:
+                    sugerencia_c = 70
+                elif edad_c <= 35:
+                    sugerencia_c = 60
+                else:
+                    sugerencia_c = 65
+
                 opciones_c = [60, 65, 70]
-                # Filtrar opciones que sean mayores a la edad actual
                 opciones_c = [o for o in opciones_c if o > edad_c]
-                if not opciones_c: opciones_c = [70] # Failsafe
+                if not opciones_c: opciones_c = [70]
+
+                if sugerencia_c not in opciones_c:
+                    sugerencia_c = opciones_c[-1]
                 
-                default_val_c = 60 if edad_c <= 35 else 65
-                idx_c = opciones_c.index(default_val_c) if default_val_c in opciones_c else (len(opciones_c)-1)
+                idx_c = opciones_c.index(sugerencia_c)
+                
+                # Forzar actualización del selectbox si la edad cambia
+                if "prev_edad_c" not in st.session_state or st.session_state.prev_edad_c != edad_c:
+                    st.session_state.costos_retiro_age_input = sugerencia_c
+                    st.session_state.prev_edad_c = edad_c
                 
                 retiro_c = st.selectbox("¿A qué edad te quieres retirar?", opciones_c, index=idx_c, key="costos_retiro_age_input")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
