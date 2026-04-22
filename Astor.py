@@ -1241,24 +1241,13 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-                    # PARÁMETROS FINANCIEROS
-                    rendimiento_anual = 0.10    # 10% Nominal
-                    inflacion_anual = 0.04      # 4% Inflación
-                    anios_espera = retiro_c - edad_c
-                    n_meses_retiro = 25 * 12    # 25 años de retiro
-                    
-                    # 1. Inflar la renta hasta el inicio del retiro
-                    renta_inflada = renta_c * ((1 + inflacion_anual) ** anios_espera)
-                    
-                    # 2. Calcular tasa real para mantener poder adquisitivo durante el retiro (Fórmula Fisher)
-                    tasa_real_anual = (1 + rendimiento_anual) / (1 + inflacion_anual) - 1
-                    r_m_real = tasa_real_anual / 12.0
-                    
-                    # 3. Meta de retiro (Valor Presente de una Anualidad con tasa real)
-                    if r_m_real > 0:
-                        meta_calculada = renta_inflada * (1 - (1 + r_m_real)**(-n_meses_retiro)) / r_m_real
+                    r_anual_retiro = 0.10 
+                    r_m = r_anual_retiro / 12.0
+                    n_meses_pago = 25 * 12
+                    if r_m > 0:
+                        meta_calculada = renta_c * (1 - (1 + r_m)**(-n_meses_pago)) / r_m
                     else:
-                        meta_calculada = renta_inflada * n_meses_retiro
+                        meta_calculada = renta_c * n_meses_pago
                     st.session_state.hub_nombre_costos = nombre_c
                     st.session_state.renta_costos_sync = float(renta_c)
                     st.session_state.meta_retiro_val = float(meta_calculada)
@@ -1408,22 +1397,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         
         rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
         
-        # --- LÓGICA DE INFLACIÓN (4%) ---
-        tasa_inf_c = 0.04
-        anios_hasta_retiro = max(0, edad_retiro - edad_inicial)
-        
-        # 1. Ajustar la renta deseada por inflación hasta el inicio del retiro
-        renta_m_inflada = renta_mensual_sidebar * ((1 + tasa_inf_c) ** anios_hasta_retiro)
-        
-        # 2. Cálculo de Meta de Retiro (Fondo Perpetuo con Tasa Real)
-        # Usamos tasa real para que el capital crezca con la inflación y el retiro mantenga su valor.
-        r_nom_c = rendimiento_anual / 100.0
-        r_real_c = (1 + r_nom_c) / (1 + tasa_inf_c) - 1
-        
-        if r_real_c > 0:
-            meta_retiro = (renta_m_inflada * 12) / r_real_c
-        else:
-            meta_retiro = (renta_m_inflada * 12) / (r_nom_c if r_nom_c > 0 else 0.01)
+        # Calcular Meta de Retiro basada en la Renta deseada (Fondo Perpetuo)
+        # El usuario solicita que con el rendimiento dado, el capital genere el retiro íntegro
+        # Meta = (Retiro Mensual * 12) / Tasa Anual
+        meta_retiro = (renta_mensual_sidebar * 12) / (rendimiento_anual / 100.0)
 
         # Guardar en session state para otros cálculos
         st.session_state.meta_retiro_val = meta_retiro
