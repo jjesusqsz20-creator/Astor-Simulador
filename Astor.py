@@ -1085,6 +1085,35 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         
     return pd.DataFrame(datos), bono_porcentaje
 
+# --- FUNCIÓN GLOBAL DE BÚSQUEDA DE OBJETIVO (Goal Seek) ---
+def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, infl_activa, tasa_infl, isr=0.0):
+    """
+    Encuentra la aportación mensual necesaria para alcanzar una meta usando el motor de Allianz.
+    """
+    # Punto de partida: fórmula básica de anualidad (como piso)
+    r_m = (tasa_anual / 100) / 12
+    if r_m > 0:
+        low = (meta_objetivo * r_m) / (((1 + r_m) ** (plazo_y * 12)) - 1)
+    else:
+        low = meta_objetivo / (plazo_y * 12)
+        
+    # Ampliamos el rango para la búsqueda (considerando comisiones)
+    high = low * 4.0 
+    
+    # Búsqueda binaria por 25 iteraciones para máxima precisión
+    for _ in range(25):
+        mid = (low + high) / 2
+        # Simulamos con el motor real
+        df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr, plazo_anos=plazo_y)
+        final_val = df_temp['Saldo de Fondo'].iloc[-1]
+        
+        if final_val < meta_objetivo:
+            low = mid
+        else:
+            high = mid
+            
+    return (low + high) / 2
+
 # --- NAVEGACIÓN PRINCIPAL ---
 # Usamos un contenedor principal para simular pestañas en la pantalla principal
 st.markdown("""
