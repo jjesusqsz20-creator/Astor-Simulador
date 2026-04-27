@@ -8,6 +8,62 @@ import base64
 import sys
 from PIL import Image
 import calendar
+import mysql.connector
+
+# --- CONFIGURACIÓN DE BASE DE DATOS ---
+def get_db_connection():
+    """Establece conexión con MySQL local"""
+    try:
+        return mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="", # Cambiar si tienes contraseña en MySQL
+            database="astor_simulador"
+        )
+    except Exception:
+        return None
+
+def guardar_datos_simulacion(datos_cliente, datos_proyecto, tipo_proyecto):
+    """Guarda los datos del cliente y la simulación en MySQL"""
+    conn = get_db_connection()
+    if not conn:
+        return
+    
+    cursor = conn.cursor()
+    try:
+        # 1. Insertar o recuperar cliente (usando email como identificador)
+        query_cliente = """
+        INSERT INTO clientes (nombre, email, telefono) 
+        VALUES (%s, %s, %s) 
+        ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), nombre=%s, telefono=%s
+        """
+        cursor.execute(query_cliente, (
+            datos_cliente['nombre'], datos_cliente['email'], datos_cliente['telefono'],
+            datos_cliente['nombre'], datos_cliente['telefono']
+        ))
+        cliente_id = cursor.lastrowid
+        
+        # 2. Crear registro de simulación
+        query_sim = "INSERT INTO simulaciones (cliente_id, tipo) VALUES (%s, %s)"
+        cursor.execute(query_sim, (cliente_id, tipo_proyecto))
+        sim_id = cursor.lastrowid
+        
+        # 3. Guardar datos específicos
+        if tipo_proyecto == 'PROYECTO_5':
+            query_p5 = "INSERT INTO sim_proyecto_5 (simulacion_id, monto_mensual, edad_actual) VALUES (%s, %s, %s)"
+            cursor.execute(query_p5, (sim_id, datos_proyecto['monto'], datos_proyecto['edad']))
+            
+        elif tipo_proyecto == 'PROYECTO_COSTOS':
+            query_cost = "INSERT INTO sim_proyecto_costos (simulacion_id, renta_deseada, edad_actual, edad_retiro, patrimonio_actual) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query_cost, (sim_id, datos_proyecto['renta'], datos_proyecto['edad'], datos_proyecto['retiro'], datos_proyecto['patrimonio']))
+            
+        conn.commit()
+    except Exception as e:
+        # En producción podrías loguear esto, aquí fallamos silenciosamente para no interrumpir al usuario
+        pass
+    finally:
+        cursor.close()
+        conn.close()
 
 # --- RESOLUCIÓN DE RUTAS PARA EXE ---
 def get_asset_path(relative_path):
@@ -1148,6 +1204,13 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
+                    # Guardar en Base de Datos
+                    guardar_datos_simulacion(
+                        {'nombre': nombre_h, 'email': email_h, 'telefono': tel_h},
+                        {'monto': monto_h, 'edad': edad_h},
+                        'PROYECTO_5'
+                    )
+                    
                     st.session_state.hub_nombre = nombre_h
                     st.session_state.hub_monto = monto_h
                     st.session_state.hub_edad = edad_h
@@ -1263,6 +1326,14 @@ if st.session_state.modulo_activo == "Hub":
                         meta_calculada = renta_inflada * (1 - (1 + r_m_real)**(-n_meses_retiro)) / r_m_real
                     else:
                         meta_calculada = renta_inflada * n_meses_retiro
+
+                    # Guardar en Base de Datos
+                    guardar_datos_simulacion(
+                        {'nombre': nombre_c, 'email': email_c, 'telefono': tel_c},
+                        {'renta': renta_c, 'edad': edad_c, 'retiro': retiro_c, 'patrimonio': 0.0},
+                        'PROYECTO_COSTOS'
+                    )
+
                     st.session_state.hub_nombre_costos = nombre_c
                     st.session_state.renta_costos_sync = float(renta_c)
                     st.session_state.meta_retiro_val = float(meta_calculada)
