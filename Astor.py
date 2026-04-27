@@ -1545,19 +1545,20 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         factor_frecuencia = dict_factores[frecuencia]
         label_dinamico = f'Aportación {frecuencia}'
 
-    # --- LÓGICA DE CÁLCULO UNIFICADA ---
-    # Si la inflación está activa, inflamos la META, pero mantenemos la APORTACIÓN fija (según instrucción del usuario)
+    # --- LÓGICA DE CÁLCULO UNIFICADA (IGUALITO AL PROYECTO 5%) ---
+    # Si la inflación está activa, inflamos la META para que el retiro mensual mantenga su poder adquisitivo
     meta_final_objetivo = meta_neta
     if inflacion_activa:
         meta_final_objetivo = meta_neta * ((1 + (tasa_inf_input / 100.0)) ** años_inversion)
     
-    # Buscamos la aportación fija (inflacion_activa=False para el motor) que alcance la meta inflada
+    # Buscamos la aportación inicial necesaria. 
+    # Pasamos inflacion_activa=inflacion_activa para que la aportación CREZCA con el tiempo (Allianz Style)
     aporte_m = encontrar_aporte_necesario(
         meta_final_objetivo, 
         int(edad_inicial), 
         años_inversion, 
         rendimiento_anual, 
-        False, # Aportación SIEMPRE igual (fija) según instrucción
+        inflacion_activa, 
         tasa_inf_input,
         isr=0.0
     )
@@ -1723,12 +1724,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
         # Generar el desglose REAL usando el motor de Allianz para la tabla dinámica
-        # IMPORTANTE: Aquí también pasamos inflacion_activa=False para que la aportación sea fija en la tabla
+        # IMPORTANTE: Usamos inflacion_activa real para que la aportación crezca en la tabla
         df_costos_real, _ = calcular_escenario(
             aporte_m, 
             int(edad_inicial), 
             rendimiento_anual, 
-            False, # Aportación FIJA por instrucción del usuario
+            inflacion_activa, 
             tasa_inf_input,
             isr_retencion=0.0,
             plazo_anos=años_inversion
