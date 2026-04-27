@@ -1597,6 +1597,13 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 high = mid
         return (low + high) / 2
 
+    r_anual_dec = (rendimiento_anual / 100.0)
+    # LÓGICA DE PATRIMONIO ACTUAL:
+    # Calculamos cuánto valdrá el dinero que el usuario ya tiene hoy cuando llegue a su retiro
+    fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
+    # La nueva meta es lo que falta por fondear
+    meta_neta = max(0.0, meta_retiro - fv_patrimonio)
+
     # Calcular aportación inicial necesaria hoy
     # Nota: Usamos la meta_neta (meta_retiro - patrimonio actual futuro)
     aporte_m = encontrar_aporte_necesario(
@@ -1606,7 +1613,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         rendimiento_anual, 
         inflacion_activa, 
         tasa_inf_input,
-        isr_retencion=0.0 # No aplicamos ISR para la meta bruta
+        isr=0.0 # No aplicamos ISR para la meta bruta
     )
 
     # Variable global para el dashboard y la tabla de costos
