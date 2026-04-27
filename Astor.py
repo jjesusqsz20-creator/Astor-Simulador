@@ -1560,8 +1560,12 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     aporte_m_metric = aporte_m
 
     # --- DASHBOARD UNIFICADO (CABECERA + MÉTRICAS + TABLA COSTE ESPERA) ---
-    # Los cálculos de años_inversion, aporte_m, etc., ya están arriba (líneas 1179-1186)
+    # Los cálculos de años_inversion, aporte_m, etc., ya están arriba
     
+    # Definiciones para compatibilidad con Proyecto 5%
+    rendimiento_retiro = rendimiento_anual 
+    label_dinamico_retiro = f"Renta Anual ({rendimiento_retiro}%)"
+
     # Pre-calcular las filas de la tabla de costos para insertarlas en el bloque maestro
     costos_espera_list = []
     r_anual_dec = rendimiento_anual / 100.0
@@ -1708,7 +1712,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Plan de Acumulación: ${meta_retiro:,.2f} a los {edad_retiro} años</h3>", unsafe_allow_html=True)
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
-        n_periodos = meses_totales // factor_frecuencia
+        meses_acumulacion = años_inversion * 12
+        n_periodos = meses_acumulacion // factor_frecuencia
         datos_tabla = []
         aporte_acum_total = 0.0
         
@@ -1718,11 +1723,11 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             m_actual = p * factor_frecuencia
             
             # Cálculo de Saldo Total
-            if r_mensual > 0:
-                saldo_total = aporte_m * (((1 + r_mensual) ** m_actual) - 1) / r_mensual
+            if r_mensual_dec > 0:
+                saldo_total = aporte_m * (((1 + r_mensual_dec) ** m_actual) - 1) / r_mensual_dec
             else:
                 saldo_total = aporte_m * m_actual
-                
+            
             # --- LÓGICA DE SALDO DISPONIBLE Y POST RETENCIÓN (ALLIANZ STYLE) ---
             # 1. Separación de Cubetas
             if m_actual <= 18:
@@ -1730,9 +1735,9 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                 saldo_regular = 0.0
             else:
                 # Saldo de los primeros 18 meses crecido hasta el mes actual
-                if r_mensual > 0:
-                    base_inicial = aporte_m * (((1 + r_mensual) ** 18) - 1) / r_mensual
-                    saldo_inicial = base_inicial * ((1 + r_mensual) ** (m_actual - 18))
+                if r_mensual_dec > 0:
+                    base_inicial = aporte_m * (((1 + r_mensual_dec) ** 18) - 1) / r_mensual_dec
+                    saldo_inicial = base_inicial * ((1 + r_mensual_dec) ** (m_actual - 18))
                 else:
                     saldo_inicial = aporte_m * 18
                 saldo_regular = max(0, saldo_total - saldo_inicial)
