@@ -1546,15 +1546,11 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         label_dinamico = f'Aportación {frecuencia}'
 
     # --- LÓGICA DE CÁLCULO UNIFICADA (IGUALITO AL PROYECTO 5%) ---
-    # Si la inflación está activa, inflamos la META para que el retiro mensual mantenga su poder adquisitivo
-    meta_final_objetivo = meta_neta
-    if inflacion_activa:
-        meta_final_objetivo = meta_neta * ((1 + (tasa_inf_input / 100.0)) ** años_inversion)
-    
-    # Buscamos la aportación inicial necesaria. 
+    # Buscamos la aportación inicial necesaria para llegar a la meta real de hoy (sin inflar la meta a futuro).
     # Pasamos inflacion_activa=inflacion_activa para que la aportación CREZCA con el tiempo (Allianz Style)
+    # y así arrancar con una cantidad más cómoda que llegará a la misma meta.
     aporte_m = encontrar_aporte_necesario(
-        meta_final_objetivo, 
+        meta_neta, 
         int(edad_inicial), 
         años_inversion, 
         rendimiento_anual, 
@@ -1562,10 +1558,6 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         tasa_inf_input,
         isr=0.0
     )
-    
-    # Variable visual para el HUD
-    meta_retiro_visual = meta_final_objetivo + fv_patrimonio
-    aporte_m_metric = aporte_m
     
     # Generar el desglose REAL empezando HOY para usarlo en métricas y tablas
     df_costos_real, _ = calcular_escenario(
@@ -1606,11 +1598,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         meses_e = (edad_retiro - edad_espera) * 12
         años_restantes = (edad_retiro - edad_espera)
         
-        # IMPORTANTE: Usamos meta_final_objetivo (la meta ya inflada hasta el retiro) 
-        # para que el objetivo sea el mismo sin importar cuándo empieces.
+        # El objetivo sigue siendo la meta neta real
         if meses_e > 0:
             aporte_e = encontrar_aporte_necesario(
-                meta_final_objetivo, 
+                meta_neta, 
                 int(edad_espera), 
                 años_restantes, 
                 rendimiento_anual, 
@@ -1622,10 +1613,10 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             df_e, _ = calcular_escenario(aporte_e, int(edad_espera), rendimiento_anual, inflacion_activa, tasa_inf_input, isr_retencion=0.0, plazo_anos=años_restantes)
             total_pago = df_e['Aportación Acumulada'].iloc[-1]
         else:
-            aporte_e = meta_final_objetivo
-            total_pago = meta_final_objetivo
+            aporte_e = meta_neta
+            total_pago = meta_neta
             
-        rendimiento_total = meta_retiro_visual - total_pago
+        rendimiento_total = meta_retiro - total_pago
         
         costos_espera_list.append({
             "edad": edad_espera,
@@ -1641,7 +1632,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     # Obtenemos el total REAL aportado hoy del plan principal (ya calculado arriba)
     # df_costos_real es el plan empezando HOY
     total_pago_hoy = df_costos_real['Aportación Acumulada'].iloc[-1]
-    rendimiento_hoy = meta_retiro_visual - total_pago_hoy
+    rendimiento_hoy = meta_retiro - total_pago_hoy
 
     rows_html_unified = f'<tr style="background-color: {ACCENT_COLOR}11; border-bottom: 2px solid {ACCENT_COLOR}33;">' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; text-transform: uppercase;">Hoy ({edad_inicial} años)</td>' \
@@ -1678,7 +1669,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Meta de Retiro ({edad_retiro} años)</p>
-<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro_visual:,.0f}</div>
+<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">CAPITAL OBJETIVO</div>
 </div>
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
@@ -1698,8 +1689,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, {ACCENT_COLOR}15, transparent); pointer-events: none;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif;">
         Para garantizar un retiro mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${renta_mensual_sidebar:,.0f}</span>, 
-        es indispensable consolidar un fondo de inversión de <span style="color: #34D399; font-weight: 800;">${meta_retiro_visual:,.0f}</span> 
-        que genere un rendimiento de <span style="color: {GOLD_COLOR}; font-weight: 800;">{meta_retiro_visual * (rendimiento_anual / 100.0):,.0f}</span> anuales.
+        es indispensable consolidar un fondo de inversión de <span style="color: #34D399; font-weight: 800;">${meta_retiro:,.0f}</span> 
+        que genere un rendimiento de <span style="color: {GOLD_COLOR}; font-weight: 800;">${rendimiento_anual_monto:,.0f}</span> anuales.
     </p>
     <div style="height: 1px; background: linear-gradient(90deg, transparent, {ACCENT_COLOR}44, transparent); margin: 25px auto; width: 70%;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif; opacity: 0.95;">
