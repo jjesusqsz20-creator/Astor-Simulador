@@ -7,6 +7,7 @@ import os
 import base64
 import sys
 from PIL import Image
+import calendar
 
 # --- RESOLUCIÓN DE RUTAS PARA EXE ---
 def get_asset_path(relative_path):
@@ -1193,19 +1194,22 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 today = date.today()
                 st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-                c_d, c_m, c_a = st.columns([1, 1.6, 1.2])
-                with c_d:
-                    d_n = st.number_input("Día", 1, 31, 1, key="c_dn_costos", label_visibility="collapsed")
+                c_d, c_m, c_a = st.columns([1, 1.8, 1.2])
+                with c_a:
+                    y_n = st.number_input("Año", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
                 with c_m:
                     m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
                     m_n_s = st.selectbox("Mes", m_names, index=0, key="c_mn_costos", label_visibility="collapsed")
                     m_n = m_names.index(m_n_s) + 1
-                with c_a:
-                    y_n = st.number_input("Año", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
+                with c_d:
+                    # Calcular días disponibles según mes y año
+                    num_days = calendar.monthrange(int(y_n), int(m_n))[1]
+                    d_n = st.selectbox("Día", list(range(1, num_days + 1)), index=0, key="c_dn_costos", label_visibility="collapsed")
                 
                 try:
                     fecha_nac_c = date(int(y_n), int(m_n), int(d_n))
                 except:
+                    # Failsafe en caso de cambio brusco de mes que deje el día fuera de rango momentáneamente
                     fecha_nac_c = date(int(y_n), int(m_n), 1)
                 edad_c = today.year - fecha_nac_c.year - ((today.month, today.day) < (fecha_nac_c.month, fecha_nac_c.day))
                 st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_c} AÑOS</p>", unsafe_allow_html=True)
