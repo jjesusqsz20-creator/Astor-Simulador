@@ -1308,24 +1308,8 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-                    # PARÁMETROS FINANCIEROS
-                    rendimiento_anual = 0.10    # 10% Nominal
-                    inflacion_anual = 0.04      # 4% Inflación
-                    anios_espera = retiro_c - edad_c
-                    n_meses_retiro = 25 * 12    # 25 años de retiro
-                    
-                    # 1. Inflar la renta hasta el inicio del retiro
-                    renta_inflada = renta_c * ((1 + inflacion_anual) ** anios_espera)
-                    
-                    # 2. Calcular tasa real para mantener poder adquisitivo durante el retiro (Fórmula Fisher)
-                    tasa_real_anual = (1 + rendimiento_anual) / (1 + inflacion_anual) - 1
-                    r_m_real = tasa_real_anual / 12.0
-                    
-                    # 3. Meta de retiro (Valor Presente de una Anualidad con tasa real)
-                    if r_m_real > 0:
-                        meta_calculada = renta_inflada * (1 - (1 + r_m_real)**(-n_meses_retiro)) / r_m_real
-                    else:
-                        meta_calculada = renta_inflada * n_meses_retiro
+                    # Meta simplificada unificada
+                    meta_calculada = (renta_c * 12) / 0.10 # 10% por defecto
 
                     # Guardar en Base de Datos
                     guardar_datos_simulacion(
@@ -1486,126 +1470,34 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
         if not opciones_retiro: opciones_retiro = [70] # Failsafe si el usuario tiene 70
         
-        # Determinar el valor por defecto deseado
         desired_default = 60 if edad_inicial <= 35 else 65
-        
-        # Si el valor guardado en session_state sigue siendo válido y está en las opciones, lo usamos.
-        # Si no, usamos el desired_default si está disponible.
-        e_retiro_state = st.session_state.get("costos_edad_retiro", desired_default)
+        e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
         if e_retiro_state not in opciones_retiro:
             e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
-            
         idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
-        edad_retiro = st.selectbox("Edad a la que te quieres retirar", opciones_retiro, index=idx_retiro)
-        
-        rendimiento_anual = st.number_input("Rendimiento Anual Estimado (%)", min_value=1.0, value=10.0, step=0.5)
-        
-        # --- CONFIGURACIÓN DE INFLACIÓN ---
-        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro)
+        rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=10.0, step=0.5)
+        st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
         col_inf1, col_inf2 = st.columns(2)
         with col_inf1:
-            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>INFLACIÓN</p>", unsafe_allow_html=True)
-            inflacion_opcion = st.selectbox("Inflación", ["Activada", "Desactivada"], index=0, label_visibility="collapsed", key="inf_toggle_postergar")
+            st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">INFLACIÓN</p>', unsafe_allow_html=True)
+            inflacion_opcion = st.selectbox('Inflación', ['Activada', 'Desactivada'], index=0, label_visibility='collapsed', key='inf_toggle_postergar')
         with col_inf2:
-            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>% INFLACIÓN</p>", unsafe_allow_html=True)
-            tasa_inf_input = st.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1, label_visibility="collapsed", key="inf_val_postergar")
-        
-        inflacion_activa = (inflacion_opcion == "Activada")
-        tasa_inf_c = (tasa_inf_input / 100.0) if inflacion_activa else 0.0
-        
-        anios_hasta_retiro = max(0, edad_retiro - edad_inicial)
-        
-        # 1. Ajustar la renta deseada por inflación hasta el inicio del retiro
-        renta_m_inflada = renta_mensual_sidebar * ((1 + tasa_inf_c) ** anios_hasta_retiro)
-        
-        # 2. Cálculo de Meta de Retiro (Fondo Perpetuo con Tasa Real)
-        # Usamos tasa real para que el capital crezca con la inflación y el retiro mantenga su valor.
-        r_nom_c = rendimiento_anual / 100.0
-        
-        # Si la inflación está desactivada, tasa real = tasa nominal
-        if inflacion_activa:
-            r_real_c = (1 + r_nom_c) / (1 + tasa_inf_c) - 1
-        else:
-            r_real_c = r_nom_c
-        
-        if r_real_c > 0:
-            meta_retiro = (renta_m_inflada * 12) / r_real_c
-        else:
-            meta_retiro = (renta_m_inflada * 12) / (r_nom_c if r_nom_c > 0 else 0.01)
-
-        # Guardar en session state para otros cálculos
+            st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">% INFLACIÓN</p>', unsafe_allow_html=True)
+            tasa_inf_input = st.number_input('% Inflación', 0.0, 10.0, 4.0, 0.1, label_visibility='collapsed', key='inf_val_postergar')
+        inflacion_activa = (inflacion_opcion == 'Activada')
+        r_anual_dec = rendimiento_anual / 100.0
+        meta_retiro = (renta_m_input * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
+        fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
+        meta_neta = max(0.0, meta_retiro - fv_patrimonio)
         st.session_state.meta_retiro_val = meta_retiro
-
-        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
-        frecuencia = st.selectbox("Frecuencia de Visualización", ["Mensual", "Semestral", "Anual"], index=2)
-        
-        # Factores de conversión
-        dict_factores = {"Mensual": 1, "Semestral": 6, "Anual": 12}
+        st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
+        frecuencia = st.selectbox('Frecuencia de Visualización', ['Mensual', 'Semestral', 'Anual'], index=2)
+        dict_factores = {'Mensual': 1, 'Semestral': 6, 'Anual': 12}
         factor_frecuencia = dict_factores[frecuencia]
-        label_dinamico = f"Aportación {frecuencia}"
+        label_dinamico = f'Aportación {frecuencia}'
 
-        st.markdown("<hr style='margin: 10px 0; opacity: 0.1;'>", unsafe_allow_html=True)
-        
-        # Disparador Secreto Disfrazado (Icono de Seguridad)
-        if 'show_patrimonio' not in st.session_state:
-            st.session_state.show_patrimonio = False
-        if 'patrimonio_persist' not in st.session_state:
-            st.session_state.patrimonio_persist = 0.0
-            
-        st.markdown('<div id="secret-shield-trigger"></div>', unsafe_allow_html=True)
-        if st.button("🛡️", key="secret_pat_shield"):
-            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
-            st.rerun()
-        
-        if st.session_state.show_patrimonio:
-            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget")
-            st.session_state.patrimonio_persist = patrimonio_actual
-        else:
-            patrimonio_actual = st.session_state.patrimonio_persist
-        
-        # Parámetros de jubilación (fijos por ahora a petición del usuario)
-        años_retiro_pago = 5
-        rendimiento_retiro = 10.0
-        label_dinamico_retiro = f"Rendimiento {frecuencia}"
-
-    # --- LÓGICA DE CÁLCULO UNIFICADA (BUSCADOR DE APORTACIÓN REAL) ---
-    años_inversion = edad_retiro - edad_inicial
-    meses_totales = años_inversion * 12
-    
-    # Función de búsqueda de objetivo (Goal Seek) para encontrar la aportación necesaria 
-    # considerando comisiones Allianz (0.1% mensual, 0.9% trimestral, 15 UDIS...)
-    def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, infl_activa, tasa_infl, isr=0.0):
-        # Punto de partida: fórmula básica sin comisiones
-        r_m = (tasa_anual / 100) / 12
-        if r_m > 0:
-            low = (meta_objetivo * r_m) / (((1 + r_m) ** (plazo_y * 12)) - 1)
-        else:
-            low = meta_objetivo / (plazo_y * 12)
-            
-        # Ampliamos el rango para la búsqueda (considerando que las comisiones piden más ahorro)
-        high = low * 2.5 
-        
-        # Búsqueda binaria por 20 iteraciones para precisión de centavos
-        for _ in range(20):
-            mid = (low + high) / 2
-            df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr, plazo_anos=plazo_y)
-            final_val = df_temp['Saldo de Fondo'].iloc[-1]
-            
-            if final_val < meta_objetivo:
-                low = mid
-            else:
-                high = mid
-        return (low + high) / 2
-
-    r_anual_dec = (rendimiento_anual / 100.0)
-    # LÓGICA DE PATRIMONIO ACTUAL:
-    # Calculamos cuánto valdrá el dinero que el usuario ya tiene hoy cuando llegue a su retiro
-    fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
-    # La nueva meta es lo que falta por fondear
-    meta_neta = max(0.0, meta_retiro - fv_patrimonio)
-
-    # Calcular aportación inicial necesaria hoy
-    # Nota: Usamos la meta_neta (meta_retiro - patrimonio actual futuro)
+    # --- LÓGICA DE CÁLCULO UNIFICADA ---
     aporte_m = encontrar_aporte_necesario(
         meta_neta, 
         int(edad_inicial), 
