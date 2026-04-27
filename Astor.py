@@ -1505,7 +1505,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         col_inf1, col_inf2 = st.columns(2)
         with col_inf1:
             st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>INFLACIÓN</p>", unsafe_allow_html=True)
-            inflacion_opcion = st.selectbox("Inflación", ["Activada", "Desactivada"], index=1, label_visibility="collapsed", key="inf_toggle_postergar")
+            inflacion_opcion = st.selectbox("Inflación", ["Activada", "Desactivada"], index=0, label_visibility="collapsed", key="inf_toggle_postergar")
         with col_inf2:
             st.markdown(f"<p style='margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else '#555'};'>% INFLACIÓN</p>", unsafe_allow_html=True)
             tasa_inf_input = st.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1, label_visibility="collapsed", key="inf_val_postergar")
@@ -1568,22 +1568,46 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         rendimiento_retiro = 10.0
         label_dinamico_retiro = f"Rendimiento {frecuencia}"
 
-    # --- CÁLCULOS BASE ---
+    # --- LÓGICA DE CÁLCULO UNIFICADA (BUSCADOR DE APORTACIÓN REAL) ---
     años_inversion = edad_retiro - edad_inicial
     meses_totales = años_inversion * 12
-    r_anual_dec = (rendimiento_anual / 100.0)
-    r_mensual = r_anual_dec / 12.0
     
-    # LÓGICA DE PATRIMONIO ACTUAL:
-    # Calculamos cuánto valdrá el dinero que el usuario ya tiene hoy cuando llegue a su retiro
-    fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
-    # La nueva meta es lo que falta por fondear
-    meta_neta = max(0.0, meta_retiro - fv_patrimonio)
+    # Función de búsqueda de objetivo (Goal Seek) para encontrar la aportación necesaria 
+    # considerando comisiones Allianz (0.1% mensual, 0.9% trimestral, 15 UDIS...)
+    def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, infl_activa, tasa_infl, isr=0.0):
+        # Punto de partida: fórmula básica sin comisiones
+        r_m = (tasa_anual / 100) / 12
+        if r_m > 0:
+            low = (meta_objetivo * r_m) / (((1 + r_m) ** (plazo_y * 12)) - 1)
+        else:
+            low = meta_objetivo / (plazo_y * 12)
+            
+        # Ampliamos el rango para la búsqueda (considerando que las comisiones piden más ahorro)
+        high = low * 2.5 
+        
+        # Búsqueda binaria por 20 iteraciones para precisión de centavos
+        for _ in range(20):
+            mid = (low + high) / 2
+            df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr, plazo_anos=plazo_y)
+            final_val = df_temp['Saldo de Fondo'].iloc[-1]
+            
+            if final_val < meta_objetivo:
+                low = mid
+            else:
+                high = mid
+        return (low + high) / 2
 
-    if r_mensual > 0:
-        aporte_m = (meta_neta * r_mensual) / (((1 + r_mensual) ** meses_totales) - 1)
-    else:
-        aporte_m = meta_neta / meses_totales
+    # Calcular aportación inicial necesaria hoy
+    # Nota: Usamos la meta_neta (meta_retiro - patrimonio actual futuro)
+    aporte_m = encontrar_aporte_necesario(
+        meta_neta, 
+        int(edad_inicial), 
+        años_inversion, 
+        rendimiento_anual, 
+        inflacion_activa, 
+        tasa_inf_input,
+        isr_retencion=0.0 # No aplicamos ISR para la meta bruta
+    )
 
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
@@ -1610,10 +1634,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         # El Patrimonio Actual crece igual hasta el retiro en todos los años de espera
         # meta_neta ya está calculada arriba usando los años totales hasta el retiro
         if meses_e > 0:
-            if r_mensual_dec > 0:
-                aporte_e = (meta_neta * r_mensual_dec) / (((1 + r_mensual_dec) ** (meses_e)) - 1)
-            else:
-                aporte_e = meta_neta / meses_e
+            aporte_e = encontrar_aporte_necesario(
+                meta_neta, 
+                int(edad_espera), 
+                (edad_retiro - edad_espera), 
+                rendimiento_anual, 
+                inflacion_activa, 
+                tasa_inf_input
+            )
         else:
             # Si es el año de retiro, el costo es la meta neta completa (un solo pago)
             aporte_e = meta_neta
