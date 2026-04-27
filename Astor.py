@@ -1387,9 +1387,26 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
         # (Rendimiento Anual moved below as requested)
-
-        e_inicial_default = st.session_state.get("costos_edad_inicial", 18)
-        edad_inicial = st.number_input("Edad a la que quieres empezar", min_value=18, max_value=70, value=int(e_inicial_default), step=1)
+        today = date.today()
+        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+        cs_d, cs_m, cs_a = st.columns([1, 1.8, 1.2])
+        with cs_a:
+            y_s = st.number_input("Año ", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
+        with cs_m:
+            m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+            m_s_s = st.selectbox("Mes ", m_names, index=0, key="c_mn_costos", label_visibility="collapsed")
+            m_s = m_names.index(m_s_s) + 1
+        with cs_d:
+            num_days_s = calendar.monthrange(int(y_s), int(m_s))[1]
+            d_s = st.selectbox("Día ", list(range(1, num_days_s + 1)), index=0, key="c_dn_costos", label_visibility="collapsed")
+        
+        try:
+            fecha_nac_s = date(int(y_s), int(m_s), int(d_s))
+        except:
+            fecha_nac_s = date(int(y_s), int(m_s), 1)
+            
+        edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
+        st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
         
         # Actualizar default de retiro basado en la edad inicial
         # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
