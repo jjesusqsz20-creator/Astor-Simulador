@@ -1566,6 +1566,17 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     # Variable visual para el HUD
     meta_retiro_visual = meta_final_objetivo + fv_patrimonio
     aporte_m_metric = aporte_m
+    
+    # Generar el desglose REAL empezando HOY para usarlo en métricas y tablas
+    df_costos_real, _ = calcular_escenario(
+        aporte_m, 
+        int(edad_inicial), 
+        rendimiento_anual, 
+        inflacion_activa, 
+        tasa_inf_input,
+        isr_retencion=0.0,
+        plazo_anos=años_inversion
+    )
 
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
@@ -1729,17 +1740,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Plan de Acumulación: ${meta_retiro:,.2f} a los {edad_retiro} años</h3>", unsafe_allow_html=True)
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
-        # Generar el desglose REAL usando el motor de Allianz para la tabla dinámica
-        # IMPORTANTE: Usamos inflacion_activa real para que la aportación crezca en la tabla
-        df_costos_real, _ = calcular_escenario(
-            aporte_m, 
-            int(edad_inicial), 
-            rendimiento_anual, 
-            inflacion_activa, 
-            tasa_inf_input,
-            isr_retencion=0.0,
-            plazo_anos=años_inversion
-        )
+        # El DataFrame df_costos_real ya fue calculado arriba para HOY
+        df_espera_full = df_costos_real.copy()
         
         # Adaptar el DataFrame a la frecuencia seleccionada (Mensual, Semestral, Anual)
         if frecuencia == "Anual":
