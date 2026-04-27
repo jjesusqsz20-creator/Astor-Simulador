@@ -1589,43 +1589,48 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         
     for p_delay in p_delays:
         edad_espera = edad_inicial + p_delay
-        if edad_espera > edad_retiro:
+        if edad_espera >= edad_retiro:
             break
             
         meses_e = (edad_retiro - edad_espera) * 12
-        # El Patrimonio Actual crece igual hasta el retiro en todos los años de espera
-        # meta_neta ya está calculada arriba usando los años totales hasta el retiro
+        años_restantes = (edad_retiro - edad_espera)
+        
+        # IMPORTANTE: Usamos meta_final_objetivo (la meta ya inflada hasta el retiro) 
+        # para que el objetivo sea el mismo sin importar cuándo empieces.
         if meses_e > 0:
             aporte_e = encontrar_aporte_necesario(
-                meta_neta, 
+                meta_final_objetivo, 
                 int(edad_espera), 
-                (edad_retiro - edad_espera), 
+                años_restantes, 
                 rendimiento_anual, 
                 inflacion_activa, 
-                tasa_inf_input
+                tasa_inf_input,
+                isr=0.0
             )
+            # Calcular el total pagado REAL (considerando incrementos por inflación si están activos)
+            df_e, _ = calcular_escenario(aporte_e, int(edad_espera), rendimiento_anual, inflacion_activa, tasa_inf_input, isr_retencion=0.0, plazo_anos=años_restantes)
+            total_pago = df_e['Aportación Acumulada'].iloc[-1]
         else:
-            # Si es el año de retiro, el costo es la meta neta completa (un solo pago)
-            aporte_e = meta_neta
-        # Totales acumulados
-        años_restantes = (edad_retiro - edad_espera)
-        total_pago = aporte_e * 12 * años_restantes if años_restantes > 0 else meta_retiro
-        rendimiento_total = meta_retiro - total_pago
+            aporte_e = meta_final_objetivo
+            total_pago = meta_final_objetivo
+            
+        rendimiento_total = meta_retiro_visual - total_pago
         
         costos_espera_list.append({
             "edad": edad_espera,
             "aporte": aporte_e,
             "diff": aporte_e - aporte_m_metric,
-            "sobre_costo_total": (aporte_e - aporte_m_metric) * 12 * años_restantes,
+            "sobre_costo_total": total_pago - (aporte_m_metric * 12 * (edad_retiro - edad_inicial)), # Simplificado o real? Usamos diferencia de totales
             "total_pago": total_pago,
             "rendimiento": rendimiento_total
         })
 
     # Generar el HTML de las filas
     # Fila Especial: HOY
-    años_hoy = (edad_retiro - edad_inicial)
-    total_pago_hoy = aporte_m_metric * 12 * años_hoy
-    rendimiento_hoy = meta_retiro - total_pago_hoy
+    # Obtenemos el total REAL aportado hoy del plan principal (ya calculado arriba)
+    # df_costos_real es el plan empezando HOY
+    total_pago_hoy = df_costos_real['Aportación Acumulada'].iloc[-1]
+    rendimiento_hoy = meta_retiro_visual - total_pago_hoy
 
     rows_html_unified = f'<tr style="background-color: {ACCENT_COLOR}11; border-bottom: 2px solid {ACCENT_COLOR}33;">' \
                          f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-weight: 800; text-align: center; text-transform: uppercase;">Hoy ({edad_inicial} años)</td>' \
@@ -1637,13 +1642,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
                          f'</tr>'
 
     for itm in costos_espera_list:
+        sobre_costo_real = itm["total_pago"] - total_pago_hoy
         diff_clr = "#ff4b4b" if itm['diff'] > 0 else TEXT_COLOR
         bg_r = "rgba(255,255,255,0.03)" if itm['edad'] % 2 == 0 else "transparent"
         rows_html_unified += f'<tr style="background-color: {bg_r}; border-bottom: 1px solid rgba(255,255,255,0.05);">' \
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; font-weight: bold; text-align: center;">{itm["edad"]} años</td>' \
                              f'<td style="padding: 15px; color: {ACCENT_COLOR}; font-family: \'Cinzel\', serif; font-size: 1.25rem; font-weight: 700; text-align: center;">${itm["aporte"]:,.2f}</td>' \
                              f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">+${itm["diff"]:,.2f}</td>' \
-                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">${itm["sobre_costo_total"]:,.0f}</td>' \
+                             f'<td style="padding: 15px; color: {diff_clr}; font-weight: bold; text-align: center;">${sobre_costo_real:,.0f}</td>' \
                              f'<td style="padding: 15px; color: {TEXT_COLOR}; text-align: center;">${itm["total_pago"]:,.0f}</td>' \
                              f'<td style="padding: 15px; color: #34D399; font-weight: bold; text-align: center;">${itm["rendimiento"]:,.0f}</td>' \
                              f'</tr>'
