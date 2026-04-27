@@ -1085,7 +1085,6 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         
     return pd.DataFrame(datos), bono_porcentaje
 
-# --- FUNCIÓN GLOBAL DE BÚSQUEDA DE OBJETIVO (Goal Seek) ---
 def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, infl_activa, tasa_infl, isr=0.0):
     """
     Encuentra la aportación mensual necesaria para alcanzar una meta usando el motor de Allianz.
@@ -1104,7 +1103,8 @@ def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, inf
     for _ in range(25):
         mid = (low + high) / 2
         # Simulamos con el motor real
-        df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr, plazo_anos=plazo_y)
+        # IMPORTANTE: Pasamos isr_retencion como argumento posicional o keyword correcto
+        df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr_retencion=isr, plazo_anos=plazo_y)
         final_val = df_temp['Saldo de Fondo'].iloc[-1]
         
         if final_val < meta_objetivo:
@@ -1546,15 +1546,25 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         label_dinamico = f'Aportación {frecuencia}'
 
     # --- LÓGICA DE CÁLCULO UNIFICADA ---
+    # Si la inflación está activa, inflamos la META, pero mantenemos la APORTACIÓN fija (según instrucción del usuario)
+    meta_final_objetivo = meta_neta
+    if inflacion_activa:
+        meta_final_objetivo = meta_neta * ((1 + (tasa_inf_input / 100.0)) ** años_inversion)
+    
+    # Buscamos la aportación fija (inflacion_activa=False para el motor) que alcance la meta inflada
     aporte_m = encontrar_aporte_necesario(
-        meta_neta, 
+        meta_final_objetivo, 
         int(edad_inicial), 
         años_inversion, 
         rendimiento_anual, 
-        inflacion_activa, 
+        False, # Aportación SIEMPRE igual (fija) según instrucción
         tasa_inf_input,
-        isr=0.0 # No aplicamos ISR para la meta bruta
+        isr=0.0
     )
+    
+    # Variable visual para el HUD
+    meta_retiro_visual = meta_final_objetivo + fv_patrimonio
+    aporte_m_metric = aporte_m
 
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
@@ -1650,7 +1660,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Meta de Retiro ({edad_retiro} años)</p>
-<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
+<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro_visual:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">CAPITAL OBJETIVO</div>
 </div>
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
@@ -1670,8 +1680,8 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, {ACCENT_COLOR}15, transparent); pointer-events: none;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif;">
         Para garantizar un retiro mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${renta_mensual_sidebar:,.0f}</span>, 
-        es indispensable consolidar un fondo de inversión de <span style="color: #34D399; font-weight: 800;">${meta_retiro:,.0f}</span> 
-        que genere un rendimiento de <span style="color: {GOLD_COLOR}; font-weight: 800;">${rendimiento_anual_monto:,.0f}</span> anuales.
+        es indispensable consolidar un fondo de inversión de <span style="color: #34D399; font-weight: 800;">${meta_retiro_visual:,.0f}</span> 
+        que genere un rendimiento de <span style="color: {GOLD_COLOR}; font-weight: 800;">{meta_retiro_visual * (rendimiento_anual / 100.0):,.0f}</span> anuales.
     </p>
     <div style="height: 1px; background: linear-gradient(90deg, transparent, {ACCENT_COLOR}44, transparent); margin: 25px auto; width: 70%;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif; opacity: 0.95;">
@@ -1713,13 +1723,14 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
         # Generar el desglose REAL usando el motor de Allianz para la tabla dinámica
+        # IMPORTANTE: Aquí también pasamos inflacion_activa=False para que la aportación sea fija en la tabla
         df_costos_real, _ = calcular_escenario(
             aporte_m, 
             int(edad_inicial), 
             rendimiento_anual, 
-            inflacion_activa, 
+            False, # Aportación FIJA por instrucción del usuario
             tasa_inf_input,
-            isr=0.0,
+            isr_retencion=0.0,
             plazo_anos=años_inversion
         )
         
