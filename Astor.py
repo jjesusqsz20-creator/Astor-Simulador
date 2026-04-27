@@ -1485,7 +1485,26 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         with col_inf2:
             st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">% INFLACIÓN</p>', unsafe_allow_html=True)
             tasa_inf_input = st.number_input('% Inflación', 0.0, 10.0, 4.0, 0.1, label_visibility='collapsed', key='inf_val_postergar')
-        inflacion_activa = (inflacion_opcion == 'Activada')
+        inflacion_activa = (inflacion_opcion == "Activada")
+        
+        # Disparador Secreto Disfrazado (Icono de Seguridad) para Patrimonio Actual
+        if 'show_patrimonio' not in st.session_state:
+            st.session_state.show_patrimonio = False
+        if 'patrimonio_persist' not in st.session_state:
+            st.session_state.patrimonio_persist = 0.0
+            
+        st.markdown('<div id="secret-shield-trigger"></div>', unsafe_allow_html=True)
+        if st.button("🛡️", key="secret_pat_shield_costos"):
+            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
+            st.rerun()
+        
+        if st.session_state.show_patrimonio:
+            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget_costos")
+            st.session_state.patrimonio_persist = patrimonio_actual
+        else:
+            patrimonio_actual = st.session_state.patrimonio_persist
+
+        años_inversion = edad_retiro - edad_inicial
         r_anual_dec = rendimiento_anual / 100.0
         meta_retiro = (renta_mensual_sidebar * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
         fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
