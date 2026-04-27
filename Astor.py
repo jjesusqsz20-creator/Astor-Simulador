@@ -1487,7 +1487,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
             tasa_inf_input = st.number_input('% Inflación', 0.0, 10.0, 4.0, 0.1, label_visibility='collapsed', key='inf_val_postergar')
         inflacion_activa = (inflacion_opcion == 'Activada')
         r_anual_dec = rendimiento_anual / 100.0
-        meta_retiro = (renta_m_input * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
+        meta_retiro = (renta_mensual_sidebar * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
         fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
         meta_neta = max(0.0, meta_retiro - fv_patrimonio)
         st.session_state.meta_retiro_val = meta_retiro
