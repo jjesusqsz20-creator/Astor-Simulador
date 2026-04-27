@@ -1712,84 +1712,87 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
         st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Plan de Acumulación: ${meta_retiro:,.2f} a los {edad_retiro} años</h3>", unsafe_allow_html=True)
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
-        meses_acumulacion = años_inversion * 12
-        n_periodos = meses_acumulacion // factor_frecuencia
-        datos_tabla = []
-        aporte_acum_total = 0.0
+        # Generar el desglose REAL usando el motor de Allianz para la tabla dinámica
+        df_costos_real, _ = calcular_escenario(
+            aporte_m, 
+            int(edad_inicial), 
+            rendimiento_anual, 
+            inflacion_activa, 
+            tasa_inf_input,
+            isr=0.0,
+            plazo_anos=años_inversion
+        )
         
-        for p in range(1, n_periodos + 1):
-            monto_periodo = aporte_m * factor_frecuencia
-            aporte_acum_total += monto_periodo
-            m_actual = p * factor_frecuencia
+        # Adaptar el DataFrame a la frecuencia seleccionada (Mensual, Semestral, Anual)
+        if frecuencia == "Anual":
+            df_espera = df_costos_real.groupby('Año').agg({
+                'Edad': 'last',
+                'Aportación': 'sum',
+                'Aportación Acumulada': 'last',
+                'Saldo de Fondo': 'last',
+                'Saldo Disponible': 'last',
+                'Post retención': 'last'
+            }).reset_index()
+            df_espera.rename(columns={
+                'Año': 'AÑO', 
+                'Edad': 'EDAD', 
+                'Aportación': 'APORTACIÓN ANUAL', 
+                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
+                'Saldo de Fondo': 'SALDO DE FONDO', 
+                'Saldo Disponible': 'SALDO DISPONIBLE', 
+                'Post retención': 'POST RETENCIÓN'
+            }, inplace=True)
+        elif frecuencia == "Semestral":
+            # Agrupar cada 6 meses
+            df_costos_real['Semestre'] = (df_costos_real['Mes Global'] - 1) // 6 + 1
+            df_espera = df_costos_real.groupby('Semestre').agg({
+                'Año': 'last',
+                'Edad': 'last',
+                'Aportación': 'sum',
+                'Aportación Acumulada': 'last',
+                'Saldo de Fondo': 'last',
+                'Saldo Disponible': 'last',
+                'Post retención': 'last'
+            }).reset_index()
+            df_espera.rename(columns={
+                'Semestre': 'PERIODO',
+                'Año': 'AÑO', 
+                'Edad': 'EDAD', 
+                'Aportación': 'APORTACIÓN SEMESTRAL', 
+                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
+                'Saldo de Fondo': 'SALDO DE FONDO', 
+                'Saldo Disponible': 'SALDO DISPONIBLE', 
+                'Post retención': 'POST RETENCIÓN'
+            }, inplace=True)
+        else:
+            # Mensual
+            df_espera = df_costos_real.copy()
+            df_espera.rename(columns={
+                'Mes Global': 'MES',
+                'Año': 'AÑO', 
+                'Edad': 'EDAD', 
+                'Aportación': 'APORTACIÓN MENSUAL', 
+                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
+                'Saldo de Fondo': 'SALDO DE FONDO', 
+                'Saldo Disponible': 'SALDO DISPONIBLE', 
+                'Post retención': 'POST RETENCIÓN'
+            }, inplace=True)
+
+        if not df_espera.empty:
+            # Identificar la columna de aportación del periodo (Anual, Semestral o Mensual)
+            col_aporte = next((c for c in df_espera.columns if "APORTACIÓN" in c and "ACUMULADA" not in c), "APORTACIÓN ANUAL")
+            col_periodo = next((c for c in df_espera.columns if c in ["AÑO", "PERIODO", "MES"]), "AÑO")
             
-            # Cálculo de Saldo Total
-            if r_mensual_dec > 0:
-                saldo_total = aporte_m * (((1 + r_mensual_dec) ** m_actual) - 1) / r_mensual_dec
-            else:
-                saldo_total = aporte_m * m_actual
-            
-            # --- LÓGICA DE SALDO DISPONIBLE Y POST RETENCIÓN (ALLIANZ STYLE) ---
-            # 1. Separación de Cubetas
-            if m_actual <= 18:
-                saldo_inicial = saldo_total
-                saldo_regular = 0.0
-            else:
-                # Saldo de los primeros 18 meses crecido hasta el mes actual
-                if r_mensual_dec > 0:
-                    base_inicial = aporte_m * (((1 + r_mensual_dec) ** 18) - 1) / r_mensual_dec
-                    saldo_inicial = base_inicial * ((1 + r_mensual_dec) ** (m_actual - 18))
-                else:
-                    saldo_inicial = aporte_m * 18
-                saldo_regular = max(0, saldo_total - saldo_inicial)
-                
-            # 2. Disponibilidad
-            edad_en_p = edad_inicial + (m_actual // 12)
-            anio_en_p = m_actual / 12
-            
-            if edad_en_p >= 65 or anio_en_p >= 25:
-                saldo_disponible = saldo_total
-            else:
-                saldo_disponible = saldo_regular
-                
-            # 3. Retención Allianz
-            tasa_ret_allianz = 0.0
-            if edad_en_p >= 60:
-                tasa_ret_allianz = 0.0
-            else:
-                anio_entero = int(anio_en_p) + 1
-                if anio_entero == 1: tasa_ret_allianz = 0.00
-                elif anio_entero == 2: tasa_ret_allianz = 0.0043
-                elif anio_entero == 3: tasa_ret_allianz = 0.0061
-                elif anio_entero == 4: tasa_ret_allianz = 0.0077
-                elif 5 <= anio_entero <= 9: tasa_ret_allianz = 0.0090
-                elif 10 <= anio_entero <= 14: tasa_ret_allianz = 0.0319
-                elif 15 <= anio_entero <= 19: tasa_ret_allianz = 0.0618
-                else: tasa_ret_allianz = 0.0818
-                
-            saldo_post = saldo_disponible * (1 - tasa_ret_allianz)
-            
-            datos_tabla.append({
-                "AÑO": (m_actual - 1) // 12 + 1,
-                "EDAD": int(edad_en_p),
-                "APORTACIÓN ANUAL": monto_periodo, # Nombre estándar
-                "APORTACIÓN ACUMULADA": aporte_acum_total,
-                "SALDO DE FONDO": saldo_total,
-                "SALDO DISPONIBLE": saldo_disponible,
-                "POST RETENCIÓN": saldo_post
-            })
-            
-        if datos_tabla:
-            df_espera = pd.DataFrame(datos_tabla)
             html_table = (
                 df_espera.style
                 .format({
-                    "APORTACIÓN ANUAL": "${:,.0f}",
+                    col_aporte: "${:,.0f}",
                     "APORTACIÓN ACUMULADA": "${:,.0f}",
                     "SALDO DE FONDO": "${:,.0f}",
                     "SALDO DISPONIBLE": "${:,.0f}",
                     "POST RETENCIÓN": "${:,.0f}",
                     "EDAD": "{:.0f}",
-                    "AÑO": "{:.0f}"
+                    col_periodo: "{:.0f}"
                 })
                 .set_properties(**{'text-align': 'center'})
                 .hide(axis="index")
