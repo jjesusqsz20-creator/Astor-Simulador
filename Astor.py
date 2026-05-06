@@ -232,7 +232,27 @@ st.markdown(f"""
         background-color: {ACCENT_COLOR}11 !important;
     }}
 
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Special+Elite&display=swap');
+
+    /* Fuente Global Segura (sin romper íconos) */
+    html, body, .stApp {{
+        font-family: 'Inter', sans-serif !important;
+    }}
+    
+    h1, h2, h3, h4, h5, h6, p, label, button, th, td, a, .stMarkdown p {{
+        font-weight: 900 !important;
+    }}
+    
+    /* Forzar que los íconos recuperen su fuente original */
+    .material-symbols-rounded, .material-icons, [class*="icon"], [class*="stIcon"] {{
+        font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
+        font-weight: normal !important;
+    }}
+    .special-elite, .special-elite * {{
+        font-family: 'Special Elite', monospace !important;
+        font-weight: normal !important;
+        letter-spacing: 0px !important;
+    }}
 
     .stApp {{ 
         background-color: {BG_COLOR} !important;
@@ -1137,7 +1157,33 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if 'modulo_activo' not in st.session_state:
-    st.session_state.modulo_activo = "Hub"
+    _mod = "Hub"
+    try:
+        if "modulo" in st.query_params:
+            _mod = st.query_params["modulo"]
+    except AttributeError:
+        try:
+            params = st.experimental_get_query_params()
+            if "modulo" in params:
+                _mod = params["modulo"][0]
+        except Exception:
+            pass
+    st.session_state.modulo_activo = _mod
+
+try:
+    if st.session_state.modulo_activo == "Hub":
+        if "modulo" in st.query_params:
+            del st.query_params["modulo"]
+    else:
+        st.query_params["modulo"] = st.session_state.modulo_activo
+except AttributeError:
+    try:
+        if st.session_state.modulo_activo == "Hub":
+            st.experimental_set_query_params()
+        else:
+            st.experimental_set_query_params(modulo=st.session_state.modulo_activo)
+    except Exception:
+        pass
 
 def ir_a_simulador(nombre_sim):
     st.session_state.modulo_activo = nombre_sim
@@ -1174,7 +1220,7 @@ if st.session_state.modulo_activo == "Hub":
         st.markdown(f"""
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 50px;">
                 <img src="data:image/png;base64,{bin_str_logo}" style="width: 250px; margin-bottom: 20px;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 5rem;">PROYECTO 5%</h1>
+                <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 5rem;">PROYECTO 5%</h1>
             </div>
         """, unsafe_allow_html=True)
     
@@ -1355,71 +1401,71 @@ if st.session_state.modulo_activo == "Hub":
                     st.session_state.modulo_activo = "✨ Nuevo Simulador"
                     st.rerun()
 
-    # st.markdown("<br><br>", unsafe_allow_html=True)
-    # c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
 
-    # with c6:
-    #     # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
-    #     st.markdown(f"""
-    #         <div class="hud-card-content">
-    #             <div class="hud-tag"></div>
-    #             <div class="sc-noise"></div>
-    #             <div class="hud-corner corner-tl" style="border-color: #34D399;"></div>
-    #             <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
-    #             <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
-    #             <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
-    #             <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
-    #             <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
-    #             <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
-    #             <div style="text-align: center; padding: 45px 20px;">
-    #                 <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
-    #                 <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">FINANCIERO</div>
-    #                 <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Administro bien mis gastos?</div>
-    #             </div>
-    #         </div>
-    #     """, unsafe_allow_html=True)
-    #     
-    #     if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
-    #         st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
-    #         st.rerun()
-    #         
-    #     if st.session_state.show_planificador_form:
-    #         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-    #         col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
-    #         with col_main:
-    #             nombre_p = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="plan_name_input")
-    #             ingreso_p = st.number_input("Ingreso mensual", min_value=1000, value=30000, step=1000, key="plan_ingreso_input")
-    #             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    #             
-    #             opciones_dep = [0, 1, 2, 3, 4, 5, 6]
-    #             dependientes_p = st.selectbox("Dependientes económicos", opciones_dep, key="plan_dep_input")
-    #             st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    #             
-    #             nec_opciones = ["🏠 Vivienda (Renta/hipoteca)", "🍎 Despensa", "🚗 Gasolina / Transporte", "⚡ Servicios (luz, agua, gas, internet)", "🧹 Personal de limpieza"]
-    #             with st.popover("📋 Necesidades y Servicios", use_container_width=True):
-    #                 for op in nec_opciones:
-    #                     st.checkbox(op, key=f"sidebar_chk_{op}")
-    #                     
-    #             est_opciones = ["🎓 Educación / colegiatura", "🥂 Salidas y restaurante", "📺 Suscripciones y digital", "💅 Cuidado personal y ropa", "🎨 Hobbies y proyectos", "🏋️ Gimnasio/club", "🐾 Mascotas (Comida y cuidados)", "🚲 Uber Eats / Delivery", "✈️ Viajes y Vacaciones", "📂 Otros gastos"]
-    #             with st.popover("📋 Estilo de Vida", use_container_width=True):
-    #                 for op in est_opciones:
-    #                     st.checkbox(op, key=f"sidebar_chk_est_{op}")
-    #                     
-    #             cred_opciones = ["🚗 Crédito de auto", "💳 Tarjeta de crédito (Meses sin intereses)", "🏦 Otros créditos"]
-    #             with st.popover("📋 Créditos", use_container_width=True):
-    #                 for op in cred_opciones:
-    #                     st.checkbox(op, key=f"sidebar_chk_cred_{op}")
-    #             
-    #             st.markdown("<br>", unsafe_allow_html=True)
-    #             
-    #             if st.button("📊 ABRIR PLANIFICADOR", use_container_width=True):
-    #                 # Sincronizar con las variables exactas que utiliza planificador.py
-    #                 st.session_state['nombre_cliente'] = nombre_p
-    #                 st.session_state['sidebar_ingreso'] = float(ingreso_p)
-    #                 st.session_state['num_dependientes'] = dependientes_p
-    #                 
-    #                 st.session_state.modulo_activo = "📈 Planificador Financiero"
-    #                 st.rerun()
+    with c6:
+        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
+        st.markdown(f"""
+            <div class="hud-card-content">
+                <div class="hud-tag"></div>
+                <div class="sc-noise"></div>
+                <div class="hud-corner corner-tl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
+                <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
+                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
+                <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
+                <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
+                <div style="text-align: center; padding: 45px 20px;">
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
+                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">FINANCIERO</div>
+                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Administro bien mis gastos?</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
+            st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
+            st.rerun()
+            
+        if st.session_state.show_planificador_form:
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
+            with col_main:
+                nombre_p = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="plan_name_input")
+                ingreso_p = st.number_input("Ingreso mensual", min_value=1000, value=30000, step=1000, key="plan_ingreso_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                
+                opciones_dep = [0, 1, 2, 3, 4, 5, 6]
+                dependientes_p = st.selectbox("Dependientes económicos", opciones_dep, key="plan_dep_input")
+                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+                
+                nec_opciones = ["🏠 Vivienda (Renta/hipoteca)", "🍎 Despensa", "🚗 Gasolina / Transporte", "⚡ Servicios (luz, agua, gas, internet)", "🧹 Personal de limpieza"]
+                with st.popover("📋 Necesidades y Servicios", use_container_width=True):
+                    for op in nec_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_{op}")
+                        
+                est_opciones = ["🎓 Educación / colegiatura", "🥂 Salidas y restaurante", "📺 Suscripciones y digital", "💅 Cuidado personal y ropa", "🎨 Hobbies y proyectos", "🏋️ Gimnasio/club", "🐾 Mascotas (Comida y cuidados)", "🚲 Uber Eats / Delivery", "✈️ Viajes y Vacaciones", "📂 Otros gastos"]
+                with st.popover("📋 Estilo de Vida", use_container_width=True):
+                    for op in est_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_est_{op}")
+                        
+                cred_opciones = ["🚗 Crédito de auto", "💳 Tarjeta de crédito (Meses sin intereses)", "🏦 Otros créditos"]
+                with st.popover("📋 Créditos", use_container_width=True):
+                    for op in cred_opciones:
+                        st.checkbox(op, key=f"sidebar_chk_cred_{op}")
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                if st.button("📊 ABRIR PLANIFICADOR", use_container_width=True):
+                    # Sincronizar con las variables exactas que utiliza planificador.py
+                    st.session_state['nombre_cliente'] = nombre_p
+                    st.session_state['sidebar_ingreso'] = float(ingreso_p)
+                    st.session_state['num_dependientes'] = dependientes_p
+                    
+                    st.session_state.modulo_activo = "📈 Planificador Financiero"
+                    st.rerun()
     #         
     # with c8:
     #     st.markdown(f"""
@@ -1663,7 +1709,7 @@ if st.session_state.modulo_activo == "✨ Nuevo Simulador":
     # BLOQUE MAESTRO HUD UNIFICADO
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 35px; opacity: 0.9;">
-    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.5rem;">PROYECTO 5%</h1>
+    <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 3.5rem;">PROYECTO 5%</h1>
     <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-top: 10px;">EL COSTO DE POSTERGAR</h2>
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
@@ -1967,7 +2013,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             else:
                 st.markdown(f"""
                     <div style="text-align: center; padding: 10px; border-bottom: 2px solid {COLORES[0]}; margin-bottom: 20px;">
-                        <h2 style="color: {TEXT_COLOR}; margin:0;">ASTOR</h2>
+                        <h2 style="color: {TEXT_COLOR}; margin:0;">SIMULADOR</h2>
                         <p style="color: #6b7280; font-size: 0.8rem; margin:0;">ASESORÍA FINANCIERA Y SEGUROS</p>
                     </div>
                 """, unsafe_allow_html=True)
@@ -2257,7 +2303,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
             </style>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px;">
                 <img src="data:image/png;base64,{bin_str_logo}" style="width: 180px; margin-bottom: 20px;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">ASTOR SIMULADOR</h1>
+                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">SIMULADOR</h1>
             </div>
         """, unsafe_allow_html=True)
     else:
@@ -2667,7 +2713,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 ws_portada.insert_image('A1', logo_portada, {'x_scale': 0.10, 'y_scale': 0.10, 'x_offset': 15, 'y_offset': 10, 'object_positioned': 1})
         
             # Título Principal centrado respecto a la zona de datos
-            ws_portada.merge_range('D3:F6', "Astor simulador", fmt_title_main)
+            ws_portada.merge_range('D3:F6', "Simulador", fmt_title_main)
             
             # --- SECCIÓN 1: DATOS DEL CLIENTE ---
             row = 25 # MÁXIMO AIRE: Bajamos hasta la fila 25 para que nada se encime
@@ -2878,7 +2924,7 @@ if st.session_state.modulo_activo == "⚖️ Simulador Comparación":
     # DISEÑO DEL MAIN HUB PARA COMPARACIÓN
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 25px; margin-top: 25px;">
-    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.0rem;">ASTOR SIMULADOR</h1>
+    <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 3.0rem;">SIMULADOR</h1>
     <h2 style="color: #A855F7; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem; margin-top: 10px;">EL COSTO DE OPORTUNIDAD: CASA VS BOLSA</h2>
 </div>
 """, unsafe_allow_html=True)

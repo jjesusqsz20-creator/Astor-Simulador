@@ -955,20 +955,50 @@ def render_planificador():
             st.markdown("### 🏠 Necesidades y servicios")
             with st.popover("📋 Seleccionar básicos", use_container_width=True):
                 st.write("Marca los gastos que tienes:")
+                def on_all_nec_change():
+                    for op in nec_opciones: st.session_state[f"sidebar_chk_{op}"] = st.session_state["chk_all_nec"]
+                def on_ind_nec_change():
+                    st.session_state["chk_all_nec"] = all(st.session_state.get(f"sidebar_chk_{op}", False) for op in nec_opciones)
+                if "chk_all_nec" not in st.session_state:
+                    st.session_state["chk_all_nec"] = all(st.session_state.get(f"sidebar_chk_{op}", False) for op in nec_opciones)
+                
+                st.checkbox("SELECCIONAR TODAS", key="chk_all_nec", on_change=on_all_nec_change)
+                st.markdown("---")
                 for op in nec_opciones:
-                    st.checkbox(op, key=f"sidebar_chk_{op}")
+                    if f"sidebar_chk_{op}" not in st.session_state: st.session_state[f"sidebar_chk_{op}"] = False
+                    st.checkbox(op, key=f"sidebar_chk_{op}", on_change=on_ind_nec_change)
 
             st.markdown("### 🌟 Estilo de vida")
             with st.popover("📋 Seleccionar estilo", use_container_width=True):
                 st.write("Marca tus gastos adicionales:")
+                def on_all_est_change():
+                    for op in est_opciones: st.session_state[f"sidebar_chk_est_{op}"] = st.session_state["chk_all_est"]
+                def on_ind_est_change():
+                    st.session_state["chk_all_est"] = all(st.session_state.get(f"sidebar_chk_est_{op}", False) for op in est_opciones)
+                if "chk_all_est" not in st.session_state:
+                    st.session_state["chk_all_est"] = all(st.session_state.get(f"sidebar_chk_est_{op}", False) for op in est_opciones)
+                
+                st.checkbox("SELECCIONAR TODAS", key="chk_all_est", on_change=on_all_est_change)
+                st.markdown("---")
                 for op in est_opciones:
-                    st.checkbox(op, key=f"sidebar_chk_est_{op}")
+                    if f"sidebar_chk_est_{op}" not in st.session_state: st.session_state[f"sidebar_chk_est_{op}"] = False
+                    st.checkbox(op, key=f"sidebar_chk_est_{op}", on_change=on_ind_est_change)
 
             st.markdown("### 💳 Créditos")
             with st.popover("📋 Seleccionar créditos", use_container_width=True):
                 st.write("Selecciona tus deudas actuales:")
+                def on_all_cred_change():
+                    for op in cred_opciones: st.session_state[f"sidebar_chk_cred_{op}"] = st.session_state["chk_all_cred"]
+                def on_ind_cred_change():
+                    st.session_state["chk_all_cred"] = all(st.session_state.get(f"sidebar_chk_cred_{op}", False) for op in cred_opciones)
+                if "chk_all_cred" not in st.session_state:
+                    st.session_state["chk_all_cred"] = all(st.session_state.get(f"sidebar_chk_cred_{op}", False) for op in cred_opciones)
+                
+                st.checkbox("SELECCIONAR TODAS", key="chk_all_cred", on_change=on_all_cred_change)
+                st.markdown("---")
                 for op in cred_opciones:
-                    st.checkbox(op, key=f"sidebar_chk_cred_{op}")
+                    if f"sidebar_chk_cred_{op}" not in st.session_state: st.session_state[f"sidebar_chk_cred_{op}"] = False
+                    st.checkbox(op, key=f"sidebar_chk_cred_{op}", on_change=on_ind_cred_change)
 
     # --- CÁLCULO DE POTENCIAL REAL (Pre-Header) ---
     # Usamos los montos que el usuario ya ingresó en el estado de sesión
@@ -1004,7 +1034,7 @@ def render_planificador():
             {logo_html}
         </div>
         <div style="text-align: center; width: 100%;">
-            <div class="astor-main-title">ASTOR PLANIFICADOR FINANCIERO PERSONAL</div>
+            <div class="astor-main-title">PLANIFICADOR FINANCIERO PERSONAL</div>
             <div class="astor-main-subtitle">Optimiza tus finanzas y descubre tu potencial de inversión.</div>
         </div>
     </div>
@@ -1031,28 +1061,28 @@ def render_planificador():
 
     # --- HEADER Y PERFIL ---
     # --- SECCIÓN DE GASTOS (NUEVO ENFOQUE: SELECCIÓN INTELIGENTE) ---
-    st.write("Selecciona las categorías que forman parte de tu vida actual. ASTOR calculará la distribución ideal basada en tu perfil.")
+    st.write("Selecciona las categorías que forman parte de tu vida actual. Se calculará la distribución ideal basada en tu perfil.")
 
     # --- CÁLCULO DE DISTRIBUCIÓN (Model Weights) ---
     pesos_sugeridos = {
         "🏠 Vivienda (Renta/hipoteca)": 0.20,
-        "🍎 Despensa": 0.125,
-        "🚗 Gasolina / Transporte": 0.10,
-        "⚡ Servicios (luz, agua, gas, internet)": 0.075,
-        "🧹 Personal de limpieza": 0.05,
-        "🎓 Educación / colegiatura": 0.05,
-        "🥂 Salidas y restaurante": 0.10,
-        "📺 Suscripciones y digital": 0.05,
-        "💅 Cuidado personal y ropa": 0.05,
-        "🎨 Hobbies y proyectos": 0.05,
-        "🏋️ Gimnasio/club": 0.05,
-        "🐾 Mascotas (Comida y cuidados)": 0.03,
-        "🚲 Uber Eats / Delivery": 0.02,
-        "✈️ Viajes y Vacaciones": 0.05,
-        "📂 Otros gastos": 0.03,
+        "🍎 Despensa": 0.095,
+        "🚗 Gasolina / Transporte": 0.075,
+        "⚡ Servicios (luz, agua, gas, internet)": 0.04,
+        "🧹 Personal de limpieza": 0.02,
+        "🎓 Educación / colegiatura": 0.02,
+        "🥂 Salidas y restaurante": 0.05,
+        "📺 Suscripciones y digital": 0.025,
+        "💅 Cuidado personal y ropa": 0.03,
+        "🎨 Hobbies y proyectos": 0.04,
+        "🏋️ Gimnasio/club": 0.03,
+        "🐾 Mascotas (Comida y cuidados)": 0.02,
+        "🚲 Uber Eats / Delivery": 0.01,
+        "✈️ Viajes y Vacaciones": 0.03,
+        "📂 Otros gastos": 0.02,
         "🚗 Crédito de auto": 0.10,
         "💳 Tarjeta de crédito (Meses sin intereses)": 0.05,
-        "🏦 Otros créditos": 0.05
+        "🏦 Otros créditos": 0.07
     }
 
     # --- NORMALIZACIÓN DE DISTRIBUCIÓN (LÍMITE MÁXIMO DEL INGRESO) ---
@@ -1142,14 +1172,14 @@ def render_planificador():
                 worksheet.insert_image('A1', logo_path, {'x_scale': 0.04, 'y_scale': 0.04, 'x_offset': 10, 'y_offset': 10})
 
             # Cuadro de Título
-            worksheet.merge_range('C2:F3', 'Astor simulador', title_box_format)
+            worksheet.merge_range('C2:F3', 'Simulador', title_box_format)
 
             # Información del cliente
             worksheet.merge_range('B5:G5', 'Información del cliente', info_header) # Ampliado a G
             worksheet.write('B6', 'Nombre del cliente', orange_header)
             worksheet.write('C6', 'Ingreso Mensual', orange_header)
             worksheet.write('D6', 'Potencial Inversión', orange_header)
-            worksheet.merge_range('E6:G6', 'Estrategia Patrimonial Astor', orange_header)
+            worksheet.merge_range('E6:G6', 'Estrategia Patrimonial', orange_header)
 
             # Calcular potencial para el Excel (7.5% directo del ingreso)
             total_sugerido_base = sum(ingreso * pesos_sugeridos.get(cat, 0) for cat in todos_seleccionados)
@@ -1159,13 +1189,13 @@ def render_planificador():
             worksheet.write('B7', nombre, text_center)
             worksheet.write('C7', ingreso, money_format)
             worksheet.write('D7', potencial_excel, money_format)
-            worksheet.merge_range('E7:G7', 'Sugerencia personalizada Astor', text_center)
+            worksheet.merge_range('E7:G7', 'Sugerencia personalizada', text_center)
 
             # --- TABLA DE ANÁLISIS ---
             worksheet.merge_range('B9:F9', 'Resumen de Análisis Financiero', info_header)
             worksheet.write('B10', 'CATEGORÍA / CONCEPTO', orange_header)
             worksheet.write('C10', 'GASTO ACTUAL', orange_header)
-            worksheet.write('D10', 'RECOMENDADO ASTOR', orange_header)
+            worksheet.write('D10', 'RECOMENDADO', orange_header)
             worksheet.write('E10', 'DIFERENCIA', orange_header)
             worksheet.write('F10', 'ESTATUS', orange_header)
 
@@ -1234,7 +1264,7 @@ def render_planificador():
     # --- DEFINICIÓN DE CONTENEDORES (NUEVA ESTRUCTURA POR FILAS) ---
     # 1. Cabecera de Columnas (SOLO TÍTULOS)
     st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
-    c_header1, s_header1, c_header2, s_header2, c_header3 = st.columns([1, 0.1, 1, 0.1, 1])
+    c_header1, s_header1, c_header2, s_header2, c_header3 = st.columns([0.9, 0.1, 1.2, 0.1, 0.9])
 
     with c_header1:
         st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 0; white-space: nowrap;'>📝 Registro de Gastos</h4>", unsafe_allow_html=True)
@@ -1244,7 +1274,7 @@ def render_planificador():
         st.markdown('<div class="col-separator" style="height: 100%; min-height: 60px; --sep-color: #3B82F6;"></div>', unsafe_allow_html=True)
 
     with c_header2:
-        st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 0; white-space: nowrap;'>📈 Distribución Sugerida Astor</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 0; white-space: nowrap;'>📈 Distribución Sugerida</h4>", unsafe_allow_html=True)
 
     with s_header2:
         # Separador Header 2
@@ -1278,7 +1308,7 @@ def render_planificador():
         </div>
         """, unsafe_allow_html=True)
 
-        c1, s1, c2, s2, c3 = st.columns([1, 0.1, 1, 0.1, 1])
+        c1, s1, c2, s2, c3 = st.columns([0.9, 0.1, 1.2, 0.1, 0.9])
 
         # 1. INPUTS
         with c1:
@@ -1309,7 +1339,7 @@ def render_planificador():
         # 2. SUGERENCIAS
         with c2:
             if titulo == "🏠 Necesidades y Servicios" and st.session_state.listo:
-                 st.markdown("<h4 style='text-align: center; color: #1e3a8a; margin-bottom: 15px; white-space: nowrap;'>Distribución Sugerida Astor</h4>", unsafe_allow_html=True)
+                 st.markdown("<h4 style='text-align: center; color: #1e3a8a; margin-bottom: 15px; white-space: nowrap;'>Distribución Sugerida</h4>", unsafe_allow_html=True)
 
             with st.container(border=True):
                 if st.session_state.listo and ingreso_mensual > 0:
@@ -1339,7 +1369,7 @@ def render_planificador():
         # 3. COMPARATIVA
         with c3:
             if titulo == "🏠 Necesidades y Servicios" and st.session_state.listo:
-                 st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 15px;'>Análisis Semáforo Astor</h4>", unsafe_allow_html=True)
+                 st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 15px;'>Análisis Semáforo</h4>", unsafe_allow_html=True)
 
             with st.container(border=True):
                 if st.session_state.listo and ingreso_mensual > 0:
@@ -1457,7 +1487,7 @@ def render_planificador():
             st.markdown("<h4 style='text-align: center; color: var(--primary-blue);'>Total Sugerido</h4>", unsafe_allow_html=True)
             st.markdown(f"""
                 <div class="card-container" style="border-color: #10B981; padding: 20px; height: 160px; display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title">Sugerencia Ideal Astor</div>
+                    <div class="card-title">Sugerencia Ideal</div>
                     <div class="card-value" style="color: #10B981; margin-top: 10px;">$ {total_sugerido:,.0f}</div>
                 </div>
             """, unsafe_allow_html=True)
@@ -1527,7 +1557,7 @@ def render_planificador():
         with col_b2:
             if not boton_habilitado:
                 st.markdown(f'<p style="color: #f87171; font-size: 0.8rem; text-align: center;">⚠️ Selecciona al menos 5 categorías ({total_seleccionados}/5)</p>', unsafe_allow_html=True)
-            if st.button("✅ GENERAR ANÁLISIS ASTOR", on_click=marcar_listo, disabled=not boton_habilitado, use_container_width=True):
+            if st.button("✅ GENERAR ANÁLISIS", on_click=marcar_listo, disabled=not boton_habilitado, use_container_width=True):
                 pass
 
     # Recalcular todos_seleccionados para uso en gráficas
@@ -1536,7 +1566,7 @@ def render_planificador():
         st.markdown("---")
         st.markdown(f"""
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; width: 100%;">
-        <h2 style='margin: 0; color: var(--primary-blue); font-size: 2.5rem;'>◕ Análisis Avanzado Astor</h2>
+        <h2 style='margin: 0; color: var(--primary-blue); font-size: 2.5rem;'>◕ Análisis Avanzado</h2>
         <div style="display: flex; justify-content: flex-end; flex-grow: 1;">
             {metric_html}
         </div>
@@ -1563,7 +1593,7 @@ def render_planificador():
                     df_real['pct_ingreso'] = (df_real['Monto'] / ingreso_mensual) * 100
 
                     # Mostrar la Real ocupando todo el ancho de la columna c_col1 para igualar tamaño
-                    st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 15px; white-space: nowrap;'>Distribución Real Actual</h4>", unsafe_allow_html=True)
+                    st.markdown("<div style='height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;'><h4 style='text-align: center; color: var(--primary-blue); margin: 0; line-height: 1.2;'>Distribución Real<br>Actual</h4></div>", unsafe_allow_html=True)
                     df_real_nec = df_real[df_real['Categoría'].isin(todos_seleccionados)]
                     if not df_real_nec.empty:
                         fig_real = px.pie(df_real_nec, values='Monto', names='Categoría', 
@@ -1587,30 +1617,18 @@ def render_planificador():
 
                         # --- Leyenda personalizada tipo Tabla 2 COLUMNAS (SIMETRÍA) ---
                         colors = px.colors.qualitative.Pastel
-                        legend_html = '<div style="margin-top: 10px; padding: 15px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
+                        legend_html = '<div style="margin-top: 10px; padding: 10px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
                         legend_html += '<table style="width: 100%; border-collapse: collapse; table-layout: fixed;">'
                         # Header para simetría
                         legend_html += f'''
                         <tr style="border-bottom: 2px solid rgba(30,58,138,0.15);">
-                            <th style="text-align: left; padding: 8px 0; width: 75%; color: var(--primary-blue); font-size: 0.85rem; font-weight: 800;">CATEGORÍA</th>
-                            <th style="text-align: right; padding: 8px 0; width: 25%; color: var(--accent-blue); font-size: 0.85rem; font-weight: 800;">REAL</th>
+                            <th style="text-align: center; padding: 8px 5px; width: 65%; color: var(--primary-blue); font-size: 0.8rem; font-weight: 800;">CATEGORÍA</th>
+                            <th style="text-align: center; padding: 8px 5px; width: 35%; color: var(--accent-blue); font-size: 0.8rem; font-weight: 800;">REAL</th>
                         </tr>
                         '''
                         for i, row in df_real_nec.iterrows():
                             color = colors[i % len(colors)]
-                            legend_html += f'''
-    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-        <td style="padding: 8px 0; width: 75%; vertical-align: middle;">
-            <div style="display: flex; align-items: center;">
-                <div style="min-width: 10px; width: 10px; height: 10px; background-color: {color}; border-radius: 50%; margin-right: 10px; flex-shrink: 0;"></div>
-                <div style="color: var(--primary-blue); font-weight: 600; font-size: 0.8rem; line-height: 1.2;">{row['Categoría']}</div>
-            </div>
-        </td>
-        <td style="padding: 8px 0; width: 25%; text-align: right; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.9rem; white-space: nowrap;">
-            $ {row['Monto']:,.0f}
-        </td>
-    </tr>
-    '''
+                            legend_html += f'<tr style="border-bottom: 1px solid rgba(0,0,0,0.05);"><td style="padding: 8px 5px; width: 65%; vertical-align: middle;"><div style="display: flex; align-items: center;"><div style="min-width: 10px; width: 10px; height: 10px; background-color: {color}; border-radius: 50%; margin-right: 8px; flex-shrink: 0;"></div><div style="color: var(--primary-blue); font-weight: 600; font-size: 0.7rem; line-height: 1.1; word-break: break-word;">{row["Categoría"]}</div></div></td><td style="padding: 8px 5px; width: 35%; text-align: center; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.85rem; white-space: nowrap;">$ {row["Monto"]:,.0f}</td></tr>'
                         legend_html += '</table></div>'
                         st.markdown(legend_html, unsafe_allow_html=True)
                     else:
@@ -1620,7 +1638,7 @@ def render_planificador():
 
         with c_col2:
             with st.container(border=True):
-                st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 15px; white-space: nowrap;'>Distribución Sugerida Astor</h4>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;'><h4 style='text-align: center; color: var(--primary-blue); margin: 0; line-height: 1.2;'>Distribución<br>Sugerida</h4></div>", unsafe_allow_html=True)
                 datos_astor = []
                 for cat in todos_seleccionados:
                     monto_sug = ingreso_mensual * pesos_sugeridos.get(cat, 0)
@@ -1654,36 +1672,24 @@ def render_planificador():
 
                     # --- Leyenda personalizada tipo Tabla 2 COLUMNAS (SIMETRÍA) ---
                     colors = px.colors.qualitative.Pastel
-                    legend_html = '<div style="margin-top: 10px; padding: 15px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
+                    legend_html = '<div style="margin-top: 10px; padding: 12px 18px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
                     legend_html += '<table style="width: 100%; border-collapse: collapse; table-layout: fixed;">'
                     # Header para simetría
                     legend_html += f'''
                     <tr style="border-bottom: 2px solid rgba(30,58,138,0.15);">
-                        <th style="text-align: left; padding: 8px 0; width: 75%; color: var(--primary-blue); font-size: 0.85rem; font-weight: 800;">CATEGORÍA</th>
-                        <th style="text-align: right; padding: 8px 0; width: 25%; color: #10B981; font-size: 0.85rem; font-weight: 800;">IDEAL</th>
+                        <th style="text-align: center; padding: 8px 5px 8px 15px; width: 65%; color: var(--primary-blue); font-size: 0.8rem; font-weight: 800;">CATEGORÍA</th>
+                        <th style="text-align: center; padding: 8px 15px 8px 5px; width: 35%; color: #10B981; font-size: 0.8rem; font-weight: 800;">IDEAL</th>
                     </tr>
                     '''
                     for i, row in df_astor.iterrows():
                         color = colors[i % len(colors)]
-                        legend_html += f'''
-    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-        <td style="padding: 8px 0; width: 75%; vertical-align: middle;">
-            <div style="display: flex; align-items: center;">
-                <div style="min-width: 10px; width: 10px; height: 10px; background-color: {color}; border-radius: 50%; margin-right: 10px; flex-shrink: 0;"></div>
-                <div style="color: var(--primary-blue); font-weight: 600; font-size: 0.8rem; line-height: 1.2;">{row['Categoría']}</div>
-            </div>
-        </td>
-        <td style="padding: 8px 0; width: 25%; text-align: right; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.9rem; white-space: nowrap;">
-            $ {row['Monto']:,.0f}
-        </td>
-    </tr>
-    '''
+                        legend_html += f'<tr style="border-bottom: 1px solid rgba(0,0,0,0.05);"><td style="padding: 8px 5px 8px 15px; width: 65%; vertical-align: middle;"><div style="display: flex; align-items: center;"><div style="min-width: 10px; width: 10px; height: 10px; background-color: {color}; border-radius: 50%; margin-right: 8px; flex-shrink: 0;"></div><div style="color: var(--primary-blue); font-weight: 600; font-size: 0.7rem; line-height: 1.1; word-break: break-word;">{row["Categoría"]}</div></div></td><td style="padding: 8px 15px 8px 5px; width: 35%; text-align: center; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.85rem; white-space: nowrap;">$ {row["Monto"]:,.0f}</td></tr>'
                     legend_html += '</table></div>'
                     st.markdown(legend_html, unsafe_allow_html=True)
 
         with c_col3:
             with st.container(border=True):
-                st.markdown("<h4 style='text-align: center; color: var(--primary-blue); margin-bottom: 15px; white-space: nowrap;'>Balance Detallado</h4>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;'><h4 style='text-align: center; color: var(--primary-blue); margin: 0; white-space: nowrap;'>Balance Detallado</h4></div>", unsafe_allow_html=True)
                 datos_detallados = []
                 total_real_det = sum(montos_reales.get(cat, 0) for cat in todos_seleccionados)
                 total_sugerido_det = sum(ingreso_mensual * pesos_sugeridos.get(cat, 0) for cat in todos_seleccionados)
@@ -1753,34 +1759,19 @@ def render_planificador():
                     st.plotly_chart(fig_det, use_container_width=True)
 
                     # --- Leyenda personalizada tipo Tabla 3 COLUMNAS ---
-                    legend_html = '<div style="margin-top: 10px; padding: 15px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
+                    legend_html = '<div style="margin-top: 10px; padding: 10px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); opacity: 0.9;">'
                     legend_html += '<table style="width: 100%; border-collapse: collapse; table-layout: fixed;">'
                     # Header
                     legend_html += f'''
                     <tr style="border-bottom: 2px solid rgba(30,58,138,0.15);">
-                        <th style="text-align: left; padding: 8px 0; width: 50%; color: var(--primary-blue); font-size: 0.85rem; font-weight: 800;">CATEGORÍA</th>
-                        <th style="text-align: right; padding: 8px 0; width: 25%; color: var(--accent-blue); font-size: 0.85rem; font-weight: 800;">REAL</th>
-                        <th style="text-align: right; padding: 8px 0; width: 25%; color: #10B981; font-size: 0.85rem; font-weight: 800;">IDEAL</th>
+                        <th style="text-align: center; padding: 8px 2px; width: 44%; color: var(--primary-blue); font-size: 0.75rem; font-weight: 800;">CATEGORÍA</th>
+                        <th style="text-align: center; padding: 8px 2px; width: 28%; color: var(--accent-blue); font-size: 0.75rem; font-weight: 800;">REAL</th>
+                        <th style="text-align: center; padding: 8px 2px; width: 28%; color: #10B981; font-size: 0.75rem; font-weight: 800;">IDEAL</th>
                     </tr>
                     '''
                     for i, row in df_det.iterrows():
                         color = row['Color']
-                        legend_html += f'''
-    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-        <td style="padding: 8px 0; width: 50%; vertical-align: middle;">
-            <div style="display: flex; align-items: center;">
-                <div style="min-width: 10px; width: 10px; height: 10px; background-color: {color}; border-radius: 50%; margin-right: 10px; flex-shrink: 0;"></div>
-                <div style="color: var(--primary-blue); font-weight: 600; font-size: 0.8rem; line-height: 1.2;">{row['Categoría']}</div>
-            </div>
-        </td>
-        <td style="padding: 8px 0; width: 25%; text-align: right; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.9rem; white-space: nowrap;">
-            $ {max(0, row['Monto_Real']):,.0f}
-        </td>
-        <td style="padding: 8px 0; width: 25%; text-align: right; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.9rem; white-space: nowrap;">
-            $ {max(0, row['Monto_Sugerido']):,.0f}
-        </td>
-    </tr>
-    '''
+                        legend_html += f'<tr style="border-bottom: 1px solid rgba(0,0,0,0.05);"><td style="padding: 8px 2px; width: 44%; vertical-align: middle;"><div style="display: flex; align-items: center;"><div style="min-width: 8px; width: 8px; height: 8px; background-color: {color}; border-radius: 50%; margin-right: 6px; flex-shrink: 0;"></div><div style="color: var(--primary-blue); font-weight: 600; font-size: 0.65rem; line-height: 1.1; word-break: break-word;">{row["Categoría"]}</div></div></td><td style="padding: 8px 2px; width: 28%; text-align: center; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.75rem; white-space: nowrap;">$ {max(0, row["Monto_Real"]):,.0f}</td><td style="padding: 8px 2px; width: 28%; text-align: center; vertical-align: middle; color: var(--primary-blue); font-weight: 700; font-size: 0.75rem; white-space: nowrap;">$ {max(0, row["Monto_Sugerido"]):,.0f}</td></tr>'
                     legend_html += '</table></div>'
                     st.markdown(legend_html, unsafe_allow_html=True)
 
@@ -1802,7 +1793,7 @@ def render_planificador():
             st.download_button(
                 label="💾 Descargar Reporte (Excel)",
                 data=excel_data,
-                file_name=f"Reporte_Astor_{nombre.replace(' ', '_')}.xlsx",
+                file_name=f"Reporte_{nombre.replace(' ', '_')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
@@ -1810,7 +1801,7 @@ def render_planificador():
     else:
         st.markdown("""
         <div style="text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 50px; padding-bottom: 20px;">
-            ASTOR Financial Planner - Configura tus ingresos y gastos para comenzar.
+            Financial Planner - Configura tus ingresos y gastos para comenzar.
         </div>
         """, unsafe_allow_html=True)
 
