@@ -1085,10 +1085,19 @@ def render_planificador():
         "🏦 Otros créditos": 0.07
     }
 
+    # Integrar dependientes económicos dinámicamente (5% del ingreso sugerido por cada uno)
+    num_dependientes = st.session_state.get("num_dependientes", 0)
+    if num_dependientes > 0:
+        pesos_sugeridos["👨‍👩‍👧 Dependientes económicos"] = 0.05 * num_dependientes
+
     # --- NORMALIZACIÓN DE DISTRIBUCIÓN (LÍMITE MÁXIMO DEL INGRESO) ---
     # Asegura que si se eligen muchas opciones, la suma sugerida no rebase el ingreso mensual.
     # El límite seguro es 92.5% (0.925) del ingreso, para siempre dejar íntegro el 7.5% de Inversión.
     _categorias_activas = necesidades_sel + estilo_sel + creditos_sel
+    
+    if num_dependientes > 0:
+        _categorias_activas.append("👨‍👩‍👧 Dependientes económicos")
+        
     _suma_pesos_activas = sum(pesos_sugeridos.get(cat, 0) for cat in _categorias_activas)
 
     if _suma_pesos_activas > 0.925:
@@ -1446,6 +1455,13 @@ def render_planificador():
 
     # Definición de categorías seleccionadas para cálculos globales
     todos_seleccionados = necesidades_sel + estilo_sel + creditos_sel
+    
+    num_dependientes = st.session_state.get("num_dependientes", 0)
+    if num_dependientes > 0:
+        # Añadir dependientes al inicio para que aparezca en todas las tablas y gráficas globales
+        todos_seleccionados.insert(0, "👨‍👩‍👧 Dependientes económicos")
+        # El gasto real asume automáticamente el 5% ingresado en el sidebar para evitar doble captura
+        montos_reales["👨‍👩‍👧 Dependientes económicos"] = st.session_state.get('sidebar_gastos_dep', 0)
 
     # --- SECCIÓN DE TOTALES ---
     if st.session_state.listo and ingreso_mensual > 0:
