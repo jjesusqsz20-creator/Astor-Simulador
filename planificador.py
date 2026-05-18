@@ -1090,20 +1090,55 @@ def render_planificador():
     if num_dependientes > 0:
         pesos_sugeridos["👨‍👩‍👧 Dependientes económicos"] = 0.05 * num_dependientes
 
-    # --- NORMALIZACIÓN DE DISTRIBUCIÓN (LÍMITE MÁXIMO DEL INGRESO) ---
-    # Asegura que si se eligen muchas opciones, la suma sugerida no rebase el ingreso mensual.
-    # El límite seguro es 92.5% (0.925) del ingreso, para siempre dejar íntegro el 7.5% de Inversión.
-    _categorias_activas = necesidades_sel + estilo_sel + creditos_sel
+    # --- NUEVA LÓGICA DE DISTRIBUCIÓN DINÁMICA POR NIVELES ---
     
-    if num_dependientes > 0:
-        _categorias_activas.append("👨‍👩‍👧 Dependientes económicos")
-        
-    _suma_pesos_activas = sum(pesos_sugeridos.get(cat, 0) for cat in _categorias_activas)
+    # 1. Definir los pesos originales (base) de cada grupo principal
+    peso_base_nec = sum(pesos_sugeridos.get(c, 0) for c in nec_opciones)
+    peso_base_est = sum(pesos_sugeridos.get(c, 0) for c in est_opciones)
+    peso_base_cred = sum(pesos_sugeridos.get(c, 0) for c in cred_opciones)
+    peso_base_dep = 0.05 * st.session_state.get("num_dependientes", 0)
 
-    if _suma_pesos_activas > 0.925:
-        _factor_ajuste = 0.925 / _suma_pesos_activas
+    # 2. Calcular cuánto peso suman los elementos REALMENTE SELECCIONADOS en cada grupo
+    suma_sel_nec = sum(pesos_sugeridos.get(c, 0) for c in necesidades_sel)
+    suma_sel_est = sum(pesos_sugeridos.get(c, 0) for c in estilo_sel)
+    suma_sel_cred = sum(pesos_sugeridos.get(c, 0) for c in creditos_sel)
+
+    # 3. Determinar el "Peso Objetivo" de cada grupo.
+    # Si un grupo tiene al menos un elemento seleccionado, exige su peso base completo (para repartirlo entre los suyos).
+    target_nec = peso_base_nec if suma_sel_nec > 0 else 0
+    target_est = peso_base_est if suma_sel_est > 0 else 0
+    target_cred = peso_base_cred if suma_sel_cred > 0 else 0
+    target_dep = peso_base_dep
+
+    # Suma de los objetivos activos. Si falta un grupo completo (ej. target_cred = 0), esta suma será menor a 0.925.
+    suma_targets = target_nec + target_est + target_cred + target_dep
+
+    if suma_targets > 0:
+        # 4. Factor Global (Segundo Nivel): Escalar los grupos activos para que sumen exactamente 0.925
+        # Si no se seleccionó nada de Créditos, Necesidades y Estilo crecerán para absorber ese vacío.
+        factor_global = 0.925 / suma_targets
+        
+        final_target_nec = target_nec * factor_global
+        final_target_est = target_est * factor_global
+        final_target_cred = target_cred * factor_global
+        final_target_dep = target_dep * factor_global
+
+        # 5. Redistribución Local (Primer Nivel): Repartir el "Target Final" entre los elementos seleccionados
+        for cat in necesidades_sel:
+            pesos_sugeridos[cat] = final_target_nec * (pesos_sugeridos[cat] / suma_sel_nec)
+        
+        for cat in estilo_sel:
+            pesos_sugeridos[cat] = final_target_est * (pesos_sugeridos[cat] / suma_sel_est)
+            
+        for cat in creditos_sel:
+            pesos_sugeridos[cat] = final_target_cred * (pesos_sugeridos[cat] / suma_sel_cred)
+            
+        if "👨‍👩‍👧 Dependientes económicos" in pesos_sugeridos:
+            pesos_sugeridos["👨‍👩‍👧 Dependientes económicos"] = final_target_dep
+    else:
+        # Prevención: si no hay absolutamente nada seleccionado
         for cat in pesos_sugeridos:
-            pesos_sugeridos[cat] *= _factor_ajuste
+            pesos_sugeridos[cat] = 0
 
     # --- FUNCIÓN PARA EXPORTAR A EXCEL PROFESIONAL ---
     def generar_excel_astor(nombre, ingreso, montos_reales, pesos_sugeridos, todos_seleccionados, fig_real, fig_astor, fig_det, is_dark_mode=False):

@@ -4,3 +4,4 @@ plotly
 Pillow
 openpyxl
 mysql-connector-python
+fpdf2

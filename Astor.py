@@ -9,6 +9,7 @@ import sys
 from PIL import Image
 import calendar
 import mysql.connector
+from pdf_astor import generar_pdf_reporte
 
 # --- CONFIGURACIÓN DE BASE DE DATOS ---
 def get_db_connection():
@@ -2175,7 +2176,10 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
                 
                 if st.button("🗑️ Borrar Todas"):
                     borrar_extras()
-    
+        
+        # El botón de PDF se renderizará al final tras calcular la data
+            
+
     # --- PROCESAMIENTO ---
     resultados = []
     resultados_65 = [] 
@@ -2439,7 +2443,7 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
     tabs = st.tabs(tabs_nombres)
     tab_grafica = tabs[0]
     tab_tabla = tabs[1]
-    if edad <= 39:
+    if anios_para_retiro > anios_horizonte:
         tab_tabla_65 = tabs[2]
     
     with tab_grafica:
@@ -2569,8 +2573,34 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
 </div>
 """, unsafe_allow_html=True)
         
-        
-        # 3. EXPORTACIÓN CSV
+    # --- GENERAR PDF DIRECTO ---
+    try:
+        pdf_bytes = generar_pdf_reporte(
+            nombre=nombre,
+            tipo_plan=tipo_plan,
+            detalles_bonos=detalles_bonos,
+            resultados=resultados,
+            resultados_65=resultados_65,
+            anios_horizonte=anios_horizonte,
+            edad=edad,
+            anios_para_retiro=anios_para_retiro,
+            fig=fig,
+            is_dark=is_dark
+        )
+        with st.sidebar:
+            st.markdown("---")
+            st.download_button(
+                label="📄 Descargar PDF",
+                data=bytes(pdf_bytes),
+                file_name=f"Reporte_Astor_{nombre.replace(' ', '_')}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+    except Exception as e:
+        with st.sidebar:
+            st.error(f"Error generando PDF: {e}")
+            
+    # 3. EXPORTACIÓN CSV
         
         
         # 3. EXPORTACIÓN CSV
