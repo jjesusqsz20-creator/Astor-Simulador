@@ -1042,8 +1042,8 @@ def render_planificador():
     <div style="display: flex; justify-content: space-between; align-items: stretch; flex-wrap: wrap; gap: 20px; width: 100%;">
     <div class="astor-metric-box" style="margin: 0;">
     <div style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;">👤 Cliente e Ingreso</div>
-    <div style="color: var(--primary-blue); font-size: 1.3rem; font-weight: 800; margin: 0; line-height: 1.2;">{nombre.upper()}</div>
-    <div style="color: var(--value-color); font-size: 1.1rem; font-weight: 800; margin-top: 2px;">$ {ingreso_mensual:,.0f}</div>
+    {f'<div style="color: var(--primary-blue); font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2;">{nombre.upper()}</div>' if nombre.strip() else ''}
+    <div style="color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;">$ {ingreso_mensual:,.0f}</div>
     </div>
     <div style="display: flex; justify-content: flex-end; flex-grow: 1;">
     {metric_html}
