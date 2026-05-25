@@ -38,3 +38,7 @@ Thumbs.db
 *.exe
 AstorSimulador.spec
 build_exe.ps1
+
+# Temporary scratch folder
+scratch/
+
