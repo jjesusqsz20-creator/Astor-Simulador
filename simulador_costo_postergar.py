@@ -131,6 +131,11 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">BLINDAJE DE PODER ADQUISITIVO</p>', unsafe_allow_html=True)
         blindar_adquisitivo = st.toggle("Blindar poder adquisitivo", value=False, key="blindar_adquisitivo_postergar")
         
+        tasa_inf_blindaje = 4.0
+        if not inflacion_activa and blindar_adquisitivo:
+            st.markdown(f'<p style="margin-top: 5px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">% INFLACIÓN DE BLINDAJE</p>', unsafe_allow_html=True)
+            tasa_inf_blindaje = st.number_input('% Inflación de Blindaje', min_value=0.0, max_value=10.0, value=4.0, step=0.1, key='inf_val_blindaje_postergar', label_visibility='collapsed')
+        
         # Disparador Secreto Disfrazado (Icono de Seguridad) para Patrimonio Actual
         if 'show_patrimonio' not in st.session_state:
             st.session_state.show_patrimonio = False
@@ -153,7 +158,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         
         # Lógica de Blindaje de Poder Adquisitivo: VF = VP * (1 + pi)^n
         if blindar_adquisitivo:
-            tasa_blindaje = (tasa_inf_input / 100.0) if inflacion_activa else 0.04
+            tasa_blindaje = (tasa_inf_input / 100.0) if inflacion_activa else (tasa_inf_blindaje / 100.0)
             renta_mensual_calculada = renta_mensual_sidebar * ((1 + tasa_blindaje) ** años_inversion)
         else:
             renta_mensual_calculada = renta_mensual_sidebar
@@ -303,7 +308,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">{"Retiro Mensual Blindado" if blindar_adquisitivo else "Retiro Mensual"}</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${renta_mensual_calculada:,.0f}</div>
-<div style="color: #34D399; font-size: 0.95rem; opacity: 1.0; margin-top: 8px; font-weight: bold; text-transform: uppercase;">{f"Equivalente a ${renta_mensual_sidebar:,.0f} de hoy (con inflación al {tasa_inf_input if inflacion_activa else 4.0:.1f}%)" if blindar_adquisitivo else "Esta cantidad equivale al poder adquisitivo actual"}</div>
+<div style="color: #34D399; font-size: 0.95rem; opacity: 1.0; margin-top: 8px; font-weight: bold; text-transform: uppercase;">{f"Equivalente a ${renta_mensual_sidebar:,.0f} de hoy (con inflación al {tasa_inf_input if inflacion_activa else tasa_inf_blindaje:.1f}%)" if blindar_adquisitivo else "Esta cantidad equivale al poder adquisitivo actual"}</div>
 </div>
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
