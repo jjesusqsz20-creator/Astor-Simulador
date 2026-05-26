@@ -321,9 +321,6 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     st.markdown("""
         <style>
         div[data-testid="stSegmentedControl"] {
-            position: relative !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -359,13 +356,15 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     """, unsafe_allow_html=True)
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    seleccion_nav = st.segmented_control(
-        "Navegación Superior",
-        options=opciones_nav,
-        default="⏱️ Costo de Postergar",
-        key="main_nav_pestañas_postergar",
-        label_visibility="collapsed"
-    )
+    _, col_center_nav, _ = st.columns([1.5, 9, 1.5])
+    with col_center_nav:
+        seleccion_nav = st.segmented_control(
+            "Navegación Superior",
+            options=opciones_nav,
+            default="⏱️ Costo de Postergar",
+            key="main_nav_pestañas_postergar",
+            label_visibility="collapsed"
+        )
     nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
     if seleccion_nav == "📊 Plan de Acumulación":
         base = float(aporte_m_metric)
