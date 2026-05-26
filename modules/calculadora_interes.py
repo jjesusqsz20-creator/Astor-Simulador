@@ -128,7 +128,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_mes_paro = mes_paro
 
     # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR ---
-    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
+    opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",
         options=opciones_nav,

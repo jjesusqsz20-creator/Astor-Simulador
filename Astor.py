@@ -1905,7 +1905,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         </style>
     """, unsafe_allow_html=True)
     
-    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
+    opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",
         options=opciones_nav,
