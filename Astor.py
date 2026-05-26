@@ -1883,19 +1883,22 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     # --- DASHBOARD ---
     st.markdown("""
         <style>
-        div[data-testid="stSegmentedControl"] {
-            display: flex;
+        div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) {
+            display: flex !important;
             justify-content: center !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
+            width: 100% !important;
+        }
+        div[data-testid="stSegmentedControl"] {
+            display: flex !important;
+            justify-content: center !important;
+            margin: 0 auto 30px auto !important;
             width: fit-content !important;
-            margin-bottom: 30px !important;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.03) !important;
+            padding: 8px !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+            backdrop-filter: blur(5px) !important;
         }
         div[data-testid="stSegmentedControl"] > div {
             justify-content: center !important;
