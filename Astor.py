@@ -1888,6 +1888,11 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             justify-content: center !important;
             width: 100% !important;
         }
+        div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) > div {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
         div[data-testid="stSegmentedControl"] {
             display: flex !important;
             justify-content: center !important;

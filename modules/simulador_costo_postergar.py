@@ -325,6 +325,11 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             justify-content: center !important;
             width: 100% !important;
         }
+        div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) > div {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
         div[data-testid="stSegmentedControl"] {
             display: flex !important;
             justify-content: center !important;
