@@ -1060,15 +1060,13 @@ def render_planificador():
     """, unsafe_allow_html=True)
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    _, col_center_nav, _ = st.columns([1.5, 9, 1.5])
-    with col_center_nav:
-        seleccion_nav = st.segmented_control(
-            "Navegación Superior",
-            options=opciones_nav,
-            default="📈 Planificador Financiero",
-            key="main_nav_pestañas_planificador",
-            label_visibility="collapsed"
-        )
+    seleccion_nav = st.segmented_control(
+        "Navegación Superior",
+        options=opciones_nav,
+        default="📈 Planificador Financiero",
+        key="main_nav_pestañas_planificador",
+        label_visibility="collapsed"
+    )
     
     if seleccion_nav == "📊 Plan de Acumulación":
         st.session_state.modulo_activo = "📊 Plan de Acumulación"

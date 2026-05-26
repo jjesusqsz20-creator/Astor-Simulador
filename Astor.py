@@ -1928,15 +1928,13 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     """, unsafe_allow_html=True)
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    _, col_center_nav, _ = st.columns([1.5, 9, 1.5])
-    with col_center_nav:
-        seleccion_nav = st.segmented_control(
-            "Navegación Superior",
-            options=opciones_nav,
-            default="📊 Plan de Acumulación",
-            key="main_nav_pestañas",
-            label_visibility="collapsed"
-        )
+    seleccion_nav = st.segmented_control(
+        "Navegación Superior",
+        options=opciones_nav,
+        default="📊 Plan de Acumulación",
+        key="main_nav_pestañas",
+        label_visibility="collapsed"
+    )
     
     if seleccion_nav == "⏱️ Costo de Postergar":
         st.session_state.nombre_cliente = nombre.title()
