@@ -1881,12 +1881,14 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         })
     
     # --- DASHBOARD ---
-    # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR (Premium Tabs) ---
     st.markdown("""
         <style>
         div[data-testid="stSegmentedControl"] {
             display: flex;
-            justify-content: center;
+            justify-content: center !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            width: fit-content !important;
             margin-bottom: 30px !important;
             background: rgba(255, 255, 255, 0.03);
             padding: 8px;
@@ -1894,6 +1896,9 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] > div {
+            justify-content: center !important;
         }
         div[data-testid="stSegmentedControl"] button {
             font-size: 1.05rem !important;

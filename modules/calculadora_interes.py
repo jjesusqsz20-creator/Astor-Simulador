@@ -110,15 +110,15 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_ano_paro = año_paro
             # Mes de paro implícito (Fin de año)
             mes_paro_total = año_paro * 12
-        else: # Por mes (Entrada directa del mes a partir del 19)
+        else: # Por mes (Entrada directa del mes a partir del 18)
             mes_paro_total = st.number_input(
-                "Mes de la Suspensión (Mes 19+)",
-                min_value=19,
+                "Mes de la Suspensión (Mes 18+)",
+                min_value=18,
                 max_value=300,
-                value=int(st.session_state.get("interes_mes_paro_directo", 19)),
+                value=int(st.session_state.get("interes_mes_paro_directo", 18)),
                 step=1,
                 key="interes_mes_paro_directo",
-                help="Los primeros 18 meses son estrictamente obligatorios (Año 1 completo + primeros 6 meses del Año 2)."
+                help="Los primeros 17 meses son estrictamente obligatorios."
             )
             
             # Calcular año y mes de plan correspondientes
@@ -128,6 +128,35 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_mes_paro = mes_paro
 
     # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR ---
+    st.markdown("""
+        <style>
+        div[data-testid="stSegmentedControl"] {
+            display: flex;
+            justify-content: center !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            width: fit-content !important;
+            margin-bottom: 30px !important;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] > div {
+            justify-content: center !important;
+        }
+        div[data-testid="stSegmentedControl"] button {
+            font-size: 1.05rem !important;
+            font-weight: bold !important;
+            padding: 8px 18px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",

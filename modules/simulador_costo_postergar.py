@@ -318,12 +318,14 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     bono_monto = (aporte_m_metric * 12) * bono_pct
     bono_mensual_ano1 = bono_monto / 12
 
-    # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR (Premium Tabs) ---
     st.markdown("""
         <style>
         div[data-testid="stSegmentedControl"] {
             display: flex;
-            justify-content: center;
+            justify-content: center !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            width: fit-content !important;
             margin-bottom: 30px !important;
             background: rgba(255, 255, 255, 0.03);
             padding: 8px;
@@ -331,6 +333,9 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] > div {
+            justify-content: center !important;
         }
         div[data-testid="stSegmentedControl"] button {
             font-size: 1.05rem !important;
