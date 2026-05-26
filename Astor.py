@@ -1968,7 +1968,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     """, unsafe_allow_html=True)
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    _, col_center_nav, _ = st.columns([1.5, 9, 1.5])
+    _, col_center_nav, _ = st.columns([2.5, 8, 1.5])
     with col_center_nav:
         seleccion_nav = st.segmented_control(
             "Navegación Superior",
