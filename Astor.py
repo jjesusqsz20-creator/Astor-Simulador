@@ -223,18 +223,18 @@ st.markdown(f"""
 
     /* Centrar Segmented Control de Navegación Globalmente */
     div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]),
-    div[data-testid="element-container"]:has(.stSegmentedControl) {
+    div[data-testid="element-container"]:has(.stSegmentedControl) {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
-    }
+    }}
     div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) > div,
-    div[data-testid="element-container"]:has(.stSegmentedControl) > div {
+    div[data-testid="element-container"]:has(.stSegmentedControl) > div {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
-    }
-    div[data-testid="stSegmentedControl"], .stSegmentedControl {
+    }}
+    div[data-testid="stSegmentedControl"], .stSegmentedControl {{
         position: relative !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
@@ -249,26 +249,26 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
         backdrop-filter: blur(5px) !important;
-    }
-    div[data-testid="stSegmentedControl"] > div, .stSegmentedControl > div {
+    }}
+    div[data-testid="stSegmentedControl"] > div, .stSegmentedControl > div {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
-    }
-    div[data-testid="stSegmentedControl"] [role="radiogroup"], .stSegmentedControl [role="radiogroup"] {
+    }}
+    div[data-testid="stSegmentedControl"] [role="radiogroup"], .stSegmentedControl [role="radiogroup"] {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
         gap: 10px !important;
-    }
-    div[data-testid="stSegmentedControl"] button, .stSegmentedControl button {
+    }}
+    div[data-testid="stSegmentedControl"] button, .stSegmentedControl button {{
         font-size: 1.05rem !important;
         font-weight: bold !important;
         padding: 8px 18px !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
-    }
+    }}
     
     /* Fondo General */
     /* Quitar franja blanca superior */
