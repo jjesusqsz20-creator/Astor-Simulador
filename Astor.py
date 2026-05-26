@@ -1906,7 +1906,16 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             backdrop-filter: blur(5px) !important;
         }
         div[data-testid="stSegmentedControl"] > div {
+            display: flex !important;
             justify-content: center !important;
+            width: 100% !important;
+        }
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            gap: 10px !important;
         }
         div[data-testid="stSegmentedControl"] button {
             font-size: 1.05rem !important;
@@ -1919,7 +1928,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     """, unsafe_allow_html=True)
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    _, col_center_nav, _ = st.columns([2, 8, 2])
+    _, col_center_nav, _ = st.columns([1.5, 9, 1.5])
     with col_center_nav:
         seleccion_nav = st.segmented_control(
             "Navegación Superior",
