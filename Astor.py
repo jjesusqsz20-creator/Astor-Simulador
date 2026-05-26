@@ -1,11 +1,14 @@
+import sys
+import os
+# Agregar el subdirectorio 'modules' al system path para organizar los archivos auxiliares
+sys.path.append(os.path.join(os.path.dirname(__file__), 'modules'))
+
 import streamlit as st
 import pandas as pd
 from datetime import date
 import plotly.graph_objects as go
 import io
-import os
 import base64
-import sys
 from PIL import Image
 import calendar
 import mysql.connector
@@ -890,10 +893,11 @@ def obtener_porcentaje_bono(monto_mensual):
         return 1.00
 
 # --- MOTOR DE CÁLCULO (Aportación SIEMPRE MENSUAL + EXTRAS + CAMBIO MES 19) ---
-def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr_retencion, plazo_anos=25, opcion_id=1, extras=[], monto_mes_19=None):
+def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_inflacion, isr_retencion, plazo_anos=25, opcion_id=1, extras=[], monto_mes_19=None, mes_suspension=None):
     # El plazo por defecto es 25 años, pero puede ser modificado (ej. para el cálculo a edad 65)
     meses_totales = int(plazo_anos * 12)
     
+    monto_inicial = float(monto_aporte)
     monto_actual = float(monto_aporte)
     
     # --- CÁLCULO DINÁMICO DEL BONO (Basado en la aportación inicial) ---
@@ -951,7 +955,10 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
             monto_actual = float(monto_mes_19) * factor_inflacion_acumulado
             
         # 2. Aportación Regular (SIEMPRE MENSUAL)
-        aportacion_periodo = monto_actual
+        if mes_suspension is not None and mes > mes_suspension:
+            aportacion_periodo = 0.0
+        else:
+            aportacion_periodo = monto_actual
         
         # 3. Revisar si hay Aportaciones Extraordinarias
         monto_extra_mes = 0.0
@@ -1538,6 +1545,11 @@ if st.session_state.modulo_activo == "⏱️ Costo de Postergar":
     simulador_costo_postergar.render_simulador(get_asset_path, encontrar_aporte_necesario, calcular_escenario)
     st.stop()
 
+if st.session_state.modulo_activo == "🧮 Interés Compuesto":
+    import calculadora_interes
+    calculadora_interes.render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_escenario)
+    st.stop()
+
 if st.session_state.modulo_activo == "📈 Planificador Financiero":
     import planificador
     planificador.render_planificador()
@@ -1893,7 +1905,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         </style>
     """, unsafe_allow_html=True)
     
-    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",
         options=opciones_nav,
@@ -1906,6 +1918,11 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         st.session_state.nombre_cliente = nombre.title()
         st.session_state.hub_nombre = nombre.title()
         st.session_state.modulo_activo = "⏱️ Costo de Postergar"
+        st.rerun()
+    elif seleccion_nav == "🧮 Interés Compuesto":
+        st.session_state.nombre_cliente = nombre.title()
+        st.session_state.hub_nombre = nombre.title()
+        st.session_state.modulo_activo = "🧮 Interés Compuesto"
         st.rerun()
     elif seleccion_nav == "📈 Planificador Financiero":
         st.session_state.modulo_activo = "📈 Planificador Financiero"

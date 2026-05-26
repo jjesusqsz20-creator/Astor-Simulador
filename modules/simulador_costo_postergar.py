@@ -220,6 +220,9 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         plazo_anos=años_inversion
     )
 
+    # Guardar la tabla dinámica completa para que sea consumida por la calculadora de suspensión
+    st.session_state.df_costos_postergar = df_costos_real
+
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
 
@@ -339,7 +342,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         </style>
     """, unsafe_allow_html=True)
     
-    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",
         options=opciones_nav,
@@ -347,7 +350,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         key="main_nav_pestañas_postergar",
         label_visibility="collapsed"
     )
-    
+    nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
     if seleccion_nav == "📊 Plan de Acumulación":
         base = float(aporte_m_metric)
         st.session_state.monto_1 = base
@@ -374,12 +377,16 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         
         st.session_state.modulo_activo = "📊 Plan de Acumulación"
         st.rerun()
+    elif seleccion_nav == "🧮 Interés Compuesto":
+        st.session_state.nombre_cliente = nombre_cliente.title()
+        st.session_state.hub_nombre = nombre_cliente.title()
+        st.session_state.modulo_activo = "🧮 Interés Compuesto"
+        st.rerun()
     elif seleccion_nav == "📈 Planificador Financiero":
         st.session_state.modulo_activo = "📈 Planificador Financiero"
         st.rerun()
 
     # BLOQUE MAESTRO HUD UNIFICADO
-    nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 10px; opacity: 0.9;">
     <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 3.5rem;">COSTO DE POSTERGAR</h1>

@@ -1037,7 +1037,7 @@ def render_planificador():
         </style>
     """, unsafe_allow_html=True)
     
-    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     seleccion_nav = st.segmented_control(
         "Navegación Superior",
         options=opciones_nav,
@@ -1050,7 +1050,16 @@ def render_planificador():
         st.session_state.modulo_activo = "📊 Plan de Acumulación"
         st.rerun()
     elif seleccion_nav == "⏱️ Costo de Postergar":
+        nombre_cliente_sync = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
+        st.session_state.nombre_cliente = nombre_cliente_sync.title()
+        st.session_state.hub_nombre = nombre_cliente_sync.title()
         st.session_state.modulo_activo = "⏱️ Costo de Postergar"
+        st.rerun()
+    elif seleccion_nav == "🧮 Interés Compuesto":
+        nombre_cliente_sync = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
+        st.session_state.nombre_cliente = nombre_cliente_sync.title()
+        st.session_state.hub_nombre = nombre_cliente_sync.title()
+        st.session_state.modulo_activo = "🧮 Interés Compuesto"
         st.rerun()
 
     # --- TÍTULO PRINCIPAL (Estilo Astor) ---
