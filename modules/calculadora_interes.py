@@ -71,12 +71,24 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
             st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
             
+        # Rendimiento Anual Estimado (%) - Sincronizado y Modificable
+        st.subheader("Rendimiento")
+        rendimiento_anual = st.number_input(
+            'Rendimiento Anual Estimado (%)', 
+            min_value=1.0, 
+            value=float(st.session_state.get("costos_rendimiento_anual", 10.0)), 
+            step=0.5,
+            key="costos_rendimiento_anual_interes",
+            help="Modifica este valor para simular diferentes tasas de rendimiento anual."
+        )
+        st.session_state.costos_rendimiento_anual = rendimiento_anual
+            
         st.subheader("Simulación de Suspensión")
         
-        # Selección de Frecuencia de Visualización
+        # Selección de Frecuencia de Visualización (Tiempo de Suspensión)
         frecuencia_def = st.session_state.get("interes_frecuencia", "Por año")
         frecuencia_sel = st.selectbox(
-            "Frecuencia de Suspensión", 
+            "Tiempo de suspensión", 
             ["Por año", "Por mes"], 
             index=0 if frecuencia_def == "Por año" else 1,
             key="interes_frecuencia_input",
@@ -98,35 +110,22 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_ano_paro = año_paro
             # Mes de paro implícito (Fin de año)
             mes_paro_total = año_paro * 12
-        else: # Por mes
-            año_paro = st.number_input(
-                "Año de la Suspensión", 
-                min_value=2, 
-                max_value=25, 
-                value=int(st.session_state.get("interes_ano_paro_mes", 2)),
+        else: # Por mes (Entrada directa del mes a partir del 19)
+            mes_paro_total = st.number_input(
+                "Mes de la Suspensión (Mes 19+)",
+                min_value=19,
+                max_value=300,
+                value=int(st.session_state.get("interes_mes_paro_directo", 19)),
                 step=1,
-                key="interes_ano_paro_mes_input"
-            )
-            st.session_state.interes_ano_paro_mes = año_paro
-            
-            # Si es el Año 2, solo permitir meses del 7 al 12
-            if año_paro == 2:
-                meses_validos = list(range(7, 13))
-                mes_def_idx = 0
-            else:
-                meses_validos = list(range(1, 13))
-                mes_def_idx = int(st.session_state.get("interes_mes_paro", 1)) - 1
-                if mes_def_idx >= len(meses_validos): mes_def_idx = 0
-                
-            mes_paro = st.selectbox(
-                "Mes de la Suspensión",
-                meses_validos,
-                index=mes_def_idx,
-                key="interes_mes_paro_input",
+                key="interes_mes_paro_directo",
                 help="Los primeros 18 meses son estrictamente obligatorios (Año 1 completo + primeros 6 meses del Año 2)."
             )
+            
+            # Calcular año y mes de plan correspondientes
+            año_paro = (mes_paro_total - 1) // 12 + 1
+            mes_paro = (mes_paro_total - 1) % 12 + 1
+            st.session_state.interes_ano_paro_mes = año_paro
             st.session_state.interes_mes_paro = mes_paro
-            mes_paro_total = (año_paro - 1) * 12 + mes_paro
 
     # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR ---
     opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
@@ -326,7 +325,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             df_display["Saldo de Fondo"] = df_display["Saldo de Fondo"].apply(lambda x: f"${x:,.2f}")
             df_display = df_display.rename(columns={"Saldo de Fondo": "Saldo de Fondo (Compuesto)"})
             
-            columnas_finales = ["No. de Mes del Plan", "No. de Año del Plan", "Edad", "Aportación Mensual", "Saldo de Fondo (Compuesto)"]
+            columnas_finales = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Saldo de Fondo (Compuesto)"]
             
         df_display = df_display[columnas_finales]
         
@@ -357,6 +356,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         text-transform: uppercase;
         font-size: 0.85rem;
         letter-spacing: 0.5px;
+        text-align: center !important;
     }}
     .tabla-espera td {{
         padding: 10px;

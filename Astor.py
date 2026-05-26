@@ -2140,8 +2140,8 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         
         # Si es mensual o semestral, añadimos la columna de periodo
         if frecuencia_vista != "Anual":
-            # Insertar al principio
-            cols_to_show.insert(0, eje_x_data_col)
+            # Insertar al segundo lugar (posición 1) para que AÑO vaya primero
+            cols_to_show.insert(1, eje_x_data_col)
         # --- TABLA BONITA CON BARRAS DE PROGRESO ---
         # --- TABLA HTML PERSONALIZADA ---
         # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
@@ -2175,7 +2175,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             
             cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
             if frecuencia_vista != "Anual":
-                cols_to_show_65.insert(0, eje_x_data_col)
+                cols_to_show_65.insert(1, eje_x_data_col)
     
             # Filtrar solo periodos posteriores al horizonte inicial
             df_65_show = seleccion65["df_65_display"][seleccion65["df_65_display"]["Año"] > anios_horizonte]

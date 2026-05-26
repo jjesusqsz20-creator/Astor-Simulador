@@ -521,9 +521,11 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Aportación': 'APORTACIÓN MENSUAL', 
                 'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
                 'Saldo de Fondo': 'SALDO DE FONDO', 
-                'Saldo Disponible': 'SALDO DISPONIBLE', 
-                'Post retención': 'POST RETENCIÓN'
+                'Saldo Disponible': 'SALDO DISPONIBLE'
             }, inplace=True)
+            # Seleccionar únicamente las columnas solicitadas con AÑO primero, luego MES
+            columnas_mensuales = ['AÑO', 'MES', 'EDAD', 'APORTACIÓN MENSUAL', 'APORTACIÓN ACUMULADA', 'SALDO DE FONDO', 'SALDO DISPONIBLE']
+            df_espera = df_espera[columnas_mensuales]
 
         if not df_espera.empty:
             if frecuencia == "Mensual":
@@ -558,6 +560,9 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     .tabla-espera table {{
         width: 100% !important;
         margin: 0 auto !important;
+    }}
+    .tabla-espera th {{
+        text-align: center !important;
     }}
 </style>
 <div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
