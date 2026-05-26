@@ -320,19 +320,13 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 
     st.markdown("""
         <style>
-        div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) {
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important;
-        }
-        div[data-testid="element-container"]:has(div[data-testid="stSegmentedControl"]) > div {
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important;
-        }
         div[data-testid="stSegmentedControl"] {
+            position: relative !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             display: flex !important;
             justify-content: center !important;
+            align-items: center !important;
             margin: 0 auto 30px auto !important;
             width: fit-content !important;
             background: rgba(255, 255, 255, 0.03) !important;
