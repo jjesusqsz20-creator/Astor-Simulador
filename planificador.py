@@ -1013,6 +1013,46 @@ def render_planificador():
         # 7.5% directo del ingreso mensual
         ahorro_inversion_pre = ingreso_mensual * 0.075
 
+    # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR (Premium Tabs) ---
+    st.markdown("""
+        <style>
+        div[data-testid="stSegmentedControl"] {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px !important;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] button {
+            font-size: 1.05rem !important;
+            font-weight: bold !important;
+            padding: 8px 18px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    seleccion_nav = st.segmented_control(
+        "Navegación Superior",
+        options=opciones_nav,
+        default="📈 Planificador Financiero",
+        key="main_nav_pestañas_planificador",
+        label_visibility="collapsed"
+    )
+    
+    if seleccion_nav == "📊 Plan de Acumulación":
+        st.session_state.modulo_activo = "📊 Plan de Acumulación"
+        st.rerun()
+    elif seleccion_nav == "⏱️ Costo de Postergar":
+        st.session_state.modulo_activo = "⏱️ Costo de Postergar"
+        st.rerun()
+
     # --- TÍTULO PRINCIPAL (Estilo Astor) ---
     # Intentar cargar el logo (Dinámico según tema)
     logo_path = get_asset_path(logo_header_file)

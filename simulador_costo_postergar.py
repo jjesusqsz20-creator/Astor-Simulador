@@ -71,37 +71,59 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         if os.path.exists(logo_sidebar):
             st.image(logo_sidebar, use_container_width=True)
         st.title("Configuración")
+        
+        with st.expander("👤 Datos del Cliente", expanded=True):
+            nombre_def_p = st.session_state.get("nombre_cliente", "") or st.session_state.get("hub_nombre", "")
+            nombre_input = st.text_input("Nombre", value=nombre_def_p, key="postergar_name_input").title()
+            st.session_state.nombre_cliente = nombre_input
+            st.session_state.hub_nombre = nombre_input
+            
+            today = date.today()
+            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+            cs_d, cs_m, cs_a = st.columns([1.5, 1.8, 1.2])
+
+            if 'c_yn_costos' not in st.session_state: st.session_state.c_yn_costos = today.year - 25
+            if 'c_mn_costos' not in st.session_state: st.session_state.c_mn_costos = "Enero"
+            if 'c_dn_costos' not in st.session_state: st.session_state.c_dn_costos = 1
+            
+            with cs_a:
+                y_s = st.number_input("Año ", 1940, today.year, value=int(st.session_state.c_yn_costos), key="postergar_birth_year", label_visibility="collapsed")
+                st.session_state.c_yn_costos = y_s
+            with cs_m:
+                m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+                m_idx = m_names.index(st.session_state.c_mn_costos) if st.session_state.c_mn_costos in m_names else 0
+                m_s_s = st.selectbox("Mes ", m_names, index=m_idx, key="postergar_birth_month", label_visibility="collapsed")
+                st.session_state.c_mn_costos = m_s_s
+                m_s = m_names.index(m_s_s) + 1
+            with cs_d:
+                num_days_s = calendar.monthrange(int(y_s), int(m_s))[1]
+                d_idx = min(int(st.session_state.c_dn_costos) - 1, num_days_s - 1)
+                d_s = st.selectbox("Día ", list(range(1, num_days_s + 1)), index=d_idx, key="postergar_birth_day", label_visibility="collapsed")
+                st.session_state.c_dn_costos = d_s
+            
+            try:
+                fecha_nac_s = date(int(y_s), int(m_s), int(d_s))
+            except:
+                fecha_nac_s = date(int(y_s), int(m_s), 1)
+                
+            edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
+            st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
+        
         st.subheader("Costo de Postergar")
         
         # Sincronización con el Hub (Renta mensual deseada)
         renta_def = st.session_state.get("renta_costos_sync", 50000.0)
-        # Mostrar el valor actual en el Label como pidió el usuario
-        renta_actual_label = st.session_state.get("renta_sync_sidebar", renta_def)
+        if "renta_sync_sidebar" in st.session_state:
+            st.session_state.renta_costos_sync = float(st.session_state.renta_sync_sidebar)
+            renta_def = st.session_state.renta_costos_sync
+        
+        renta_actual_label = renta_def
         # Etiqueta personalizada con formato resaltado
         st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.25rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${renta_actual_label:,.0f}</span></p>", unsafe_allow_html=True)
         renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
         
-        # (Rendimiento Anual moved below as requested)
-        today = date.today()
-        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-        cs_d, cs_m, cs_a = st.columns([1, 1.8, 1.2])
-        with cs_a:
-            y_s = st.number_input("Año ", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
-        with cs_m:
-            m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-            m_s_s = st.selectbox("Mes ", m_names, index=0, key="c_mn_costos", label_visibility="collapsed")
-            m_s = m_names.index(m_s_s) + 1
-        with cs_d:
-            num_days_s = calendar.monthrange(int(y_s), int(m_s))[1]
-            d_s = st.selectbox("Día ", list(range(1, num_days_s + 1)), index=0, key="c_dn_costos", label_visibility="collapsed")
-        
-        try:
-            fecha_nac_s = date(int(y_s), int(m_s), int(d_s))
-        except:
-            fecha_nac_s = date(int(y_s), int(m_s), 1)
-            
-        edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
-        st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
+        # Guardar valor actualizado en session_state persistente
+        st.session_state.renta_costos_sync = float(renta_mensual_sidebar)
         
         # Actualizar default de retiro basado en la edad inicial
         # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
@@ -293,11 +315,78 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     bono_monto = (aporte_m_metric * 12) * bono_pct
     bono_mensual_ano1 = bono_monto / 12
 
+    # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR (Premium Tabs) ---
+    st.markdown("""
+        <style>
+        div[data-testid="stSegmentedControl"] {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px !important;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] button {
+            font-size: 1.05rem !important;
+            font-weight: bold !important;
+            padding: 8px 18px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    seleccion_nav = st.segmented_control(
+        "Navegación Superior",
+        options=opciones_nav,
+        default="⏱️ Costo de Postergar",
+        key="main_nav_pestañas_postergar",
+        label_visibility="collapsed"
+    )
+    
+    if seleccion_nav == "📊 Plan de Acumulación":
+        base = float(aporte_m_metric)
+        st.session_state.monto_1 = base
+        st.session_state.monto_0 = max(1000.0, base - 1000.0)
+        st.session_state.monto_2 = base + 1000.0
+        st.session_state.num_escenarios = 3
+        
+        # Sincronizar nombre y modulo activo
+        nombre_cliente_sync = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
+        st.session_state.hub_nombre = nombre_cliente_sync.title()
+        
+        # Calcular edad actual para hub_edad
+        today = date.today()
+        y_s_val = int(st.session_state.get('c_yn_costos', today.year - 25))
+        m_names_list = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        m_s_s_val = st.session_state.get('c_mn_costos', 'Enero')
+        m_s_val = m_names_list.index(m_s_s_val) + 1 if m_s_s_val in m_names_list else 1
+        d_s_val = int(st.session_state.get('c_dn_costos', 1))
+        try:
+            birth_h = date(y_s_val, m_s_val, d_s_val)
+        except:
+            birth_h = date(y_s_val, m_s_val, 1)
+        st.session_state.hub_edad = today.year - birth_h.year - ((today.month, today.day) < (birth_h.month, birth_h.day))
+        
+        st.session_state.modulo_activo = "📊 Plan de Acumulación"
+        st.rerun()
+    elif seleccion_nav == "📈 Planificador Financiero":
+        st.session_state.modulo_activo = "📈 Planificador Financiero"
+        st.rerun()
+
     # BLOQUE MAESTRO HUD UNIFICADO
+    nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
     st.markdown(f"""
-<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 35px; opacity: 0.9;">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 10px; opacity: 0.9;">
     <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 3.5rem;">COSTO DE POSTERGAR</h1>
     <h2 style="color: {ACCENT_COLOR}; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-top: 10px;">EL COSTO DE LA ESPERA</h2>
+</div>
+<div style="text-align: center; margin-top: -15px; margin-bottom: 25px; font-size: 1.2rem; color: {TEXT_COLOR}; font-family: 'Montserrat', sans-serif;">
+    Proyección para el cliente: <b>{nombre_cliente.title()}</b>
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
 <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">

@@ -1205,9 +1205,9 @@ if st.session_state.modulo_activo == "Hub":
     if "sim" in q_params:
         target_sim = q_params["sim"]
         if target_sim == "retiro":
-            st.session_state.modulo_activo = "📊 Simulador de Retiro"
+            st.session_state.modulo_activo = "📊 Plan de Acumulación"
         elif target_sim == "costos":
-            st.session_state.modulo_activo = "✨ Nuevo Simulador"
+            st.session_state.modulo_activo = "⏱️ Costo de Postergar"
         
         # Limpiar parámetros y recargar
         st.query_params.clear()
@@ -1268,7 +1268,39 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Monto Mensual que va depositar <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${m_h_val:,.0f}</span></p>", unsafe_allow_html=True)
                 monto_h = st.number_input("Monto Mensual que va depositar", min_value=1000, value=3000, step=500, key="hub_monto_input", label_visibility="collapsed")
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                edad_h = st.number_input("Edad", min_value=18, max_value=70, value=25, key="hub_edad_input")
+                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+                cs_d_h, cs_m_h, cs_a_h = st.columns([1.5, 1.8, 1.2])
+                today = date.today()
+                
+                # Inicializar valores en session_state si no existen
+                if 'c_yn_costos' not in st.session_state: st.session_state.c_yn_costos = today.year - 25
+                if 'c_mn_costos' not in st.session_state: st.session_state.c_mn_costos = "Enero"
+                if 'c_dn_costos' not in st.session_state: st.session_state.c_dn_costos = 1
+                
+                with cs_a_h:
+                    y_s_h = st.number_input("Año  ", 1940, today.year, value=int(st.session_state.c_yn_costos), key="hub_birth_year", label_visibility="collapsed")
+                    st.session_state.c_yn_costos = y_s_h
+                with cs_m_h:
+                    m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+                    m_idx = m_names.index(st.session_state.c_mn_costos) if st.session_state.c_mn_costos in m_names else 0
+                    m_s_s_h = st.selectbox("Mes  ", m_names, index=m_idx, key="hub_birth_month", label_visibility="collapsed")
+                    st.session_state.c_mn_costos = m_s_s_h
+                    m_s_h = m_names.index(m_s_s_h) + 1
+                with cs_d_h:
+                    num_days_s_h = calendar.monthrange(int(y_s_h), int(m_s_h))[1]
+                    d_idx = min(int(st.session_state.c_dn_costos) - 1, num_days_s_h - 1)
+                    d_s_h = st.selectbox("Día  ", list(range(1, num_days_s_h + 1)), index=d_idx, key="hub_birth_day", label_visibility="collapsed")
+                    st.session_state.c_dn_costos = d_s_h
+                
+                # Calcular edad dinámicamente
+                try:
+                    birth_h = date(int(y_s_h), int(m_s_h), int(d_s_h))
+                except:
+                    birth_h = date(int(y_s_h), int(m_s_h), 1)
+                edad_h = today.year - birth_h.year - ((today.month, today.day) < (birth_h.month, birth_h.day))
+                
+                st.markdown(f"<p style='margin-top: -5px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_h} AÑOS</p>", unsafe_allow_html=True)
+                
                 default_retiro_h = 60 if edad_h <= 35 else 65
                 st.session_state.hub_edad = edad_h
                 st.session_state.hub_retiro_default = default_retiro_h
@@ -1288,13 +1320,14 @@ if st.session_state.modulo_activo == "Hub":
                     )
                     
                     st.session_state.hub_nombre = nombre_h
+                    st.session_state.nombre_cliente = nombre_h
                     st.session_state.hub_monto = monto_h
                     st.session_state.hub_edad = edad_h
                     st.session_state.num_escenarios = 3
                     st.session_state.monto_0 = float(monto_h)
                     st.session_state.monto_1 = float(monto_h + 1000)
                     st.session_state.monto_2 = float(monto_h + 2000)
-                    st.session_state.modulo_activo = "✨ Proyecto 5%"
+                    st.session_state.modulo_activo = "📊 Plan de Acumulación"
                     st.rerun()
     with c4:
         # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
@@ -1333,7 +1366,7 @@ if st.session_state.modulo_activo == "Hub":
                 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
                 today = date.today()
                 st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-                c_d, c_m, c_a = st.columns([1, 1.8, 1.2])
+                c_d, c_m, c_a = st.columns([1.5, 1.8, 1.2])
                 with c_a:
                     y_n = st.number_input("Año", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
                 with c_m:
@@ -1395,11 +1428,13 @@ if st.session_state.modulo_activo == "Hub":
                     )
 
                     st.session_state.hub_nombre_costos = nombre_c
+                    st.session_state.nombre_cliente = nombre_c
+                    st.session_state.hub_nombre = nombre_c
                     st.session_state.renta_costos_sync = float(renta_c)
                     st.session_state.meta_retiro_val = float(meta_calculada)
                     st.session_state.costos_edad_inicial = int(edad_c)
                     st.session_state.costos_edad_retiro = int(retiro_c)
-                    st.session_state.modulo_activo = "✨ Nuevo Simulador"
+                    st.session_state.modulo_activo = "⏱️ Costo de Postergar"
                     st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -1498,7 +1533,7 @@ if st.session_state.modulo_activo == "Hub":
 # --- SELECTOR ORIGINAL ELIMINADO (Ya no se usa) ---
 # seleccion = st.radio(...) - Se omite para usar modulo_activo
 
-if st.session_state.modulo_activo == "✨ Nuevo Simulador":
+if st.session_state.modulo_activo == "⏱️ Costo de Postergar":
     import simulador_costo_postergar
     simulador_costo_postergar.render_simulador(get_asset_path, encontrar_aporte_necesario, calcular_escenario)
     st.stop()
@@ -1507,7 +1542,7 @@ if st.session_state.modulo_activo == "📈 Planificador Financiero":
     import planificador
     planificador.render_planificador()
     st.stop()
-if st.session_state.modulo_activo == "✨ Proyecto 5%":
+if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     # --- CONTINÚA SIMULADOR DE RETIRO ORIGINAL ---
     # --- SIDEBAR ---
     with st.sidebar:
@@ -1529,12 +1564,43 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
     
         st.title("Configuración")
         
-        with st.expander("👤 Datos del Cliente", expanded=False):
-            nombre_default = st.session_state.get('hub_nombre', "Cliente Ejemplo")
-            nombre = st.text_input("Nombre", value=nombre_default)
+        nombre_default = st.session_state.get('hub_nombre', '') or st.session_state.get('nombre_cliente', '')
+        with st.expander("👤 Datos del Cliente", expanded=True):
+            nombre = st.text_input("Nombre", value=nombre_default).title()
+            st.session_state.hub_nombre = nombre
             
-            edad_default = st.session_state.get('hub_edad', 35)
-            edad = st.number_input("Edad Actual", 18, 70, value=int(edad_default), key="edad_actual_input")
+            today = date.today()
+            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+            cs_d_p, cs_m_p, cs_a_p = st.columns([1.5, 1.8, 1.2])
+            
+            # Inicializar valores en session_state si no existen
+            if 'c_yn_costos' not in st.session_state: st.session_state.c_yn_costos = today.year - 25
+            if 'c_mn_costos' not in st.session_state: st.session_state.c_mn_costos = "Enero"
+            if 'c_dn_costos' not in st.session_state: st.session_state.c_dn_costos = 1
+            
+            with cs_a_p:
+                y_s_p = st.number_input("Año   ", 1940, today.year, value=int(st.session_state.c_yn_costos), key="sim1_birth_year", label_visibility="collapsed")
+                st.session_state.c_yn_costos = y_s_p
+            with cs_m_p:
+                m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+                m_idx = m_names.index(st.session_state.c_mn_costos) if st.session_state.c_mn_costos in m_names else 0
+                m_s_s_p = st.selectbox("Mes   ", m_names, index=m_idx, key="sim1_birth_month", label_visibility="collapsed")
+                st.session_state.c_mn_costos = m_s_s_p
+                m_s_p = m_names.index(m_s_s_p) + 1
+            with cs_d_p:
+                num_days_s_p = calendar.monthrange(int(y_s_p), int(m_s_p))[1]
+                d_idx = min(int(st.session_state.c_dn_costos) - 1, num_days_s_p - 1)
+                d_s_p = st.selectbox("Día   ", list(range(1, num_days_s_p + 1)), index=d_idx, key="sim1_birth_day", label_visibility="collapsed")
+                st.session_state.c_dn_costos = d_s_p
+            
+            # Calcular edad
+            try:
+                birth_p = date(int(y_s_p), int(m_s_p), int(d_s_p))
+            except:
+                birth_p = date(int(y_s_p), int(m_s_p), 1)
+            edad = today.year - birth_p.year - ((today.month, today.day) < (birth_p.month, birth_p.day))
+            st.session_state.hub_edad = edad
+            st.markdown(f"<p style='margin-top: -5px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad} AÑOS</p>", unsafe_allow_html=True)
             tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
     
         with st.expander("⚙️ Parámetros Globales", expanded=True):
@@ -1803,6 +1869,48 @@ if st.session_state.modulo_activo == "✨ Proyecto 5%":
         })
     
     # --- DASHBOARD ---
+    # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR (Premium Tabs) ---
+    st.markdown("""
+        <style>
+        div[data-testid="stSegmentedControl"] {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px !important;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        div[data-testid="stSegmentedControl"] button {
+            font-size: 1.05rem !important;
+            font-weight: bold !important;
+            padding: 8px 18px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    opciones_nav = ["📊 Plan de Acumulación", "⏱️ Costo de Postergar", "📈 Planificador Financiero"]
+    seleccion_nav = st.segmented_control(
+        "Navegación Superior",
+        options=opciones_nav,
+        default="📊 Plan de Acumulación",
+        key="main_nav_pestañas",
+        label_visibility="collapsed"
+    )
+    
+    if seleccion_nav == "⏱️ Costo de Postergar":
+        st.session_state.nombre_cliente = nombre.title()
+        st.session_state.hub_nombre = nombre.title()
+        st.session_state.modulo_activo = "⏱️ Costo de Postergar"
+        st.rerun()
+    elif seleccion_nav == "📈 Planificador Financiero":
+        st.session_state.modulo_activo = "📈 Planificador Financiero"
+        st.rerun()
+
     logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
     logo_dash = get_asset_path(logo_filename_dash)
     if os.path.exists(logo_dash):
