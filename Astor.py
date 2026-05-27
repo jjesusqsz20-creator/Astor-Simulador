@@ -1308,6 +1308,7 @@ if st.session_state.modulo_activo == "Hub":
             max-width: 800px;
             margin: 30px auto 0 auto;
         }
+        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(1) button,
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button {
             background: linear-gradient(135deg, #22D3EE 0%, #0891B2 100%) !important;
             color: #000000 !important;
@@ -1322,10 +1323,12 @@ if st.session_state.modulo_activo == "Hub":
             min-height: 62.38px !important;
             border-radius: 100px !important; /* Capsule/pill shape as in screenshot */
         }
+        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(1) button:hover,
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button:hover {
             box-shadow: 0 0 35px rgba(34, 211, 238, 0.7) !important;
             transform: translateY(-2px) !important;
         }
+        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(2) button,
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button {
             background: linear-gradient(135deg, #DFBF72 0%, #B89C53 100%) !important;
             color: #0E121A !important;
@@ -1340,6 +1343,7 @@ if st.session_state.modulo_activo == "Hub":
             min-height: 62.38px !important;
             border-radius: 12px !important; /* Rounded corners as in screenshot */
         }
+        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(2) button:hover,
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button:hover {
             box-shadow: 0 0 30px rgba(223, 191, 114, 0.4) !important;
             transform: translateY(-2px) !important;
