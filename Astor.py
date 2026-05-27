@@ -1873,10 +1873,17 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
                 
                 # 1. Monto Inicial
                 # ETIQUETA VIVO (Separador de miles)
-                m_def_i = st.session_state.get(f"persist_monto_{i}", float(val_defecto))
+                # Prioridad: monto_{i} (sync desde Costo de Postergar) > persist_monto_{i} > defecto
+                if f"monto_{i}" in st.session_state:
+                    m_def_i = float(st.session_state[f"monto_{i}"])
+                else:
+                    m_def_i = st.session_state.get(f"persist_monto_{i}", float(val_defecto))
                 st.markdown(f"<div style='font-size: 1.15rem; font-weight: 900; color: {color}; margin-bottom: 2px;'> ${m_def_i:,.0f}</div>", unsafe_allow_html=True)
                 monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_def_i), step=500.0, key=f"monto_ui_{i}", label_visibility="collapsed")
+                # Guardar en persist para que sobreviva cambios de pestaña (limpiar el hub key para que no sobreescriba ediciones futuras)
                 st.session_state[f"persist_monto_{i}"] = monto
+                if f"monto_{i}" in st.session_state:
+                    del st.session_state[f"monto_{i}"]
                 
                 # 2. Checkbox para cambio en mes 19
                 chk_def_i = st.session_state.get(f"persist_chk_m19_{i}", False)
