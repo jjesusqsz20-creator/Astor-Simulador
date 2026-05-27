@@ -648,8 +648,8 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             
             fig_g = go.Figure()
             fig_g.add_trace(go.Scatter(
-                x=df_espera["AÑO"].tolist() if frecuencia == "Anual" else list(range(1, len(df_espera) + 1)),
-                y=df_espera["SALDO DE FONDO"].tolist(),
+                x=df_espera["Año"].tolist() if frecuencia == "Anual" else list(range(1, len(df_espera) + 1)),
+                y=df_espera["Saldo de Fondo"].tolist(),
                 mode='lines+markers',
                 fill='tozeroy',
                 line=dict(color=ACCENT_COLOR, width=3),
