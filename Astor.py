@@ -313,10 +313,8 @@ st.markdown(f"""
             radial-gradient(circle at 10% 20%, #E04343{RADIAL_OPACITY} 0%, transparent 50%),
             radial-gradient(circle at 90% 10%, #00CC6A{RADIAL_OPACITY} 0%, transparent 50%),
             radial-gradient(circle at 50% 80%, #B800D6{RADIAL_OPACITY} 0%, transparent 50%),
-            radial-gradient(circle at 80% 90%, #5A8B8B{RADIAL_OPACITY if is_dark else '03'} 0%, transparent 40%),
-            linear-gradient(rgba(107, 164, 164, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(107, 164, 164, 0.05) 1px, transparent 1px) !important;
-        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50px 50px, 50px 50px !important;
+            radial-gradient(circle at 80% 90%, #5A8B8B{RADIAL_OPACITY if is_dark else '03'} 0%, transparent 40%) !important;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100% !important;
         color: {TEXT_COLOR};
         background-attachment: fixed;
     }}
