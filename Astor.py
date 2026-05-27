@@ -1363,36 +1363,21 @@ if st.session_state.modulo_activo == "Form_Postergar":
     # --- PANTALLA FORMULARIO INTERMEDIO ---
     st.markdown("""
         <style>
-        .form-title-container {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 25px;
-        }
-        .form-title {
-            font-family: 'Inter', sans-serif;
-            font-size: 2.1rem;
-            font-weight: 900;
-            color: #DFBF72;
-            text-shadow: 0 0 20px rgba(223, 191, 114, 0.3);
-            letter-spacing: 1px;
-            margin: 0;
-        }
-        
-        /* Dark Curved Card Container */
-        .premium-form-card {
+        /* Target the container wrapper to style the single big card */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #0D1117 !important;
-            border: 1px solid rgba(107, 164, 164, 0.2) !important;
-            border-radius: 20px !important;
+            border: 1px solid rgba(107, 164, 164, 0.25) !important;
+            border-radius: 24px !important;
             padding: 40px !important;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(107, 164, 164, 0.05) !important;
             max-width: 750px !important;
-            margin: 0 auto 50px auto !important;
+            margin: 0 auto 30px auto !important;
         }
         
         /* Styled input elements */
-        .premium-form-card div[data-testid="stTextInput"] label, 
-        .premium-form-card div[data-testid="stNumberInput"] label, 
-        .premium-form-card div[data-testid="stSelectbox"] label {
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stTextInput"] label, 
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stNumberInput"] label, 
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stSelectbox"] label {
             color: #6BA4A4 !important;
             font-weight: 800 !important;
             font-size: 0.85rem !important;
@@ -1401,9 +1386,9 @@ if st.session_state.modulo_activo == "Form_Postergar":
             margin-bottom: 6px !important;
         }
         
-        .premium-form-card div[data-testid="stTextInput"] input, 
-        .premium-form-card div[data-testid="stNumberInput"] input,
-        .premium-form-card div[data-testid="stSelectbox"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stTextInput"] input, 
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stNumberInput"] input,
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stSelectbox"] [data-baseweb="select"] {
             background-color: #161B22 !important;
             border: 1px solid #30363D !important;
             color: #FEFFFF !important;
@@ -1413,7 +1398,7 @@ if st.session_state.modulo_activo == "Form_Postergar":
         }
         
         /* Selectbox inner text styling */
-        .premium-form-card div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {
             color: #FEFFFF !important;
             font-size: 1rem !important;
             line-height: 48px !important;
@@ -1442,73 +1427,79 @@ if st.session_state.modulo_activo == "Form_Postergar":
         </style>
     """, unsafe_allow_html=True)
     
-    st.markdown("""
-        <div class="form-title-container">
-            <h2 class="form-title">¿CUÁL ES EL MONTO MENSUAL DE TU LIBERTAD?</h2>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Outer Form Card Wrapper
-    st.markdown('<div class="premium-form-card">', unsafe_allow_html=True)
-    
-    col_name, col_surname = st.columns(2)
-    with col_name:
-        nombres_val = st.text_input("Nombres", placeholder="Ej. Juan", key="form_nombres")
-    with col_surname:
-        apellidos_val = st.text_input("Apellidos", placeholder="Ej. Pérez", key="form_apellidos")
+    # Outer Form Card Wrapper using native Streamlit container with border
+    with st.container(border=True):
+        st.markdown("""
+            <div style="text-align: center; margin-bottom: 25px; width: 100%;">
+                <h1 style="font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.1; color: #FFFFFF; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
+                    EL COSTO DE<br>POSTERGAR<br><span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.6);">TU LIBERTAD</span>
+                </h1>
+                <p class="special-elite" style="color: #64748B; font-size: 1.1rem; font-style: italic; margin-top: 12px; margin-bottom: 25px; letter-spacing: 3px;">
+                    PROYECTO 5%
+                </p>
+                <div style="margin-top: 25px; margin-bottom: 20px; text-align: center;">
+                    <h2 style="font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: #DFBF72; text-shadow: 0 0 15px rgba(223,191,114,0.3); margin: 0; letter-spacing: 1px;">
+                        ¿CUÁL ES EL MONTO MENSUAL DE TU LIBERTAD?
+                    </h2>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
-    col_wa_pref, col_wa_num, col_monto = st.columns([1, 1.5, 2.5])
-    with col_wa_pref:
-        pref_val = st.selectbox("Whatsapp", ["+52 MX", "+1 US", "+52", "+1", "+34 ES", "+57 CO", "+54 AR", "+56 CL"], index=0, key="form_phone_prefix")
-    with col_wa_num:
-        phone_val = st.text_input("Número", placeholder="55-0000-0000", key="form_phone_number")
-    with col_monto:
-        monto_val = st.number_input("Monto Mensual Deseado ($)", min_value=1000, value=50000, step=5000, key="form_monto_deseado")
+        col_name, col_surname = st.columns(2)
+        with col_name:
+            nombres_val = st.text_input("Nombres", placeholder="Ej. Juan", key="form_nombres")
+        with col_surname:
+            apellidos_val = st.text_input("Apellidos", placeholder="Ej. Pérez", key="form_apellidos")
+            
+        col_wa_pref, col_wa_num, col_monto = st.columns([1, 1.5, 2.5])
+        with col_wa_pref:
+            pref_val = st.selectbox("Whatsapp", ["+52 MX", "+1 US", "+52", "+1", "+34 ES", "+57 CO", "+54 AR", "+56 CL"], index=0, key="form_phone_prefix")
+        with col_wa_num:
+            phone_val = st.text_input("Número", placeholder="55-0000-0000", key="form_phone_number")
+        with col_monto:
+            monto_val = st.number_input("Monto Mensual Deseado ($)", min_value=1000, value=50000, step=5000, key="form_monto_deseado")
+            
+        st.markdown("<p style='color: #6BA4A4; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; margin-bottom: 6px;'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+        col_d, col_m, col_a = st.columns([1, 1.5, 1])
+        with col_d:
+            d_val = st.selectbox("Día", list(range(1, 32)), index=4, key="form_birth_day")
+        with col_m:
+            m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+            m_val = st.selectbox("Mes", m_names, index=8, key="form_birth_month")
+        with col_a:
+            y_val = st.selectbox("Año", list(range(1940, date.today().year + 1)), index=list(range(1940, date.today().year + 1)).index(1987), key="form_birth_year")
+            
+        retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", [50, 55, 60, 65, 70], index=2, key="form_retiro_age")
         
-    st.markdown("<p style='color: #6BA4A4; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; margin-bottom: 6px;'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-    col_d, col_m, col_a = st.columns([1, 1.5, 1])
-    with col_d:
-        d_val = st.selectbox("Día", list(range(1, 32)), index=4, key="form_birth_day")
-    with col_m:
-        m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-        m_val = st.selectbox("Mes", m_names, index=8, key="form_birth_month")
-    with col_a:
-        y_val = st.selectbox("Año", list(range(1940, date.today().year + 1)), index=list(range(1940, date.today().year + 1)).index(1987), key="form_birth_year")
+        st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
+        if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
+            if not nombres_val.strip():
+                st.error("Por favor, ingresa tus nombres.")
+            elif not phone_val.strip():
+                st.error("Por favor, ingresa tu número de WhatsApp.")
+            else:
+                m_idx = m_names.index(m_val) + 1
+                try:
+                    birth_date = date(int(y_val), int(m_idx), int(d_val))
+                except Exception:
+                    birth_date = date(int(y_val), int(m_idx), 1)
+                today = date.today()
+                edad_actual = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+                
+                st.session_state.nombre_cliente = f"{nombres_val} {apellidos_val}".strip().title()
+                st.session_state.hub_nombre = st.session_state.nombre_cliente
+                st.session_state.c_yn_costos = int(y_val)
+                st.session_state.c_mn_costos = m_val
+                st.session_state.c_dn_costos = int(d_val)
+                st.session_state.hub_edad = edad_actual
+                st.session_state.renta_costos_sync = float(monto_val)
+                st.session_state.costos_edad_retiro = int(retiro_val)
+                
+                st.session_state.modulo_activo = "⏱️ Costo de Postergar"
+                st.rerun()
+                
+        st.markdown('</div>', unsafe_allow_html=True)
         
-    retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", [50, 55, 60, 65, 70], index=2, key="form_retiro_age")
-    
-    st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
-    if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
-        if not nombres_val.strip():
-            st.error("Por favor, ingresa tus nombres.")
-        elif not phone_val.strip():
-            st.error("Por favor, ingresa tu número de WhatsApp.")
-        else:
-            m_idx = m_names.index(m_val) + 1
-            try:
-                birth_date = date(int(y_val), int(m_idx), int(d_val))
-            except Exception:
-                birth_date = date(int(y_val), int(m_idx), 1)
-            today = date.today()
-            edad_actual = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-            
-            st.session_state.nombre_cliente = f"{nombres_val} {apellidos_val}".strip().title()
-            st.session_state.hub_nombre = st.session_state.nombre_cliente
-            st.session_state.c_yn_costos = int(y_val)
-            st.session_state.c_mn_costos = m_val
-            st.session_state.c_dn_costos = int(d_val)
-            st.session_state.hub_edad = edad_actual
-            st.session_state.renta_costos_sync = float(monto_val)
-            st.session_state.costos_edad_retiro = int(retiro_val)
-            
-
-            
-            st.session_state.modulo_activo = "⏱️ Costo de Postergar"
-            st.rerun()
-            
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
     col_ret_l, col_ret_c, col_ret_r = st.columns([2, 1, 2])
     with col_ret_c:
         if st.button("🏠 REGRESAR", use_container_width=True):
