@@ -1501,15 +1501,7 @@ if st.session_state.modulo_activo == "Form_Postergar":
             st.session_state.renta_costos_sync = float(monto_val)
             st.session_state.costos_edad_retiro = int(retiro_val)
             
-            nombre_completo = st.session_state.nombre_cliente
-            telefono_completo = f"{pref_val} {phone_val}".strip()
-            email_generado = f"{nombres_val.lower().replace(' ', '')}.{apellidos_val.lower().replace(' ', '')}@{phone_val.strip()[-4:] if len(phone_val.strip()) >= 4 else '1234'}.astor.com"
-            
-            guardar_datos_simulacion(
-                {'nombre': nombre_completo, 'email': email_generado, 'telefono': telefono_completo},
-                {'renta': float(monto_val), 'edad': int(edad_actual), 'retiro': int(retiro_val), 'patrimonio': 0.0},
-                'PROYECTO_COSTOS'
-            )
+
             
             st.session_state.modulo_activo = "⏱️ Costo de Postergar"
             st.rerun()
