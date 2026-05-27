@@ -111,89 +111,75 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         
         st.subheader("Costo de Postergar")
         
-        # Sincronización con el Hub (Renta mensual deseada)
-        renta_def = st.session_state.get("renta_costos_sync", 50000.0)
-        if "renta_sync_sidebar" in st.session_state:
-            st.session_state.renta_costos_sync = float(st.session_state.renta_sync_sidebar)
-            renta_def = st.session_state.renta_costos_sync
-        
-        renta_actual_label = renta_def
-        # Etiqueta personalizada con formato resaltado
-        st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Retiro Mensual Deseado <span style='font-size: 1.25rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${renta_actual_label:,.0f}</span></p>", unsafe_allow_html=True)
-        renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
-        
-        # Guardar valor actualizado en session_state persistente
-        st.session_state.renta_costos_sync = float(renta_mensual_sidebar)
-        
-        # Actualizar default de retiro basado en la edad inicial
-        # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
-        opciones_retiro = [60, 65, 70]
-        # Filtrar para que solo muestre opciones mayores a la edad inicial
-        opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
-        if not opciones_retiro: opciones_retiro = [70] # Failsafe si el usuario tiene 70
-        
-        desired_default = 60 if edad_inicial <= 35 else 65
-        e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
-        if e_retiro_state not in opciones_retiro:
-            e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
-        idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
-        edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro)
-        rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=10.0, step=0.5)
-        st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
-        col_inf1, col_inf2 = st.columns(2)
-        with col_inf1:
-            st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">INFLACIÓN</p>', unsafe_allow_html=True)
-            inflacion_opcion = st.selectbox('Inflación', ['Activada', 'Desactivada'], index=0, label_visibility='collapsed', key='inf_toggle_postergar')
-        with col_inf2:
-            st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">% INFLACIÓN</p>', unsafe_allow_html=True)
-            tasa_inf_input = st.number_input('% Inflación', min_value=0.0, max_value=10.0, value=4.0, step=0.1, label_visibility='collapsed', key='inf_val_postergar')
-        inflacion_activa = (inflacion_opcion == "Activada")
-        
-        # Blindar poder adquisitivo toggle
-        st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">BLINDAJE DE PODER ADQUISITIVO</p>', unsafe_allow_html=True)
-        blindar_adquisitivo = st.toggle("Blindar poder adquisitivo", value=False, key="blindar_adquisitivo_postergar")
-        
-        tasa_inf_blindaje = 4.0
-        if blindar_adquisitivo:
-            st.markdown(f'<p style="margin-top: 5px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {ACCENT_COLOR if is_dark else "#555"};">% INFLACIÓN DE BLINDAJE</p>', unsafe_allow_html=True)
-            tasa_inf_blindaje = st.number_input('% Inflación de Blindaje', min_value=0.0, max_value=10.0, value=4.0, step=0.1, key='inf_val_blindaje_postergar', label_visibility='collapsed')
-        
-        # Disparador Secreto Disfrazado (Icono de Seguridad) para Patrimonio Actual
-        if 'show_patrimonio' not in st.session_state:
-            st.session_state.show_patrimonio = False
-        if 'patrimonio_persist' not in st.session_state:
-            st.session_state.patrimonio_persist = 0.0
-            
-        st.markdown('<div id="secret-shield-trigger"></div>', unsafe_allow_html=True)
-        if st.button("🛡️", key="secret_pat_shield_costos"):
-            st.session_state.show_patrimonio = not st.session_state.show_patrimonio
-            st.rerun()
-        
-        if st.session_state.show_patrimonio:
-            patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget_costos")
-            st.session_state.patrimonio_persist = patrimonio_actual
-        else:
-            patrimonio_actual = st.session_state.patrimonio_persist
+        with st.expander("⚙️ Parámetros Globales", expanded=True):
+            frecuencia = st.selectbox('Frecuencia de Visualización', ['Mensual', 'Semestral', 'Anual'], index=2)
+            dict_factores = {'Mensual': 1, 'Semestral': 6, 'Anual': 12}
+            factor_frecuencia = dict_factores[frecuencia]
+            label_dinamico = f'Aportación {frecuencia}'
 
-        años_inversion = edad_retiro - edad_inicial
-        r_anual_dec = rendimiento_anual / 100.0
-        
-        # Lógica de Blindaje de Poder Adquisitivo: VF = VP * (1 + pi)^n
-        if blindar_adquisitivo:
-            tasa_blindaje = (tasa_inf_blindaje / 100.0)
-            renta_mensual_calculada = renta_mensual_sidebar * ((1 + tasa_blindaje) ** años_inversion)
-        else:
-            renta_mensual_calculada = renta_mensual_sidebar
+            # Sincronización con el Hub (Renta mensual deseada)
+            renta_def = st.session_state.get("renta_costos_sync", 50000.0)
+            if "renta_sync_sidebar" in st.session_state:
+                st.session_state.renta_costos_sync = float(st.session_state.renta_sync_sidebar)
+                renta_def = st.session_state.renta_costos_sync
             
-        meta_retiro = (renta_mensual_calculada * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
-        fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
-        meta_neta = max(0.0, meta_retiro - fv_patrimonio)
-        st.session_state.meta_retiro_val = meta_retiro
-        st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
-        frecuencia = st.selectbox('Frecuencia de Visualización', ['Mensual', 'Semestral', 'Anual'], index=2)
-        dict_factores = {'Mensual': 1, 'Semestral': 6, 'Anual': 12}
-        factor_frecuencia = dict_factores[frecuencia]
-        label_dinamico = f'Aportación {frecuencia}'
+            renta_actual_label = renta_def
+            # Etiqueta personalizada con formato resaltado
+            st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {{ACCENT_COLOR if is_dark else '#555'}};'><span style='font-size: 1.25rem; font-weight: 900; color: {{GOLD_COLOR if is_dark else '#000'}};'>${renta_actual_label:,.0f}</span> Retiro Mensual Deseado</p>", unsafe_allow_html=True)
+            renta_mensual_sidebar = st.number_input("Retiro Mensual Deseado", min_value=1000.0, value=float(renta_def), step=5000.0, key="renta_sync_sidebar", label_visibility="collapsed")
+            
+            # Guardar valor actualizado en session_state persistente
+            st.session_state.renta_costos_sync = float(renta_mensual_sidebar)
+            
+            # Actualizar default de retiro basado en la edad inicial
+            # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
+            opciones_retiro = [60, 65, 70]
+            # Filtrar para que solo muestre opciones mayores a la edad inicial
+            opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
+            if not opciones_retiro: opciones_retiro = [70] # Failsafe si el usuario tiene 70
+            
+            desired_default = 60 if edad_inicial <= 35 else 65
+            e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
+            if e_retiro_state not in opciones_retiro:
+                e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
+            idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
+            edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro)
+            rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=10.0, step=0.5)
+            st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
+            col_inf1, col_inf2 = st.columns(2)
+            with col_inf1:
+                st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">INFLACIÓN</p>', unsafe_allow_html=True)
+                inflacion_opcion = st.selectbox('Inflación', ['Activada', 'Desactivada'], index=0, label_visibility='collapsed', key='inf_toggle_postergar')
+            with col_inf2:
+                st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">% INFLACIÓN</p>', unsafe_allow_html=True)
+                tasa_inf_input = st.number_input('% Inflación', min_value=0.0, max_value=10.0, value=4.0, step=0.1, label_visibility='collapsed', key='inf_val_postergar')
+            inflacion_activa = (inflacion_opcion == "Activada")
+            
+            # Blindar poder adquisitivo toggle
+            st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">BLINDAJE DE PODER ADQUISITIVO</p>', unsafe_allow_html=True)
+            blindar_adquisitivo = st.toggle("Blindar poder adquisitivo", value=False, key="blindar_adquisitivo_postergar")
+            
+            tasa_inf_blindaje = 4.0
+            if blindar_adquisitivo:
+                st.markdown(f'<p style="margin-top: 5px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">% INFLACIÓN DE BLINDAJE</p>', unsafe_allow_html=True)
+                tasa_inf_blindaje = st.number_input('% Inflación de Blindaje', min_value=0.0, max_value=10.0, value=4.0, step=0.1, key='inf_val_blindaje_postergar', label_visibility='collapsed')
+            
+            # Disparador Secreto Disfrazado (Icono de Seguridad) para Patrimonio Actual
+            if 'show_patrimonio' not in st.session_state:
+                st.session_state.show_patrimonio = False
+            if 'patrimonio_persist' not in st.session_state:
+                st.session_state.patrimonio_persist = 0.0
+                
+            st.markdown('<div id="secret-shield-trigger"></div>', unsafe_allow_html=True)
+            if st.button("🛡️", key="secret_pat_shield_costos"):
+                st.session_state.show_patrimonio = not st.session_state.show_patrimonio
+                st.rerun()
+            
+            if st.session_state.show_patrimonio:
+                patrimonio_actual = st.number_input("Patrimonio actual ($)", min_value=0.0, value=st.session_state.patrimonio_persist, step=10000.0, key="pat_input_widget_costos")
+                st.session_state.patrimonio_persist = patrimonio_actual
+            else:
+                patrimonio_actual = st.session_state.patrimonio_persist
 
     # --- LÓGICA DE CÁLCULO UNIFICADA (IGUALITO AL PROYECTO 5%) ---
     # Buscamos la aportación inicial necesaria para llegar a la meta real de hoy (sin inflar la meta a futuro).

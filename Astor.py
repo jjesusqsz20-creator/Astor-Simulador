@@ -1827,7 +1827,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
     
         with st.expander("⚙️ Parámetros Globales", expanded=True):
-            frecuencia_vista = st.selectbox("Vista de Tabla/Gráfica", ["Mensual", "Semestral", "Anual"], index=2)
+            frecuencia_vista = st.selectbox("Frecuencia de visualización", ["Mensual", "Semestral", "Anual"], index=2)
             col_inf1, col_inf2 = st.columns(2)
             opcion_inflacion = col_inf1.selectbox("Inflación", ["Activada", "Desactivada"], index=0)
             inflacion_activa = True if opcion_inflacion == "Activada" else False
