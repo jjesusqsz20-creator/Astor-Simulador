@@ -1725,8 +1725,8 @@ if st.session_state.modulo_activo == "Form_Postergar":
                 today = date.today()
                 edad_actual = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
                 
-                st.session_state.nombre_cliente = f"{nombres_val} {apellidos_val}".strip().title()
-                st.session_state.hub_nombre = st.session_state.nombre_cliente
+                # Guardar en el hub global en lugar de escribir directamente en 'nombre_cliente'
+                st.session_state['hub_nombre'] = f"{nombres_val} {apellidos_val}".strip().title()
                 st.session_state.c_yn_costos = int(y_val)
                 st.session_state.c_mn_costos = m_val
                 st.session_state.c_dn_costos = int(d_val)
@@ -2106,13 +2106,11 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         )
     
     if seleccion_nav == "⏱️ Costo de Postergar":
-        st.session_state.nombre_cliente = nombre.title()
-        st.session_state.hub_nombre = nombre.title()
+        st.session_state['hub_nombre'] = nombre.title()
         st.session_state.modulo_activo = "⏱️ Costo de Postergar"
         st.rerun()
     elif seleccion_nav == "🧮 Interés Compuesto":
-        st.session_state.nombre_cliente = nombre.title()
-        st.session_state.hub_nombre = nombre.title()
+        st.session_state['hub_nombre'] = nombre.title()
         st.session_state.modulo_activo = "🧮 Interés Compuesto"
         st.rerun()
     elif seleccion_nav == "📈 Planificador Financiero":

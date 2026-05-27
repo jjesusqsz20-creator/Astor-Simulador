@@ -75,8 +75,8 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         with st.expander("👤 Datos del Cliente", expanded=True):
             nombre_def_p = st.session_state.get("nombre_cliente", "") or st.session_state.get("hub_nombre", "")
             nombre_input = st.text_input("Nombre", value=nombre_def_p, key="postergar_name_input").title()
-            st.session_state.nombre_cliente = nombre_input
-            st.session_state.hub_nombre = nombre_input
+            # No escribir directamente en 'nombre_cliente' para evitar modificar la clave después de creado el widget.
+            st.session_state['hub_nombre'] = nombre_input
             
             today = date.today()
             st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
@@ -467,9 +467,9 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         st.session_state.modulo_activo = "📊 Plan de Acumulación"
         st.rerun()
     elif seleccion_nav == "🧮 Interés Compuesto":
-        st.session_state.nombre_cliente = nombre_cliente.title()
-        st.session_state.hub_nombre = nombre_cliente.title()
-        st.session_state.modulo_activo = "🧮 Interés Compuesto"
+        # Sincronizar solamente el hub; no tocar 'nombre_cliente' para no romper el widget existente.
+        st.session_state['hub_nombre'] = nombre_cliente.title()
+        st.session_state['modulo_activo'] = "🧮 Interés Compuesto"
         st.rerun()
     elif seleccion_nav == "📈 Planificador Financiero":
         st.session_state.modulo_activo = "📈 Planificador Financiero"

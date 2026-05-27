@@ -1137,20 +1137,15 @@ def render_planificador():
         )
     
     if seleccion_nav == "📊 Plan de Acumulación":
-        st.session_state.modulo_activo = "📊 Plan de Acumulación"
-        st.rerun()
+        st.session_state['modulo_activo'] = "📊 Plan de Acumulación"
     elif seleccion_nav == "⏱️ Costo de Postergar":
-        nombre_cliente_sync = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
-        st.session_state.nombre_cliente = nombre_cliente_sync.title()
-        st.session_state.hub_nombre = nombre_cliente_sync.title()
-        st.session_state.modulo_activo = "⏱️ Costo de Postergar"
-        st.rerun()
+        nombre_cliente_sync = st.session_state.get('hub_nombre', '')
+        st.session_state['hub_nombre'] = nombre_cliente_sync.title()
+        st.session_state['modulo_activo'] = "⏱️ Costo de Postergar"
     elif seleccion_nav == "🧮 Interés Compuesto":
-        nombre_cliente_sync = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
-        st.session_state.nombre_cliente = nombre_cliente_sync.title()
-        st.session_state.hub_nombre = nombre_cliente_sync.title()
-        st.session_state.modulo_activo = "🧮 Interés Compuesto"
-        st.rerun()
+        nombre_cliente_sync = st.session_state.get('hub_nombre', '')
+        st.session_state['hub_nombre'] = nombre_cliente_sync.title()
+        st.session_state['modulo_activo'] = "🧮 Interés Compuesto"
 
     # --- TÍTULO PRINCIPAL ---
     st.markdown(
