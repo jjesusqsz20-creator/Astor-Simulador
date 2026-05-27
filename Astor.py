@@ -1399,8 +1399,33 @@ if st.session_state.modulo_activo == "Form_Postergar":
             border: 1px solid #30363D !important;
             color: #FEFFFF !important;
             border-radius: 10px !important;
-            height: 48px !important;
-            font-size: 1rem !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Nombres & Apellidos Inputs (295 x 50 px) */
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="column"] div[data-testid="stTextInput"] input {
+            width: 295px !important;
+            height: 50px !important;
+            text-transform: uppercase !important;
+        }
+        
+        /* WhatsApp Country Prefix (110 x 50 px) */
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="column"]:nth-of-type(1) div[data-testid="stSelectbox"] [data-baseweb="select"] {
+            width: 110px !important;
+            height: 50px !important;
+        }
+        
+        /* WhatsApp Phone Number (177 x 50 px) */
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="column"]:nth-of-type(2) div[data-testid="stTextInput"] input {
+            width: 177px !important;
+            height: 50px !important;
+        }
+        
+        /* Monto Mensual Deseado (205 x 43 px) */
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="column"]:nth-of-type(3) div[data-testid="stNumberInput"] input {
+            width: 205px !important;
+            height: 43px !important;
+            text-align: center !important;
         }
         
         /* Selectbox inner text styling */
@@ -1461,7 +1486,7 @@ if st.session_state.modulo_activo == "Form_Postergar":
         with col_surname:
             apellidos_val = st.text_input("Apellidos", placeholder="Ej. Pérez", key="form_apellidos")
             
-        col_wa_pref, col_wa_num, col_monto = st.columns([1, 1.5, 2.5])
+        col_wa_pref, col_wa_num, col_monto = st.columns([1.1, 1.8, 3.0])
         with col_wa_pref:
             pref_val = st.selectbox("Whatsapp", ["+52 MX", "+1 US", "+52", "+1", "+34 ES", "+57 CO", "+54 AR", "+56 CL"], index=0, key="form_phone_prefix")
         with col_wa_num:
