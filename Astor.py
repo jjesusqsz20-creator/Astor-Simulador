@@ -1992,21 +1992,21 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         st.session_state.modulo_activo = "📈 Planificador Financiero"
         st.rerun()
 
-    logo_filename_dash = "1-08.png" if is_dark else "1-01-copy.png"
+    logo_filename_dash = "Proyecto 5%.png"
     logo_dash = get_asset_path(logo_filename_dash)
     if os.path.exists(logo_dash):
         bin_str_logo = get_base64_of_bin_file(logo_dash)
         st.markdown(f"""
-            <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-            </style>
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="width: 180px; margin-bottom: 20px;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">SIMULADOR</h1>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; width: 100%;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 450px; width: 85%; margin: 0 auto 20px auto; display: block;">
             </div>
         """, unsafe_allow_html=True)
     else:
-        st.title("Simulador")
+        st.markdown("""
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; width: 100%;">
+                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">SIMULADOR</h1>
+            </div>
+        """, unsafe_allow_html=True)
     st.markdown(f"Proyección para <span style='color: {TEXT_COLOR}; font-size: 1.2rem; font-weight: bold;'>{nombre.title()}</span> | Plan: **{tipo_plan}**", unsafe_allow_html=True)
     
     # --- DASHBOARD UNIFICADO ---
