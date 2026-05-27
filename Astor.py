@@ -2337,6 +2337,15 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             .to_html()
         )
         st.markdown(f"""
+<style>
+    .tabla-espera table {{
+        width: 100% !important;
+        margin: 0 auto !important;
+    }}
+    .tabla-espera th {{
+        text-align: center !important;
+    }}
+</style>
 <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
 {html_table}
 </div>
@@ -2374,6 +2383,15 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             )
             
             st.markdown(f"""
+<style>
+    .tabla-espera table {{
+        width: 100% !important;
+        margin: 0 auto !important;
+    }}
+    .tabla-espera th {{
+        text-align: center !important;
+    }}
+</style>
 <div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
 {html_table_65}
 </div>

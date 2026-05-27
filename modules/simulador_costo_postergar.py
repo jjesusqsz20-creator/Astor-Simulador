@@ -568,15 +568,10 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Post retención': 'last'
             }).reset_index()
             df_espera.rename(columns={
-                'Año': 'AÑO', 
-                'Edad': 'EDAD', 
-                'Aportación': 'APORTACIÓN ANUAL', 
-                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
-                'Saldo de Fondo': 'SALDO DE FONDO', 
-                'Saldo Disponible': 'SALDO DISPONIBLE', 
-                'Post retención': 'POST RETENCIÓN'
+                'Aportación': 'Aportación Anual'
             }, inplace=True)
-            df_espera.insert(2, 'APORTACIÓN MENSUAL', df_costos_real.groupby('Año')['Aportación'].last().values)
+            # Add Aportacion Mensual if needed, but the user wants columns exactly like Plan de Acumulacion
+            # We'll just omit Aportacion Mensual here if Anual, to match Plan de Acumulacion
         elif frecuencia == "Semestral":
             # Agrupar cada 6 meses
             df_costos_real['Semestre'] = (df_costos_real['Mes Global'] - 1) // 6 + 1
@@ -590,51 +585,41 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Post retención': 'last'
             }).reset_index()
             df_espera.rename(columns={
-                'Semestre': 'PERIODO',
-                'Año': 'AÑO', 
-                'Edad': 'EDAD', 
-                'Aportación': 'APORTACIÓN SEMESTRAL', 
-                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
-                'Saldo de Fondo': 'SALDO DE FONDO', 
-                'Saldo Disponible': 'SALDO DISPONIBLE', 
-                'Post retención': 'POST RETENCIÓN'
+                'Semestre': 'Periodo',
+                'Aportación': 'Aportación Semestral'
             }, inplace=True)
-            df_espera.insert(3, 'APORTACIÓN MENSUAL', df_costos_real.groupby('Semestre')['Aportación'].last().values)
         else:
             # Mensual
             df_espera = df_costos_real.copy()
             df_espera.rename(columns={
-                'Mes Global': 'MES',
-                'Año': 'AÑO', 
-                'Edad': 'EDAD', 
-                'Aportación': 'APORTACIÓN MENSUAL', 
-                'Aportación Acumulada': 'APORTACIÓN ACUMULADA', 
-                'Saldo de Fondo': 'SALDO DE FONDO', 
-                'Saldo Disponible': 'SALDO DISPONIBLE'
+                'Mes Global': 'Mes',
+                'Aportación': 'Aportación Mensual'
             }, inplace=True)
-            # Seleccionar únicamente las columnas solicitadas con AÑO primero, luego MES
-            columnas_mensuales = ['AÑO', 'MES', 'EDAD', 'APORTACIÓN MENSUAL', 'APORTACIÓN ACUMULADA', 'SALDO DE FONDO', 'SALDO DISPONIBLE']
+            # Seleccionar únicamente las columnas como en plan de acumulacion + Mes
+            columnas_mensuales = ['Año', 'Mes', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
+            # Asegurar que todas existan
+            columnas_mensuales = [c for c in columnas_mensuales if c in df_espera.columns]
             df_espera = df_espera[columnas_mensuales]
 
         if not df_espera.empty:
             if frecuencia == "Mensual":
-                col_aporte = "APORTACIÓN MENSUAL"
+                col_aporte = "Aportación Mensual"
+            elif frecuencia == "Semestral":
+                col_aporte = "Aportación Semestral"
             else:
-                col_aporte = next((c for c in df_espera.columns if "APORTACIÓN" in c and "ACUMULADA" not in c and c != "APORTACIÓN MENSUAL"), "APORTACIÓN ANUAL")
+                col_aporte = "Aportación Anual"
                 
-            col_periodo = next((c for c in df_espera.columns if c in ["AÑO", "PERIODO", "MES"]), "AÑO")
+            col_periodo = next((c for c in df_espera.columns if c in ["Año", "Periodo", "Mes"]), "Año")
             
             format_dict = {
                 col_aporte: "${:,.0f}",
-                "APORTACIÓN ACUMULADA": "${:,.0f}",
-                "SALDO DE FONDO": "${:,.0f}",
-                "SALDO DISPONIBLE": "${:,.0f}",
-                "POST RETENCIÓN": "${:,.0f}",
-                "EDAD": "{:.0f}",
+                "Aportación Acumulada": "${:,.0f}",
+                "Saldo de Fondo": "${:,.0f}",
+                "Saldo Disponible": "${:,.0f}",
+                "Post retención": "${:,.0f}",
+                "Edad": "{:.0f}",
                 col_periodo: "{:.0f}"
             }
-            if "APORTACIÓN MENSUAL" in df_espera.columns:
-                format_dict["APORTACIÓN MENSUAL"] = "${:,.0f}"
                 
             html_table = (
                 df_espera.style
