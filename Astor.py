@@ -1827,14 +1827,31 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             tipo_plan = st.selectbox("Tipo de Plan", ["Art. 93 (No Deducible)", "Art. 185 (Deducible)"])
     
         with st.expander("⚙️ Parámetros Globales", expanded=True):
-            frecuencia_vista = st.selectbox("Frecuencia de visualización", ["Mensual", "Semestral", "Anual"], index=2)
+            frec_opts_a = ["Mensual", "Semestral", "Anual"]
+            frec_def_a = st.session_state.get('persist_frecuencia_vista_astor', 'Anual')
+            frec_idx_a = frec_opts_a.index(frec_def_a) if frec_def_a in frec_opts_a else 2
+            frecuencia_vista = st.selectbox("Frecuencia de visualización", frec_opts_a, index=frec_idx_a)
+            st.session_state.persist_frecuencia_vista_astor = frecuencia_vista
+            
             col_inf1, col_inf2 = st.columns(2)
-            opcion_inflacion = col_inf1.selectbox("Inflación", ["Activada", "Desactivada"], index=0)
+            op_inf_def_a = st.session_state.get('persist_opcion_inflacion_astor', 'Activada')
+            op_inf_idx_a = 0 if op_inf_def_a == 'Activada' else 1
+            opcion_inflacion = col_inf1.selectbox("Inflación", ["Activada", "Desactivada"], index=op_inf_idx_a)
+            st.session_state.persist_opcion_inflacion_astor = opcion_inflacion
             inflacion_activa = True if opcion_inflacion == "Activada" else False
-            tasa_inflacion = col_inf2.number_input("% Inflación", 0.0, 10.0, 4.0, 0.1)
+            
+            tasa_inf_def_a = st.session_state.get('persist_tasa_inflacion_astor', 4.0)
+            tasa_inflacion = col_inf2.number_input("% Inflación", 0.0, 10.0, float(tasa_inf_def_a), 0.1)
+            st.session_state.persist_tasa_inflacion_astor = tasa_inflacion
+            
             # CAMBIO: Default a 10.0%
-            tasa_anual = st.number_input("Rendimiento Anual (%)", 1.0, 100.0, 10.0, 0.5) 
-            isr = st.number_input("Retención ISR Final (%)", 0.0, 35.0, 20.0)
+            tasa_anual_def_a = st.session_state.get('persist_tasa_anual_astor', 10.0)
+            tasa_anual = st.number_input("Rendimiento Anual (%)", 1.0, 100.0, float(tasa_anual_def_a), 0.5) 
+            st.session_state.persist_tasa_anual_astor = tasa_anual
+            
+            isr_def_a = st.session_state.get('persist_isr_astor', 20.0)
+            isr = st.number_input("Retención ISR Final (%)", 0.0, 35.0, float(isr_def_a))
+            st.session_state.persist_isr_astor = isr
     
         # Lista para guardar detalles de bonos y configuración de escenarios
         escenarios_config = []
@@ -1856,18 +1873,23 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
                 
                 # 1. Monto Inicial
                 # ETIQUETA VIVO (Separador de miles)
-                m_val = st.session_state.get(f"monto_{i}", float(val_defecto))
-                st.markdown(f"<div style='font-size: 1.15rem; font-weight: 900; color: {color}; margin-bottom: 2px;'> ${m_val:,.0f}</div>", unsafe_allow_html=True)
-                monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_val), step=500.0, key=f"monto_{i}", label_visibility="collapsed")
+                m_def_i = st.session_state.get(f"persist_monto_{i}", float(val_defecto))
+                st.markdown(f"<div style='font-size: 1.15rem; font-weight: 900; color: {color}; margin-bottom: 2px;'> ${m_def_i:,.0f}</div>", unsafe_allow_html=True)
+                monto = st.number_input(f"Monto Mensual {i+1}", min_value=1000.0, value=float(m_def_i), step=500.0, key=f"monto_ui_{i}", label_visibility="collapsed")
+                st.session_state[f"persist_monto_{i}"] = monto
                 
                 # 2. Checkbox para cambio en mes 19
-                usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", key=f"chk_m19_{i}")
+                chk_def_i = st.session_state.get(f"persist_chk_m19_{i}", False)
+                usar_cambio_m19 = st.checkbox(f"Modificar a partir del Mes 19", value=chk_def_i, key=f"chk_m19_ui_{i}")
+                st.session_state[f"persist_chk_m19_{i}"] = usar_cambio_m19
+                
                 monto_m19 = None
                 if usar_cambio_m19:
                     # ETIQUETA VIVO M19
-                    m19_val = st.session_state.get(f"val_m19_{i}", float(monto))
-                    st.markdown(f"<div style='font-size: 1.15rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: 2px;'>Nuevo Monto: ${m19_val:,.0f}</div>", unsafe_allow_html=True)
-                    monto_m19 = st.number_input(f"Nuevo Monto Mes 19+ (Escenario de inversión {i+1})", min_value=2000, value=monto, step=500, key=f"val_m19_{i}")
+                    m19_def_i = st.session_state.get(f"persist_val_m19_{i}", float(monto))
+                    st.markdown(f"<div style='font-size: 1.15rem; font-weight: 800; color: {ACCENT_COLOR}; margin-bottom: 2px;'>Nuevo Monto: ${m19_def_i:,.0f}</div>", unsafe_allow_html=True)
+                    monto_m19 = st.number_input(f"Nuevo Monto Mes 19+ (Escenario de inversión {i+1})", min_value=2000, value=float(m19_def_i), step=500, key=f"val_m19_ui_{i}")
+                    st.session_state[f"persist_val_m19_{i}"] = monto_m19
                 
                 # Guardar configuración para cálculo posterior
                 escenarios_config.append({

@@ -112,7 +112,12 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         st.subheader("Costo de Postergar")
         
         with st.expander("⚙️ Parámetros Globales", expanded=True):
-            frecuencia = st.selectbox('Frecuencia de Visualización', ['Mensual', 'Semestral', 'Anual'], index=2)
+            frec_opts = ['Mensual', 'Semestral', 'Anual']
+            frec_def = st.session_state.get('persist_frecuencia_postergar', 'Anual')
+            frec_idx = frec_opts.index(frec_def) if frec_def in frec_opts else 2
+            frecuencia = st.selectbox('Frecuencia de Visualización', frec_opts, index=frec_idx)
+            st.session_state.persist_frecuencia_postergar = frecuencia
+            
             dict_factores = {'Mensual': 1, 'Semestral': 6, 'Anual': 12}
             factor_frecuencia = dict_factores[frecuencia]
             label_dinamico = f'Aportación {frecuencia}'
@@ -144,25 +149,39 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
             idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
             edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro)
-            rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=10.0, step=0.5)
+            
+            rend_def = st.session_state.get('persist_rend_postergar', 10.0)
+            rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=float(rend_def), step=0.5)
+            st.session_state.persist_rend_postergar = rendimiento_anual
+            
             st.markdown('<hr style="margin: 10px 0; opacity: 0.1;">', unsafe_allow_html=True)
             col_inf1, col_inf2 = st.columns(2)
             with col_inf1:
                 st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">INFLACIÓN</p>', unsafe_allow_html=True)
-                inflacion_opcion = st.selectbox('Inflación', ['Activada', 'Desactivada'], index=0, label_visibility='collapsed', key='inf_toggle_postergar')
+                inf_op_def = st.session_state.get('persist_inf_op_postergar', 'Activada')
+                inf_op_idx = 0 if inf_op_def == 'Activada' else 1
+                inflacion_opcion = st.selectbox('Inflación', ['Activada', 'Desactivada'], index=inf_op_idx, label_visibility='collapsed', key='inf_toggle_postergar')
+                st.session_state.persist_inf_op_postergar = inflacion_opcion
+                
             with col_inf2:
                 st.markdown(f'<p style="margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">% INFLACIÓN</p>', unsafe_allow_html=True)
-                tasa_inf_input = st.number_input('% Inflación', min_value=0.0, max_value=10.0, value=4.0, step=0.1, label_visibility='collapsed', key='inf_val_postergar')
+                tasa_inf_def = st.session_state.get('persist_tasa_inf_postergar', 4.0)
+                tasa_inf_input = st.number_input('% Inflación', min_value=0.0, max_value=10.0, value=float(tasa_inf_def), step=0.1, label_visibility='collapsed', key='inf_val_postergar')
+                st.session_state.persist_tasa_inf_postergar = tasa_inf_input
             inflacion_activa = (inflacion_opcion == "Activada")
             
             # Blindar poder adquisitivo toggle
             st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">BLINDAJE DE PODER ADQUISITIVO</p>', unsafe_allow_html=True)
-            blindar_adquisitivo = st.toggle("Blindar poder adquisitivo", value=False, key="blindar_adquisitivo_postergar")
+            blindar_def = st.session_state.get('persist_blindar_postergar', False)
+            blindar_adquisitivo = st.toggle("Blindar poder adquisitivo", value=blindar_def, key="blindar_adquisitivo_postergar")
+            st.session_state.persist_blindar_postergar = blindar_adquisitivo
             
             tasa_inf_blindaje = 4.0
             if blindar_adquisitivo:
                 st.markdown(f'<p style="margin-top: 5px; margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">% INFLACIÓN DE BLINDAJE</p>', unsafe_allow_html=True)
-                tasa_inf_blindaje = st.number_input('% Inflación de Blindaje', min_value=0.0, max_value=10.0, value=4.0, step=0.1, key='inf_val_blindaje_postergar', label_visibility='collapsed')
+                tasa_blindaje_def = st.session_state.get('persist_tasa_blindaje_postergar', 4.0)
+                tasa_inf_blindaje = st.number_input('% Inflación de Blindaje', min_value=0.0, max_value=10.0, value=float(tasa_blindaje_def), step=0.1, key='inf_val_blindaje_postergar', label_visibility='collapsed')
+                st.session_state.persist_tasa_blindaje_postergar = tasa_inf_blindaje
             
             # Disparador Secreto Disfrazado (Icono de Seguridad) para Patrimonio Actual
             if 'show_patrimonio' not in st.session_state:
