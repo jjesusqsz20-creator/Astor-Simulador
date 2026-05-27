@@ -1269,15 +1269,14 @@ if st.session_state.modulo_activo == "Hub":
         st.query_params.clear()
         st.rerun()
 
-    logo_filename_hub = "1-08.png" if is_dark else "1-01-copy.png"
+    logo_filename_hub = "Proyecto 5%.png"
     logo_hub_path = get_asset_path(logo_filename_hub)
     
     if os.path.exists(logo_hub_path):
         bin_str_logo = get_base64_of_bin_file(logo_hub_path)
         st.markdown(f"""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 50px;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="width: 250px; margin-bottom: 20px;">
-                <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 4rem; letter-spacing: 2px;">PLAN DE ACUMULACIÓN</h1>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 20px; width: 100%;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 500px; width: 90%; margin: 0 auto; display: block;">
             </div>
         """, unsafe_allow_html=True)
     
