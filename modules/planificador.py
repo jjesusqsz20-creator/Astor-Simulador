@@ -1152,43 +1152,46 @@ def render_planificador():
         st.session_state.modulo_activo = "🧮 Interés Compuesto"
         st.rerun()
 
-    # --- TÍTULO PRINCIPAL (Estilo Astor) ---
-    # Intentar cargar el logo (Dinámico según tema)
-    logo_path = get_asset_path(logo_header_file)
-    logo_html = ""
-    if os.path.exists(logo_path):
-        with open(logo_path, "rb") as f:
-            data = base64.b64encode(f.read()).decode()
-        logo_html = f'<img src="data:image/png;base64,{data}" style="width: 150px;">'
-    # Si no existe el logo, logo_html queda vacío (sin ningún elemento de respaldo)
+    # --- TÍTULO PRINCIPAL ---
+    st.markdown(
+        "<div style='text-align: center; margin-bottom: 6px;'>"
+        "<span style='font-family: Cinzel, serif; font-size: 1.4rem; font-weight: 800; "
+        "letter-spacing: 2px; color: #1A2530;'>PLANIFICADOR FINANCIERO PERSONAL</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<div style='text-align: center; margin-bottom: 20px;'>"
+        "<span style='font-size: 0.95rem; color: #6BA4A4;'>"
+        "Optimiza tus finanzas y descubre tu potencial de inversión.</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    metric_html = ""
-    if ahorro_inversion_pre > 0:
-        metric_html = f'<div class="astor-metric-box"><div style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;">💰 Potencial de inversión</div><div style="color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;">$ {ahorro_inversion_pre:,.0f}</div></div>'
+    # Métricas de resumen si hay datos
+    if nombre.strip() or ingreso_mensual > 0:
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            if nombre.strip():
+                st.markdown(
+                    f"<div class='astor-metric-box'>"
+                    f"<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;'>👤 Cliente e Ingreso</div>"
+                    f"<div style='color: var(--primary-blue); font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2;'>{nombre.upper()}</div>"
+                    f"<div style='color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;'>$ {ingreso_mensual:,.0f}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+        with col_m2:
+            if ahorro_inversion_pre > 0:
+                st.markdown(
+                    f"<div class='astor-metric-box'>"
+                    f"<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;'>💰 Potencial de inversión</div>"
+                    f"<div style='color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;'>$ {ahorro_inversion_pre:,.0f}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
 
-    st.markdown(f"""
-    <div style="margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; width: 100%;">
-        <div style="margin-bottom: 15px; display: flex; justify-content: center; width: 100%;">
-            {logo_html}
-        </div>
-        <div style="text-align: center; width: 100%;">
-            <div class="astor-main-title">PLANIFICADOR FINANCIERO PERSONAL</div>
-            <div class="astor-main-subtitle">Optimiza tus finanzas y descubre tu potencial de inversión.</div>
-        </div>
-    </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: stretch; flex-wrap: wrap; gap: 20px; width: 100%;">
-    <div class="astor-metric-box" style="margin: 0;">
-    <div style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;">👤 Cliente e Ingreso</div>
-    {f'<div style="color: var(--primary-blue); font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2;">{nombre.upper()}</div>' if nombre.strip() else ''}
-    <div style="color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;">$ {ingreso_mensual:,.0f}</div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; flex-grow: 1;">
-    {metric_html}
-    </div>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 
     # --- CONFIGURACIÓN INICIAL DE ESTADO ---
