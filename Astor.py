@@ -1356,6 +1356,69 @@ if st.session_state.modulo_activo == "Hub":
     with col_btn2:
         st.button("SOLICITAR MI ASESORÍA PERSONALIZADA", key="btn_asesoria_hub", use_container_width=True)
         
+    st.markdown("""
+        <style>
+        .stats-wrapper {
+            background-color: #0E121A !important;
+            border: 1px solid rgba(223, 191, 114, 0.35) !important;
+            border-radius: 16px !important;
+            padding: 25px 20px !important;
+            display: flex !important;
+            justify-content: space-around !important;
+            align-items: center !important;
+            max-width: 800px !important;
+            margin: 40px auto 0 auto !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+            box-sizing: border-box !important;
+        }
+        .stat-item {
+            text-align: center !important;
+            flex: 1 !important;
+        }
+        .stat-num {
+            font-size: 2.2rem !important;
+            font-weight: 900 !important;
+            color: #DFBF72 !important;
+            font-family: 'Inter', sans-serif !important;
+            margin-bottom: 8px !important;
+            line-height: 1 !important;
+        }
+        .stat-label {
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            color: #6BA4A4 !important;
+            letter-spacing: 1.5px !important;
+            text-transform: uppercase !important;
+        }
+        .stat-divider {
+            width: 1px !important;
+            height: 60px !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        </style>
+        <div class="stats-wrapper">
+            <div class="stat-item">
+                <div class="stat-num">5%</div>
+                <div class="stat-label">DISCIPLINA</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">LIBERTAD</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-num">0</div>
+                <div class="stat-label">SEGUROS FORZOSOS</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-num">15 Segundos</div>
+                <div class="stat-label">EN CONOCER TU META</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
