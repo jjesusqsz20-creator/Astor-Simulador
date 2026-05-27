@@ -2303,7 +2303,8 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     with tab_tabla:
         col_sel, col_dump = st.columns([1, 3])
         opciones_select = [r['id'] for r in resultados]
-        id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}")
+        default_idx = 1 if len(opciones_select) > 1 else 0
+        id_seleccionado = col_sel.selectbox("Ver detalle de:", opciones_select, index=default_idx, format_func=lambda x: f"Escenario de inversión {x}")
         seleccion = next(item for item in resultados if item["id"] == id_seleccionado)
         color_ver = seleccion["color"]
         
@@ -2354,7 +2355,8 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     if anios_para_retiro > anios_horizonte:
         with tab_tabla_65:
             col_sel65, col_dump65 = st.columns([1, 3])
-            id_seleccionado65 = col_sel65.selectbox(f"Ver detalle ({proy_edad_retiro}) de:", opciones_select, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
+            default_idx65 = 1 if len(opciones_select) > 1 else 0
+            id_seleccionado65 = col_sel65.selectbox(f"Ver detalle ({proy_edad_retiro}) de:", opciones_select, index=default_idx65, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
             seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
             
             cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
