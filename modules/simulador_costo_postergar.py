@@ -181,6 +181,21 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             else:
                 patrimonio_actual = st.session_state.patrimonio_persist
 
+        años_inversion = edad_retiro - edad_inicial
+        r_anual_dec = rendimiento_anual / 100.0
+        
+        # Lógica de Blindaje de Poder Adquisitivo: VF = VP * (1 + pi)^n
+        if blindar_adquisitivo:
+            tasa_blindaje = (tasa_inf_blindaje / 100.0)
+            renta_mensual_calculada = renta_mensual_sidebar * ((1 + tasa_blindaje) ** años_inversion)
+        else:
+            renta_mensual_calculada = renta_mensual_sidebar
+            
+        meta_retiro = (renta_mensual_calculada * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
+        fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** años_inversion)
+        meta_neta = max(0.0, meta_retiro - fv_patrimonio)
+        st.session_state.meta_retiro_val = meta_retiro
+
     # --- LÓGICA DE CÁLCULO UNIFICADA (IGUALITO AL PROYECTO 5%) ---
     # Buscamos la aportación inicial necesaria para llegar a la meta real de hoy (sin inflar la meta a futuro).
     # Pasamos inflacion_activa=inflacion_activa para que la aportación CREZCA con el tiempo (Allianz Style)
