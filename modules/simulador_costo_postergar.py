@@ -57,11 +57,11 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         CARD_BG = "#252932"
         BORDER_COLOR = "#6BA4A422"
     else:
-        TEXT_COLOR = "#1E3A8A"
-        ACCENT_COLOR = "#3B82F6"
-        GOLD_COLOR = "#1E3A8A"
+        TEXT_COLOR = "#1A2530"    # Elegant readable dark text
+        ACCENT_COLOR = "#0891B2"  # Cyan text / selected button
+        GOLD_COLOR = "#DFBF72"    # Beautiful dynamic gold
         CARD_BG = "#FFFFFF"
-        BORDER_COLOR = "#E5E7EB"
+        BORDER_COLOR = "#E2E8F0"
 
     # --- PANTALLA NUEVO SIMULADOR ---
     logo_filename = "1-07.png" if is_dark else "1-01.png"
@@ -318,46 +318,120 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     bono_monto = (aporte_m_metric * 12) * bono_pct
     bono_mensual_ano1 = bono_monto / 12
 
-    st.markdown("""
+
+    
+    opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
+    _, col_center_nav, _ = st.columns([2.5, 8, 1.5])
+    with col_center_nav:
+        st.markdown(f"""
         <style>
-        div[data-testid="stSegmentedControl"] {
+        div[data-testid="stSegmentedControl"], .stSegmentedControl {{
+            position: relative !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             margin: 0 auto 30px auto !important;
             width: fit-content !important;
-            background: rgba(255, 255, 255, 0.03) !important;
+            background: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important; /* Elegant light grey in light mode, dark transparent in dark mode */
+            background-color: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important;
             padding: 8px !important;
             border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid {"#BDC3C7" if not is_dark else "rgba(255, 255, 255, 0.05)"} !important; /* Elegant subtle grey border */
+            box-shadow: {"0 4px 15px rgba(0, 0, 0, 0.05)" if not is_dark else "0 4px 30px rgba(0, 0, 0, 0.1)"} !important;
             backdrop-filter: blur(5px) !important;
-        }
-        div[data-testid="stSegmentedControl"] > div {
+        }}
+        div[data-testid="stSegmentedControl"] > div, .stSegmentedControl > div {{
             display: flex !important;
             justify-content: center !important;
             width: 100% !important;
-        }
-        div[data-testid="stSegmentedControl"] [role="radiogroup"] {
+            background: transparent !important;
+            background-color: transparent !important;
+        }}
+        div[data-testid="stSegmentedControl"] [role="radiogroup"], .stSegmentedControl [role="radiogroup"] {{
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             width: 100% !important;
             gap: 10px !important;
-        }
-        div[data-testid="stSegmentedControl"] button {
-            font-size: 1.05rem !important;
+            background: transparent !important;
+            background-color: transparent !important;
+        }}
+        
+        /* Force individual tabs to be transparent to strip native dark backgrounds */
+        div[data-testid="stSegmentedControl"] button, 
+        .stSegmentedControl button,
+        div[data-testid="stSegmentedControl"] [role="radio"],
+        .stSegmentedControl [role="radio"],
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] button,
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] [role="radio"] {{
+            font-size: 1.02rem !important;
             font-weight: bold !important;
             padding: 8px 18px !important;
             border-radius: 8px !important;
             transition: all 0.3s ease !important;
-        }
+            background-color: transparent !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }}
+        
+        /* Unselected active state/inactive buttons (aria-checked="false") - Force elegant legibility */
+        div[data-testid="stSegmentedControl"] button[aria-checked="false"],
+        .stSegmentedControl button[aria-checked="false"],
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"],
+        .stSegmentedControl [role="radio"][aria-checked="false"],
+        div[data-testid="stSegmentedControl"] button[aria-checked="false"] p,
+        div[data-testid="stSegmentedControl"] button[aria-checked="false"] div,
+        div[data-testid="stSegmentedControl"] button[aria-checked="false"] span,
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] p,
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] div,
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] span,
+        div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] * {{
+            color: {"#1A2530" if not is_dark else "#A0AEC0"} !important; 
+            background-color: transparent !important;
+            background: transparent !important;
+        }}
+        
+        /* Hover state for buttons */
+        div[data-testid="stSegmentedControl"] button:hover,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover,
+        div[data-testid="stSegmentedControl"] button:hover p,
+        div[data-testid="stSegmentedControl"] button:hover div,
+        div[data-testid="stSegmentedControl"] button:hover span,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover p,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover div,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover span,
+        div[data-testid="stSegmentedControl"] button:hover *,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover * {{
+            color: {"#000000" if not is_dark else "#FEFFFF"} !important;
+            background-color: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
+            background: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
+        }}
+        
+        /* Selected button (active state - aria-checked="true") */
+        div[data-testid="stSegmentedControl"] button[aria-checked="true"], 
+        .stSegmentedControl button[aria-checked="true"],
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="true"],
+        .stSegmentedControl [role="radio"][aria-checked="true"],
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] button[aria-checked="true"],
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] [role="radio"][aria-checked="true"] {{
+            background-color: #0891B2 !important; /* Beautiful corporate cyan key blue */
+            background: #0891B2 !important;
+            box-shadow: 0 4px 10px rgba(8, 145, 178, 0.3) !important;
+            border-radius: 8px !important;
+        }}
+        
+        div[data-testid="stSegmentedControl"] [aria-checked="true"] p,
+        div[data-testid="stSegmentedControl"] [aria-checked="true"] div,
+        div[data-testid="stSegmentedControl"] [aria-checked="true"] span,
+        div[data-testid="stSegmentedControl"] [aria-checked="true"] * {{
+            color: #FFFFFF !important; /* Hardcoded solid white text for active tab in both themes */
+        }}
         </style>
-    """, unsafe_allow_html=True)
-    
-    opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
-    _, col_center_nav, _ = st.columns([2.5, 8, 1.5])
-    with col_center_nav:
+        """, unsafe_allow_html=True)
         seleccion_nav = st.segmented_control(
             "Navegación Superior",
             options=opciones_nav,

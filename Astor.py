@@ -87,7 +87,7 @@ def get_asset_path(relative_path):
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 if 'theme' not in st.session_state:
-    st.session_state.theme = 'dark'
+    st.session_state.theme = 'light'
 
 st.set_page_config(
     page_title="Proyecto 5%",
@@ -112,21 +112,21 @@ if is_dark:
     SUNSET_COLOR = "#E6C200" # Oro en oscuro
     BORDER_COLOR = "#6BA4A422"
 else:
-    # Modo Claro (Identidad Astor Original)
-    BG_COLOR = "#F0F2F5"      # Fondo General (Blanco Azulado)
-    BG_GRADIENT_END = "#E2E8F0" # Gris Azulado
+    # Modo Claro Premium (Restablecido y elegante)
+    BG_COLOR = "#F4F6F9"      # Fondo General Suave
+    BG_GRADIENT_END = "#E9ECEF" 
     SIDEBAR_BG = "#FFFFFF"
-    TEXT_COLOR = "#1E3A8A"    # Azul Astor (Primary)
-    ACCENT_COLOR = "#3B82F6"  # Azul Acento
-    GOLD_COLOR = "#1E3A8A"    # Azul para títulos en claro
-    CARD_BG = "#FFFFFF"       # Blanco Marfil
-    INPUT_BG = "#F1F5F9"
-    EXPANDER_BG = "#F8FAFC"
-    RADIAL_OPACITY = "08"
-    SUNSET_COLOR = "#F59E0B"  # Naranja Sunset
-    BORDER_COLOR = "#E5E7EB"
-    TEXT_SECONDARY = "#64748B" # Gris Grafito
-    TITLE_COLOR = "#364350"    # Color específico del logo solicitado
+    TEXT_COLOR = "#1A2530"    # Texto oscuro elegante
+    ACCENT_COLOR = "#22D3EE"  # Cyan vibrante solicitado
+    GOLD_COLOR = "#DFBF72"    # Oro refinado
+    CARD_BG = "#FFFFFF"       # Tarjetas blancas limpias
+    INPUT_BG = "#FFFFFF"      # Inputs limpios
+    EXPANDER_BG = "#F8F9FA"
+    RADIAL_OPACITY = "04"
+    SUNSET_COLOR = "#DFBF72"  # Oro metálico
+    BORDER_COLOR = "#E2E8F0"
+    TEXT_SECONDARY = "#4B5563"
+    TITLE_COLOR = "#1A2530"
 
 COLORES = [
     "#EF4444",  # Rojo Coral
@@ -243,17 +243,20 @@ st.markdown(f"""
         align-items: center !important;
         margin: 0 auto 30px auto !important;
         width: fit-content !important;
-        background: rgba(255, 255, 255, 0.03) !important;
+        background: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important; /* Elegant light grey in light mode, dark transparent in dark mode */
+        background-color: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important;
         padding: 8px !important;
         border-radius: 12px !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+        border: 2px solid {"#BDC3C7" if not is_dark else "rgba(255, 255, 255, 0.05)"} !important; /* Elegant subtle grey border */
+        box-shadow: {"0 4px 15px rgba(0, 0, 0, 0.05)" if not is_dark else "0 4px 30px rgba(0, 0, 0, 0.1)"} !important;
         backdrop-filter: blur(5px) !important;
     }}
     div[data-testid="stSegmentedControl"] > div, .stSegmentedControl > div {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
+        background: transparent !important;
+        background-color: transparent !important;
     }}
     div[data-testid="stSegmentedControl"] [role="radiogroup"], .stSegmentedControl [role="radiogroup"] {{
         display: flex !important;
@@ -261,13 +264,80 @@ st.markdown(f"""
         align-items: center !important;
         width: 100% !important;
         gap: 10px !important;
+        background: transparent !important;
+        background-color: transparent !important;
     }}
-    div[data-testid="stSegmentedControl"] button, .stSegmentedControl button {{
-        font-size: 1.05rem !important;
+    
+    /* Force individual tabs to be transparent to strip native dark backgrounds */
+    div[data-testid="stSegmentedControl"] button, 
+    .stSegmentedControl button,
+    div[data-testid="stSegmentedControl"] [role="radio"],
+    .stSegmentedControl [role="radio"],
+    div[data-testid="stSegmentedControl"] [role="radiogroup"] button,
+    div[data-testid="stSegmentedControl"] [role="radiogroup"] [role="radio"] {{
+        font-size: 1.02rem !important;
         font-weight: bold !important;
         padding: 8px 18px !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
+        background-color: transparent !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }}
+    
+    /* Unselected active state/inactive buttons (aria-checked="false") - Force elegant legibility */
+    div[data-testid="stSegmentedControl"] button[aria-checked="false"],
+    .stSegmentedControl button[aria-checked="false"],
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"],
+    .stSegmentedControl [role="radio"][aria-checked="false"],
+    div[data-testid="stSegmentedControl"] button[aria-checked="false"] p,
+    div[data-testid="stSegmentedControl"] button[aria-checked="false"] div,
+    div[data-testid="stSegmentedControl"] button[aria-checked="false"] span,
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] p,
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] div,
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] span,
+    div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] * {{
+        color: {"#1A2530" if not is_dark else "#A0AEC0"} !important; 
+        background-color: transparent !important;
+        background: transparent !important;
+    }}
+    
+    /* Hover state for buttons */
+    div[data-testid="stSegmentedControl"] button:hover,
+    div[data-testid="stSegmentedControl"] [role="radio"]:hover,
+    div[data-testid="stSegmentedControl"] button:hover p,
+    div[data-testid="stSegmentedControl"] button:hover div,
+    div[data-testid="stSegmentedControl"] button:hover span,
+    div[data-testid="stSegmentedControl"] [role="radio"]:hover p,
+    div[data-testid="stSegmentedControl"] [role="radio"]:hover div,
+    div[data-testid="stSegmentedControl"] [role="radio"]:hover span,
+    div[data-testid="stSegmentedControl"] button:hover *,
+    div[data-testid="stSegmentedControl"] [role="radio"]:hover * {{
+        color: {"#000000" if not is_dark else "#FEFFFF"} !important;
+        background-color: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
+        background: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
+    }}
+    
+    /* Selected button (active state - aria-checked="true") */
+    div[data-testid="stSegmentedControl"] button[aria-checked="true"], 
+    .stSegmentedControl button[aria-checked="true"],
+    div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="true"],
+    .stSegmentedControl [role="radio"][aria-checked="true"],
+    div[data-testid="stSegmentedControl"] [role="radiogroup"] button[aria-checked="true"],
+    div[data-testid="stSegmentedControl"] [role="radiogroup"] [role="radio"][aria-checked="true"] {{
+        background-color: #0891B2 !important; /* Beautiful corporate cyan key blue */
+        background: #0891B2 !important;
+        box-shadow: 0 4px 10px rgba(8, 145, 178, 0.3) !important;
+        border-radius: 8px !important;
+    }}
+    
+    div[data-testid="stSegmentedControl"] [aria-checked="true"] p,
+    div[data-testid="stSegmentedControl"] [aria-checked="true"] div,
+    div[data-testid="stSegmentedControl"] [aria-checked="true"] span,
+    div[data-testid="stSegmentedControl"] [aria-checked="true"] * {{
+        color: #FFFFFF !important; /* Hardcoded solid white text for active tab in both themes */
     }}
     
     /* Fondo General */
@@ -1282,21 +1352,22 @@ if st.session_state.modulo_activo == "Hub":
     if os.path.exists(logo_hub_path):
         bin_str_logo = get_base64_of_bin_file(logo_hub_path)
         st.markdown(f"""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 60px; margin-bottom: 20px; width: 100%;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 320px; width: 75%; margin: 0 auto; display: block;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 60px; margin-bottom: 20px; width: 100%; overflow: visible !important;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 320px; width: 75%; margin: 0 auto; display: block; padding: 25px !important; overflow: visible !important;">
             </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("""
+    # Use dynamic theme values for title and text to ensure readability in light mode
+    st.markdown(f"""
         <div style="text-align: center; margin-bottom: 40px; width: 100%;">
-            <div style="text-align: center; color: #6BA4A4; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(107,164,164,0.3);">
+            <div style="text-align: center; color: {ACCENT_COLOR}; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(107,164,164,0.3);">
                 EL MOVIMIENTO DEL 5%
             </div>
-            <h1 style="text-align: center; font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.2; margin: 0 auto 25px auto; max-width: 850px; color: #FFFFFF; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                ¿CUÁNTO MÁS TE COSTARÁ TU <span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.5);">LIBERTAD</span> POR NO TENER UNA <span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.5);">ESTRATEGIA</span>?
+            <h1 style="text-align: center; font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.2; margin: 0 auto 25px auto; max-width: 850px; color: {TEXT_COLOR};">
+                ¿CUÁNTO MÁS TE COSTARÁ TU <span style="color: {ACCENT_COLOR};">LIBERTAD</span> POR NO TENER UNA <span style="color: {ACCENT_COLOR};">ESTRATEGIA</span>?
             </h1>
-            <p style="text-align: center; font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 500; max-width: 680px; margin: 0 auto; color: #A0AEC0; line-height: 1.5; opacity: 0.85;">
-                Toma el control de tu futuro hoy mismo. Descubre el impacto exacto de postergar tu plan de acumulación y calcula la ruta más eficiente hacia tu libertad financiera.
+            <p style="text-align: center; font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 700; max-width: 720px; margin: 0 auto; color: {"#000000" if not is_dark else "#FEFFFF"}; line-height: 1.5; opacity: 1.0;">
+                Blinda tu futuro y vive al 100% igual con la estrategia diseñada para recuperar tu tiempo <span style="color: {ACCENT_COLOR};">con el 5% de lo que ya ganas.</span>
             </p>
         </div>
     """, unsafe_allow_html=True)
@@ -1304,12 +1375,18 @@ if st.session_state.modulo_activo == "Hub":
     # Custom styled horizontal buttons container
     st.markdown("""
         <style>
-        .hub-buttons-wrapper {
-            max-width: 800px;
-            margin: 30px auto 0 auto;
+        /* Target the columns of the buttons section directly */
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) {
+            max-width: 800px !important;
+            margin: 30px auto 0 auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 20px !important;
         }
-        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(1) button,
-        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button {
+        
+        /* Button 1: CALCULAR MI LIBERTAD (316.97 x 62.38 px, pill border-radius: 100px) */
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="column"]:nth-of-type(1) button,
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="stColumn"]:nth-of-type(1) button {
             background: linear-gradient(135deg, #22D3EE 0%, #0891B2 100%) !important;
             color: #000000 !important;
             border: none !important;
@@ -1323,13 +1400,15 @@ if st.session_state.modulo_activo == "Hub":
             min-height: 62.38px !important;
             border-radius: 100px !important; /* Capsule/pill shape as in screenshot */
         }
-        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(1) button:hover,
-        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button:hover {
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="column"]:nth-of-type(1) button:hover,
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="stColumn"]:nth-of-type(1) button:hover {
             box-shadow: 0 0 35px rgba(34, 211, 238, 0.7) !important;
             transform: translateY(-2px) !important;
         }
-        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(2) button,
-        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button {
+        
+        /* Button 2: SOLICITAR MI ASESORÍA PERSONALIZADA (489.8 x 62.38 px, rounded corners: 12px) */
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="column"]:nth-of-type(2) button,
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="stColumn"]:nth-of-type(2) button {
             background: linear-gradient(135deg, #DFBF72 0%, #B89C53 100%) !important;
             color: #0E121A !important;
             border: 1px solid #ffe29e33 !important;
@@ -1343,14 +1422,13 @@ if st.session_state.modulo_activo == "Hub":
             min-height: 62.38px !important;
             border-radius: 12px !important; /* Rounded corners as in screenshot */
         }
-        .hub-buttons-wrapper div[data-testid="column"]:nth-of-type(2) button:hover,
-        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button:hover {
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="column"]:nth-of-type(2) button:hover,
+        div[data-testid="stHorizontalBlock"]:has(button[key*="btn_calcular_libertad_hub"]) div[data-testid="stColumn"]:nth-of-type(2) button:hover {
             box-shadow: 0 0 30px rgba(223, 191, 114, 0.4) !important;
             transform: translateY(-2px) !important;
             border-color: #DFBF72 !important;
         }
         </style>
-        <div class="hub-buttons-wrapper">
     """, unsafe_allow_html=True)
     
     col_btn1, col_btn2 = st.columns([3.17, 4.90])
@@ -1361,45 +1439,53 @@ if st.session_state.modulo_activo == "Hub":
     with col_btn2:
         st.button("SOLICITAR MI ASESORÍA PERSONALIZADA", key="btn_asesoria_hub", use_container_width=True)
         
-    st.markdown("""
+    # Style the stats box wrapper dynamically based on the active theme
+    st.markdown(f"""
         <style>
-        .stats-wrapper {
-            background-color: #0E121A !important;
-            border: 1px solid rgba(223, 191, 114, 0.35) !important;
+        .stats-wrapper {{
+            background-color: {"#0E121A" if is_dark else "#EAEFF2"} !important; /* Black in dark mode, super light grey in light mode */
+            border: 2px solid #22D3EE !important; /* Always the beautiful cyan text color as border */
             border-radius: 16px !important;
-            padding: 25px 20px !important;
+            padding: 25px 15px !important;
             display: flex !important;
             justify-content: space-around !important;
             align-items: center !important;
-            max-width: 800px !important;
+            max-width: 900px !important; /* Made slightly wider to perfectly fit everything on a single line */
             margin: 40px auto 0 auto !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+            box-shadow: {"0 10px 30px rgba(0,0,0,0.4)" if is_dark else "0 10px 25px rgba(0,0,0,0.08)"} !important;
             box-sizing: border-box !important;
-        }
-        .stat-item {
+        }}
+        .stat-item {{
             text-align: center !important;
-            flex: 1 !important;
-        }
-        .stat-num {
-            font-size: 2.2rem !important;
+            flex: 1 1 auto !important;
+            padding: 0 10px !important;
+        }}
+        .stat-item:last-of-type {{
+            flex: 1.4 1 auto !important; /* Give the last element (15 segundos) a bit more horizontal space */
+        }}
+        .stat-num {{
+            font-size: 1.85rem !important; /* Slightly adjusted to fit perfectly in a single line */
             font-weight: 900 !important;
             color: #DFBF72 !important;
             font-family: 'Inter', sans-serif !important;
             margin-bottom: 8px !important;
             line-height: 1 !important;
-        }
-        .stat-label {
+            white-space: nowrap !important; /* Prevent text wrapping of numbers like 15 Segundos */
+        }}
+        .stat-label {{
             font-size: 0.75rem !important;
             font-weight: 800 !important;
-            color: #6BA4A4 !important;
+            color: {"#0891B2" if not is_dark else "#22D3EE"} !important; /* Beautiful readable cyan inside the card */
             letter-spacing: 1.5px !important;
             text-transform: uppercase !important;
-        }
-        .stat-divider {
+            white-space: nowrap !important;
+        }}
+        .stat-divider {{
             width: 1px !important;
             height: 60px !important;
-            background-color: rgba(255, 255, 255, 0.08) !important;
-        }
+            background-color: {"rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.12)"} !important;
+            flex-shrink: 0 !important;
+        }}
         </style>
         <div class="stats-wrapper">
             <div class="stat-item">
@@ -1424,20 +1510,19 @@ if st.session_state.modulo_activo == "Hub":
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 if st.session_state.modulo_activo == "Form_Postergar":
-    # --- PANTALLA FORMULARIO INTERMEDIO ---
-    st.markdown("""
+    # Use dynamic theme values inside the markdown block to format the Form_Postergar container properly in light mode
+    st.markdown(f"""
         <style>
         /* Target only the inner container wrapper using nested :has(h2) to style the single big card with exact 720x679px dimensions */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) {
-            background-color: #0D1117 !important;
-            border: 1px solid rgba(107, 164, 164, 0.25) !important;
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) {{
+            background-color: {"#EAEFF2" if not is_dark else "#0D1117"} !important;
+            border: 2px solid #22D3EE !important; /* Always the beautiful cyan text color as border */
             border-radius: 24px !important;
             padding: 35px 45px 35px 45px !important;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(107, 164, 164, 0.05) !important;
+            box-shadow: {"0 15px 35px rgba(0, 0, 0, 0.08), 0 0 30px rgba(34, 211, 238, 0.05)" if not is_dark else "0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(107, 164, 164, 0.05)"} !important;
             width: 720px !important;
             max-width: 720px !important;
             min-width: 720px !important;
@@ -1448,77 +1533,77 @@ if st.session_state.modulo_activo == "Form_Postergar":
             box-sizing: border-box !important;
             display: flex !important;
             flex-direction: column !important;
-        }
+        }}
         
         /* Styled input elements */
         div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] label, 
         div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] label, 
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] label {
-            color: #6BA4A4 !important;
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] label {{
+            color: {"#3B7A7A" if not is_dark else "#6BA4A4"} !important;
             font-weight: 800 !important;
             font-size: 0.85rem !important;
             text-transform: uppercase !important;
             letter-spacing: 1.5px !important;
             margin-bottom: 6px !important;
-        }
+        }}
         
         div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] input, 
         div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] input,
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] {
-            background-color: #161B22 !important;
-            border: 1px solid #30363D !important;
-            color: #FEFFFF !important;
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] {{
+            background-color: {"#FFFFFF" if not is_dark else "#161B22"} !important;
+            border: 1px solid {"#D1D5DB" if not is_dark else "#30363D"} !important;
+            color: {"#1A2530" if not is_dark else "#FEFFFF"} !important;
             border-radius: 10px !important;
             box-sizing: border-box !important;
-        }
+        }}
         
         /* Row 1: Nombres & Apellidos Inputs (295 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(1) div[data-testid="stTextInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(1) div[data-testid="stTextInput"] input {{
             width: 295px !important;
             height: 50px !important;
             text-transform: uppercase !important;
-        }
+        }}
         
         /* Row 2 - WhatsApp Country Prefix (110 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) [data-baseweb="select"] {{
             width: 110px !important;
             height: 50px !important;
-        }
+        }}
         
         /* Row 2 - WhatsApp Phone Number (177 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) div[data-testid="stTextInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) div[data-testid="stTextInput"] input {{
             width: 177px !important;
             height: 50px !important;
-        }
+        }}
         
         /* Row 2 - Monto Mensual Deseado (205 x 43 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(3) div[data-testid="stNumberInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(3) div[data-testid="stNumberInput"] input {{
             width: 205px !important;
             height: 43px !important;
             text-align: center !important;
-        }
+        }}
         
         /* Row 3 - Birth Date Selectboxes (186 x 50 px each) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(3) div[data-testid="column"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(3) div[data-testid="column"] [data-baseweb="select"] {{
             width: 186px !important;
             height: 50px !important;
-        }
-
+        }}
+ 
         /* Row 4 - Retirement Age Selectbox (622 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) > div[data-testid="element-container"] div[data-testid="stSelectbox"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) > div[data-testid="element-container"] div[data-testid="stSelectbox"] [data-baseweb="select"] {{
             width: 622px !important;
             height: 50px !important;
-        }
-
+        }}
+ 
         /* Selectbox inner text styling */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {
-            color: #FEFFFF !important;
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {{
+            color: {"#1A2530" if not is_dark else "#FEFFFF"} !important;
             font-size: 1rem !important;
             line-height: 48px !important;
-        }
+        }}
         
         /* Cyan Glow Submit Button (622 x 59 px) */
-        .submit-btn-container button {
+        .submit-btn-container button {{
             width: 622px !important;
             height: 59px !important;
             min-height: 59px !important;
@@ -1540,22 +1625,22 @@ if st.session_state.modulo_activo == "Form_Postergar":
             align-items: center !important;
             justify-content: center !important;
             line-height: 1 !important;
-        }
-        .submit-btn-container button:hover {
+        }}
+        .submit-btn-container button:hover {{
             box-shadow: 0 0 25px rgba(34, 211, 238, 0.7) !important;
             transform: translateY(-2px) !important;
             background-color: #22D3EE !important;
-        }
+        }}
         </style>
     """, unsafe_allow_html=True)
     
     # Heading text OUTSIDE/ABOVE the card container
-    st.markdown("""
+    st.markdown(f"""
         <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; width: 100%;">
-            <h1 style="font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.1; color: #FFFFFF; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
-                EL COSTO DE<br>POSTERGAR<br><span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.6);">TU LIBERTAD</span>
+            <h1 style="font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.1; color: {TEXT_COLOR}; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
+                EL COSTO DE<br>POSTERGAR<br><span style="color: {ACCENT_COLOR};">TU LIBERTAD</span>
             </h1>
-            <p class="special-elite" style="color: #64748B; font-size: 1.1rem; font-style: italic; margin-top: 12px; margin-bottom: 0px; letter-spacing: 3px;">
+            <p class="special-elite" style="color: {TEXT_SECONDARY}; font-size: 1.1rem; font-style: italic; margin-top: 12px; margin-bottom: 0px; letter-spacing: 3px;">
                 PROYECTO 5%
             </p>
         </div>
@@ -1583,8 +1668,38 @@ if st.session_state.modulo_activo == "Form_Postergar":
         with col_wa_num:
             phone_val = st.text_input("Número", placeholder="55-0000-0000", key="form_phone_number")
         with col_monto:
-            monto_val = st.number_input("Monto Mensual Deseado ($)", min_value=1000, value=50000, step=5000, key="form_monto_deseado")
-            
+            # Parsear el valor actual del campo (que puede tener o no comas)
+            _monto_raw = st.session_state.get("form_monto_deseado_str", "50,000")
+            try:
+                _monto_num = int(str(_monto_raw).replace(",", "").replace("$", "").replace(" ", "").strip())
+                if _monto_num < 1000:
+                    _monto_num = 1000
+            except Exception:
+                _monto_num = 50000
+            # Formatear con comas para mostrar en la etiqueta
+            _monto_fmt_label = f"{_monto_num:,}"
+            # Mostrar la etiqueta con el valor formateado en tiempo real
+            st.markdown(
+                f"<p style='margin-bottom: 4px; font-weight: 900; text-transform: uppercase; font-size: 0.82rem; "
+                f"letter-spacing: 0.8px; color: #6BA4A4;'>Monto Mensual Deseado "
+                f"<span style='font-size: 1.0rem; font-weight: 900; color: #6BA4A4;'>(${_monto_fmt_label})</span></p>",
+                unsafe_allow_html=True
+            )
+            _monto_input_str = st.text_input(
+                "Monto Mensual Deseado ($)",
+                value=_monto_fmt_label,
+                key="form_monto_deseado_str",
+                placeholder="50,000",
+                label_visibility="collapsed"
+            )
+            # Limpiar y convertir a entero para cálculos
+            try:
+                monto_val = int(_monto_input_str.replace(",", "").replace("$", "").replace(" ", "").strip())
+                if monto_val < 1000:
+                    monto_val = 1000
+            except Exception:
+                monto_val = 50000
+
         st.markdown("<p style='color: #6BA4A4; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; margin-bottom: 6px;'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
         col_d, col_m, col_a = st.columns([1, 1.5, 1])
         with col_d:
@@ -1601,8 +1716,6 @@ if st.session_state.modulo_activo == "Form_Postergar":
         if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
             if not nombres_val.strip():
                 st.error("Por favor, ingresa tus nombres.")
-            elif not phone_val.strip():
-                st.error("Por favor, ingresa tu número de WhatsApp.")
             else:
                 m_idx = m_names.index(m_val) + 1
                 try:
@@ -1979,42 +2092,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         })
     
     # --- DASHBOARD ---
-    st.markdown("""
-        <style>
-        div[data-testid="stSegmentedControl"] {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: 0 auto 30px auto !important;
-            width: fit-content !important;
-            background: rgba(255, 255, 255, 0.03) !important;
-            padding: 8px !important;
-            border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
-            backdrop-filter: blur(5px) !important;
-        }
-        div[data-testid="stSegmentedControl"] > div {
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important;
-        }
-        div[data-testid="stSegmentedControl"] [role="radiogroup"] {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            width: 100% !important;
-            gap: 10px !important;
-        }
-        div[data-testid="stSegmentedControl"] button {
-            font-size: 1.05rem !important;
-            font-weight: bold !important;
-            padding: 8px 18px !important;
-            border-radius: 8px !important;
-            transition: all 0.3s ease !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+
     
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     _, col_center_nav, _ = st.columns([2.5, 8, 1.5])
@@ -2041,21 +2119,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         st.session_state.modulo_activo = "📈 Planificador Financiero"
         st.rerun()
 
-    logo_filename_dash = "Proyecto 5%.png"
-    logo_dash = get_asset_path(logo_filename_dash)
-    if os.path.exists(logo_dash):
-        bin_str_logo = get_base64_of_bin_file(logo_dash)
-        st.markdown(f"""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; width: 100%;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 450px; width: 85%; margin: 0 auto 20px auto; display: block;">
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; width: 100%;">
-                <h1 class="white-title" style="margin: 0; padding: 0; line-height: 1.0; font-weight: 700; letter-spacing: 2px; font-size: 4.5rem;">SIMULADOR</h1>
-            </div>
-        """, unsafe_allow_html=True)
+
     st.markdown(f"Proyección para <span style='color: {TEXT_COLOR}; font-size: 1.2rem; font-weight: bold;'>{nombre.title()}</span> | Plan: **{tipo_plan}**", unsafe_allow_html=True)
     
     # --- DASHBOARD UNIFICADO ---
