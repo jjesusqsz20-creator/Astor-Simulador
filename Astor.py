@@ -1225,15 +1225,37 @@ if 'modulo_activo' not in st.session_state:
             pass
     st.session_state.modulo_activo = _mod
 
+# Dynamic CSS to hide sidebar globally on Hub and Form_Postergar
+if st.session_state.modulo_activo in ["Hub", "Form_Postergar"]:
+    st.markdown("""
+        <style>
+        [data-testid="stSidebar"] {
+            display: none !important;
+        }
+        [data-testid="stSidebarCollapseButton"] {
+            display: none !important;
+        }
+        .stAppViewContainer {
+            margin-left: 0px !important;
+            padding-left: 0px !important;
+        }
+        div[data-testid="stAppViewBlockContainer"] {
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+            max-width: 100% !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
 try:
-    if st.session_state.modulo_activo == "Hub":
+    if st.session_state.modulo_activo in ["Hub", "Form_Postergar"]:
         if "modulo" in st.query_params:
             del st.query_params["modulo"]
     else:
         st.query_params["modulo"] = st.session_state.modulo_activo
 except AttributeError:
     try:
-        if st.session_state.modulo_activo == "Hub":
+        if st.session_state.modulo_activo in ["Hub", "Form_Postergar"]:
             st.experimental_set_query_params()
         else:
             st.experimental_set_query_params(modulo=st.session_state.modulo_activo)
@@ -1244,7 +1266,7 @@ def ir_a_simulador(nombre_sim):
     st.session_state.modulo_activo = nombre_sim
 
 # --- NAVEGACIÓN DE REGRESO ---
-if st.session_state.modulo_activo != "Hub":
+if st.session_state.modulo_activo not in ["Hub", "Form_Postergar"]:
     with st.sidebar:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🏠 MENÚ PRINCIPAL", use_container_width=True, type="primary"):
@@ -1254,331 +1276,252 @@ if st.session_state.modulo_activo != "Hub":
 
 if st.session_state.modulo_activo == "Hub":
     # --- PANTALLA HUB (MENÚ PRINCIPAL) ---
-    # --- LÓGICA DE NAVEGACIÓN POR URL (Para que las tarjetas sean botones) ---
-    q_params = st.query_params
-    if "sim" in q_params:
-        target_sim = q_params["sim"]
-        if target_sim == "retiro":
-            st.session_state.modulo_activo = "📊 Plan de Acumulación"
-        elif target_sim == "costos":
-            st.session_state.modulo_activo = "⏱️ Costo de Postergar"
-        
-        # Limpiar parámetros y recargar
-        st.query_params.clear()
-        st.rerun()
-
     logo_filename_hub = "Proyecto 5%.png"
     logo_hub_path = get_asset_path(logo_filename_hub)
     
     if os.path.exists(logo_hub_path):
         bin_str_logo = get_base64_of_bin_file(logo_hub_path)
         st.markdown(f"""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 50px; margin-bottom: 20px; width: 100%;">
-                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 500px; width: 90%; margin: 0 auto; display: block;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-top: 60px; margin-bottom: 20px; width: 100%;">
+                <img src="data:image/png;base64,{bin_str_logo}" style="max-width: 320px; width: 75%; margin: 0 auto; display: block;">
             </div>
         """, unsafe_allow_html=True)
     
-    # Inicializar estados de despliegue si no existen
-    if 'show_sim_form' not in st.session_state: st.session_state.show_sim_form = False
-    if 'show_costos_form' not in st.session_state: st.session_state.show_costos_form = False
-    if 'show_planificador_form' not in st.session_state: st.session_state.show_planificador_form = False
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
-
-    with c2:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
-        st.markdown(f"""
-            <div class="hud-card-content">
-                <div class="hud-tag"></div>
-                <div class="sc-noise"></div>
-                <div class="hud-corner corner-tl"></div>
-                <div class="hud-corner corner-tr"></div>
-                <div class="hud-corner corner-bl"></div>
-                <div class="hud-corner corner-br"></div>
-                <div class="scan-line"></div>
-                <div class="status-label stat-tl">SYSTEM: ONLINE</div>
-                <div class="status-label stat-br">INPUT_MODE: ACTIVE</div>
-                <div style="text-align: center; padding: 45px 20px;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLAN DE</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {ACCENT_COLOR}99; line-height: 1.2;">ACUMULACIÓN</div>
-                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Cuánto dinero puedo ahorrar al mes?</div>
-                </div>
+    st.markdown("""
+        <div style="text-align: center; margin-bottom: 40px; width: 100%;">
+            <div style="text-align: center; color: #6BA4A4; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(107,164,164,0.3);">
+                EL MOVIMIENTO DEL 5%
             </div>
-        """, unsafe_allow_html=True)
-        
-        if st.button(" ", key="btn_toggle_sim", use_container_width=True):
-            st.session_state.show_sim_form = not st.session_state.get('show_sim_form', False)
+            <h1 style="text-align: center; font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.2; margin: 0 auto 25px auto; max-width: 850px; color: #FFFFFF; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                ¿CUÁNTO MÁS TE COSTARÁ TU <span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.5);">LIBERTAD</span> POR NO TENER UNA <span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.5);">ESTRATEGIA</span>?
+            </h1>
+            <p style="text-align: center; font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 500; max-width: 680px; margin: 0 auto; color: #A0AEC0; line-height: 1.5; opacity: 0.85;">
+                Toma el control de tu futuro hoy mismo. Descubre el impacto exacto de postergar tu plan de acumulación y calcula la ruta más eficiente hacia tu libertad financiera.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Custom styled horizontal buttons container
+    st.markdown("""
+        <style>
+        .hub-buttons-wrapper {
+            max-width: 800px;
+            margin: 30px auto 0 auto;
+        }
+        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button {
+            background: linear-gradient(135deg, #6BA4A4 0%, #4D8080 100%) !important;
+            color: #FFFFFF !important;
+            border: 1px solid #8ecbcb33 !important;
+            box-shadow: 0 0 20px rgba(107, 164, 164, 0.3) !important;
+            transition: all 0.3s ease !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 1px !important;
+            padding: 14px 20px !important;
+            border-radius: 12px !important;
+            min-height: 52px !important;
+        }
+        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button:hover {
+            box-shadow: 0 0 30px rgba(107, 164, 164, 0.6) !important;
+            transform: translateY(-2px) !important;
+            border-color: #6BA4A4 !important;
+        }
+        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button {
+            background: linear-gradient(135deg, #DFBF72 0%, #B89C53 100%) !important;
+            color: #0E121A !important;
+            border: 1px solid #ffe29e33 !important;
+            box-shadow: 0 0 20px rgba(223, 191, 114, 0.15) !important;
+            transition: all 0.3s ease !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 1px !important;
+            padding: 14px 20px !important;
+            border-radius: 12px !important;
+            min-height: 52px !important;
+        }
+        .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button:hover {
+            box-shadow: 0 0 30px rgba(223, 191, 114, 0.4) !important;
+            transform: translateY(-2px) !important;
+            border-color: #DFBF72 !important;
+        }
+        </style>
+        <div class="hub-buttons-wrapper">
+    """, unsafe_allow_html=True)
+    
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("CALCULAR MI LIBERTAD", key="btn_calcular_libertad_hub", use_container_width=True):
+            st.session_state.modulo_activo = "Form_Postergar"
             st.rerun()
-
-        if st.session_state.get('show_sim_form', False):
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
-            with col_main:
-                # Inputs de Streamlit
-                nombre_h = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="hub_name_input")
-                m_h_val = st.session_state.get("hub_monto_input", 3000)
-                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Monto Mensual que va depositar <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${m_h_val:,.0f}</span></p>", unsafe_allow_html=True)
-                monto_h = st.number_input("Monto Mensual que va depositar", min_value=1000, value=3000, step=500, key="hub_monto_input", label_visibility="collapsed")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-                cs_d_h, cs_m_h, cs_a_h = st.columns([1.5, 1.8, 1.2])
-                today = date.today()
-                
-                # Inicializar valores en session_state si no existen
-                if 'c_yn_costos' not in st.session_state: st.session_state.c_yn_costos = today.year - 25
-                if 'c_mn_costos' not in st.session_state: st.session_state.c_mn_costos = "Enero"
-                if 'c_dn_costos' not in st.session_state: st.session_state.c_dn_costos = 1
-                
-                with cs_a_h:
-                    y_s_h = st.number_input("Año  ", 1940, today.year, value=int(st.session_state.c_yn_costos), key="hub_birth_year", label_visibility="collapsed")
-                    st.session_state.c_yn_costos = y_s_h
-                with cs_m_h:
-                    m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-                    m_idx = m_names.index(st.session_state.c_mn_costos) if st.session_state.c_mn_costos in m_names else 0
-                    m_s_s_h = st.selectbox("Mes  ", m_names, index=m_idx, key="hub_birth_month", label_visibility="collapsed")
-                    st.session_state.c_mn_costos = m_s_s_h
-                    m_s_h = m_names.index(m_s_s_h) + 1
-                with cs_d_h:
-                    num_days_s_h = calendar.monthrange(int(y_s_h), int(m_s_h))[1]
-                    d_idx = min(int(st.session_state.c_dn_costos) - 1, num_days_s_h - 1)
-                    d_s_h = st.selectbox("Día  ", list(range(1, num_days_s_h + 1)), index=d_idx, key="hub_birth_day", label_visibility="collapsed")
-                    st.session_state.c_dn_costos = d_s_h
-                
-                # Calcular edad dinámicamente
-                try:
-                    birth_h = date(int(y_s_h), int(m_s_h), int(d_s_h))
-                except:
-                    birth_h = date(int(y_s_h), int(m_s_h), 1)
-                edad_h = today.year - birth_h.year - ((today.month, today.day) < (birth_h.month, birth_h.day))
-                
-                st.markdown(f"<p style='margin-top: -5px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_h} AÑOS</p>", unsafe_allow_html=True)
-                
-                default_retiro_h = 60 if edad_h <= 35 else 65
-                st.session_state.hub_edad = edad_h
-                st.session_state.hub_retiro_default = default_retiro_h
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                tel_h = st.text_input("Número Telefónico", placeholder="55-0000-0000", key="hub_tel_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                email_h = st.text_input("Correo Electrónico", placeholder="cliente@ejemplo.com", key="hub_email_input")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                if st.button("🚀 CALCULAR ESTRATEGIA", use_container_width=True, type="primary"):
-                    # Guardar en Base de Datos
-                    guardar_datos_simulacion(
-                        {'nombre': nombre_h, 'email': email_h, 'telefono': tel_h},
-                        {'monto': monto_h, 'edad': edad_h},
-                        'PROYECTO_5'
-                    )
-                    
-                    st.session_state.hub_nombre = nombre_h
-                    st.session_state.nombre_cliente = nombre_h
-                    st.session_state.hub_monto = monto_h
-                    st.session_state.hub_edad = edad_h
-                    st.session_state.num_escenarios = 3
-                    st.session_state.monto_0 = float(monto_h)
-                    st.session_state.monto_1 = float(monto_h + 1000)
-                    st.session_state.monto_2 = float(monto_h + 2000)
-                    st.session_state.modulo_activo = "📊 Plan de Acumulación"
-                    st.rerun()
-    with c4:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
-        st.markdown(f"""
-            <div class="hud-card-content">
-                <div class="hud-tag"></div>
-                <div class="sc-noise"></div>
-                <div class="hud-corner corner-tl" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-tr" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-bl" style="border-color: {GOLD_COLOR};"></div>
-                <div class="hud-corner corner-br" style="border-color: {GOLD_COLOR};"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, {GOLD_COLOR}, transparent); box-shadow: 0 0 15px {GOLD_COLOR}; animation: scan-move 4s ease-in-out infinite alternate;"></div>
-                <div class="status-label stat-tl" style="color: {GOLD_COLOR}; opacity: 0.6;">SIM_CORE: STABLE</div>
-                <div class="status-label stat-br" style="color: {GOLD_COLOR}; opacity: 0.6;">MOD: ALFA_PRIME</div>
-                <div style="text-align: center; padding: 45px 20px;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">COSTO DE</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px {GOLD_COLOR}99; line-height: 1.2;">POSTERGAR</div>
-                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Con cuánto dinero me quiero pensionar?</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+    with col_btn2:
+        st.button("SOLICITAR MI ASESORÍA PERSONALIZADA", key="btn_asesoria_hub", use_container_width=True)
         
-        if st.button(" ", key="btn_toggle_costos", use_container_width=True):
-            st.session_state.show_costos_form = not st.session_state.get('show_costos_form', False)
-            st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
 
-        if st.session_state.show_costos_form:
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
-            with col_main:
-                # Inputs de Proyecto Costos
-                nombre_c = st.text_input("Nombre del Cliente ", placeholder="Ej. Juan Pérez", key="costos_name_input")
-                r_c_val = st.session_state.get("costos_renta_input", 50000)
-                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>¿Cuánto dinero necesitas para vivir al mes? <span style='font-size: 1.2rem; font-weight: 900; color: {GOLD_COLOR if is_dark else '#000'};'>${r_c_val:,.0f}</span></p>", unsafe_allow_html=True)
-                renta_c = st.number_input("¿Cuánto dinero necesitas para vivir al mes?", min_value=1000, value=50000, step=5000, key="costos_renta_input", label_visibility="collapsed")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                today = date.today()
-                st.markdown(f"<p style='margin-bottom: 5px; font-weight: 900; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.8px; color: {ACCENT_COLOR if is_dark else '#555'};'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
-                c_d, c_m, c_a = st.columns([1.5, 1.8, 1.2])
-                with c_a:
-                    y_n = st.number_input("Año", 1940, today.year, today.year - 25, key="c_yn_costos", label_visibility="collapsed")
-                with c_m:
-                    m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-                    m_n_s = st.selectbox("Mes", m_names, index=0, key="c_mn_costos", label_visibility="collapsed")
-                    m_n = m_names.index(m_n_s) + 1
-                with c_d:
-                    # Calcular días disponibles según mes y año
-                    num_days = calendar.monthrange(int(y_n), int(m_n))[1]
-                    d_n = st.selectbox("Día", list(range(1, num_days + 1)), index=0, key="c_dn_costos", label_visibility="collapsed")
-                
-                try:
-                    fecha_nac_c = date(int(y_n), int(m_n), int(d_n))
-                except:
-                    # Failsafe en caso de cambio brusco de mes que deje el día fuera de rango momentáneamente
-                    fecha_nac_c = date(int(y_n), int(m_n), 1)
-                edad_c = today.year - fecha_nac_c.year - ((today.month, today.day) < (fecha_nac_c.month, fecha_nac_c.day))
-                st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_c} AÑOS</p>", unsafe_allow_html=True)
-                
-                # Lógica de sugerencia: <=35 -> 60, >=36 -> 65, si edad+25 > 70 -> 70.
-                if edad_c + 25 > 70:
-                    sugerencia_c = 70
-                elif edad_c <= 35:
-                    sugerencia_c = 60
-                else:
-                    sugerencia_c = 65
-
-                opciones_c = [60, 65, 70]
-                opciones_c = [o for o in opciones_c if o > edad_c]
-                if not opciones_c: opciones_c = [70]
-
-                if sugerencia_c not in opciones_c:
-                    sugerencia_c = opciones_c[-1]
-                
-                idx_c = opciones_c.index(sugerencia_c)
-                
-                # Forzar actualización del selectbox si la edad cambia
-                if "prev_edad_c" not in st.session_state or st.session_state.prev_edad_c != edad_c:
-                    st.session_state.costos_retiro_age_input = sugerencia_c
-                    st.session_state.prev_edad_c = edad_c
-                
-                retiro_c = st.selectbox("¿A qué edad te quieres retirar?", opciones_c, index=idx_c, key="costos_retiro_age_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                tel_c = st.text_input("Número Telefónico ", placeholder="55-0000-0000", key="costos_tel_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                email_c = st.text_input("Correo Electrónico ", placeholder="cliente@ejemplo.com", key="costos_email_input")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                if st.button("✨ EJECUTAR MÓDULO", use_container_width=True):
-                    # Meta simplificada unificada
-                    meta_calculada = (renta_c * 12) / 0.10 # 10% por defecto
-
-                    # Guardar en Base de Datos
-                    guardar_datos_simulacion(
-                        {'nombre': nombre_c, 'email': email_c, 'telefono': tel_c},
-                        {'renta': renta_c, 'edad': edad_c, 'retiro': retiro_c, 'patrimonio': 0.0},
-                        'PROYECTO_COSTOS'
-                    )
-
-                    st.session_state.hub_nombre_costos = nombre_c
-                    st.session_state.nombre_cliente = nombre_c
-                    st.session_state.hub_nombre = nombre_c
-                    st.session_state.renta_costos_sync = float(renta_c)
-                    st.session_state.meta_retiro_val = float(meta_calculada)
-                    st.session_state.costos_edad_inicial = int(edad_c)
-                    st.session_state.costos_edad_retiro = int(retiro_c)
-                    st.session_state.modulo_activo = "⏱️ Costo de Postergar"
-                    st.rerun()
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    c_pad1, c6, c_gap, c8, c_pad2 = st.columns([0.8, 3.5, 0.4, 3.5, 0.8])
-
-    with c6:
-        # Encabezado HUD Premium envuelto en un contenedor interactivo (Nativo)
-        st.markdown(f"""
-            <div class="hud-card-content">
-                <div class="hud-tag"></div>
-                <div class="sc-noise"></div>
-                <div class="hud-corner corner-tl" style="border-color: #34D399;"></div>
-                <div class="hud-corner corner-tr" style="border-color: #34D399;"></div>
-                <div class="hud-corner corner-bl" style="border-color: #34D399;"></div>
-                <div class="hud-corner corner-br" style="border-color: #34D399;"></div>
-                <div class="scan-line" style="background: linear-gradient(90deg, transparent, #34D399, transparent); box-shadow: 0 0 15px #34D399; animation: scan-move 4s ease-in-out infinite alternate;"></div>
-                <div class="status-label stat-tl" style="color: #34D399; opacity: 0.6;">FINANCE: READY</div>
-                <div class="status-label stat-br" style="color: #34D399; opacity: 0.6;">MOD: OMEGA_PLAN</div>
-                <div style="text-align: center; padding: 45px 20px;">
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">PLANIFICADOR</div>
-                    <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #34D39999; line-height: 1.2;">FINANCIERO</div>
-                    <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Administro bien mis gastos?</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+if st.session_state.modulo_activo == "Form_Postergar":
+    # --- PANTALLA FORMULARIO INTERMEDIO ---
+    st.markdown("""
+        <style>
+        .form-title-container {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 25px;
+        }
+        .form-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 900;
+            color: #DFBF72;
+            text-shadow: 0 0 20px rgba(223, 191, 114, 0.3);
+            letter-spacing: 1px;
+            margin: 0;
+        }
         
-        if st.button(" ", key="btn_toggle_planificador", use_container_width=True):
-            st.session_state.show_planificador_form = not st.session_state.get('show_planificador_form', False)
+        /* Dark Curved Card Container */
+        .premium-form-card {
+            background-color: #0D1117 !important;
+            border: 1px solid rgba(107, 164, 164, 0.2) !important;
+            border-radius: 20px !important;
+            padding: 40px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(107, 164, 164, 0.05) !important;
+            max-width: 750px !important;
+            margin: 0 auto 50px auto !important;
+        }
+        
+        /* Styled input elements */
+        .premium-form-card div[data-testid="stTextInput"] label, 
+        .premium-form-card div[data-testid="stNumberInput"] label, 
+        .premium-form-card div[data-testid="stSelectbox"] label {
+            color: #6BA4A4 !important;
+            font-weight: 800 !important;
+            font-size: 0.85rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1.5px !important;
+            margin-bottom: 6px !important;
+        }
+        
+        .premium-form-card div[data-testid="stTextInput"] input, 
+        .premium-form-card div[data-testid="stNumberInput"] input,
+        .premium-form-card div[data-testid="stSelectbox"] [data-baseweb="select"] {
+            background-color: #161B22 !important;
+            border: 1px solid #30363D !important;
+            color: #FEFFFF !important;
+            border-radius: 10px !important;
+            height: 48px !important;
+            font-size: 1rem !important;
+        }
+        
+        /* Selectbox inner text styling */
+        .premium-form-card div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {
+            color: #FEFFFF !important;
+            font-size: 1rem !important;
+            line-height: 48px !important;
+        }
+        
+        /* Cyan Glow Submit Button */
+        .submit-btn-container button {
+            background: linear-gradient(135deg, #6BA4A4 0%, #4D8080 100%) !important;
+            color: #FFFFFF !important;
+            border: 1px solid #8ecbcb33 !important;
+            box-shadow: 0 0 20px rgba(107, 164, 164, 0.3) !important;
+            transition: all 0.3s ease !important;
+            font-weight: 900 !important;
+            font-size: 1.1rem !important;
+            letter-spacing: 1px !important;
+            padding: 14px 20px !important;
+            border-radius: 12px !important;
+            min-height: 52px !important;
+            margin-top: 15px !important;
+        }
+        .submit-btn-container button:hover {
+            box-shadow: 0 0 35px rgba(107, 164, 164, 0.7) !important;
+            transform: translateY(-2px) !important;
+            border-color: #6BA4A4 !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+        <div class="form-title-container">
+            <h2 class="form-title">¿CUÁL ES EL MONTO MENSUAL DE TU LIBERTAD?</h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Outer Form Card Wrapper
+    st.markdown('<div class="premium-form-card">', unsafe_allow_html=True)
+    
+    col_name, col_surname = st.columns(2)
+    with col_name:
+        nombres_val = st.text_input("Nombres", placeholder="Ej. Juan", key="form_nombres")
+    with col_surname:
+        apellidos_val = st.text_input("Apellidos", placeholder="Ej. Pérez", key="form_apellidos")
+        
+    col_wa_pref, col_wa_num, col_monto = st.columns([1, 1.5, 2.5])
+    with col_wa_pref:
+        pref_val = st.selectbox("Whatsapp", ["+52 MX", "+1 US", "+52", "+1", "+34 ES", "+57 CO", "+54 AR", "+56 CL"], index=0, key="form_phone_prefix")
+    with col_wa_num:
+        phone_val = st.text_input("Número", placeholder="55-0000-0000", key="form_phone_number")
+    with col_monto:
+        monto_val = st.number_input("Monto Mensual Deseado ($)", min_value=1000, value=50000, step=5000, key="form_monto_deseado")
+        
+    st.markdown("<p style='color: #6BA4A4; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; margin-bottom: 6px;'>Fecha de Nacimiento</p>", unsafe_allow_html=True)
+    col_d, col_m, col_a = st.columns([1, 1.5, 1])
+    with col_d:
+        d_val = st.selectbox("Día", list(range(1, 32)), index=4, key="form_birth_day")
+    with col_m:
+        m_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        m_val = st.selectbox("Mes", m_names, index=8, key="form_birth_month")
+    with col_a:
+        y_val = st.selectbox("Año", list(range(1940, date.today().year + 1)), index=list(range(1940, date.today().year + 1)).index(1987), key="form_birth_year")
+        
+    retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", [50, 55, 60, 65, 70], index=2, key="form_retiro_age")
+    
+    st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
+    if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
+        if not nombres_val.strip():
+            st.error("Por favor, ingresa tus nombres.")
+        elif not phone_val.strip():
+            st.error("Por favor, ingresa tu número de WhatsApp.")
+        else:
+            m_idx = m_names.index(m_val) + 1
+            try:
+                birth_date = date(int(y_val), int(m_idx), int(d_val))
+            except Exception:
+                birth_date = date(int(y_val), int(m_idx), 1)
+            today = date.today()
+            edad_actual = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            
+            st.session_state.nombre_cliente = f"{nombres_val} {apellidos_val}".strip().title()
+            st.session_state.hub_nombre = st.session_state.nombre_cliente
+            st.session_state.c_yn_costos = int(y_val)
+            st.session_state.c_mn_costos = m_val
+            st.session_state.c_dn_costos = int(d_val)
+            st.session_state.hub_edad = edad_actual
+            st.session_state.renta_costos_sync = float(monto_val)
+            st.session_state.costos_edad_retiro = int(retiro_val)
+            
+            nombre_completo = st.session_state.nombre_cliente
+            telefono_completo = f"{pref_val} {phone_val}".strip()
+            email_generado = f"{nombres_val.lower().replace(' ', '')}.{apellidos_val.lower().replace(' ', '')}@{phone_val.strip()[-4:] if len(phone_val.strip()) >= 4 else '1234'}.astor.com"
+            
+            guardar_datos_simulacion(
+                {'nombre': nombre_completo, 'email': email_generado, 'telefono': telefono_completo},
+                {'renta': float(monto_val), 'edad': int(edad_actual), 'retiro': int(retiro_val), 'patrimonio': 0.0},
+                'PROYECTO_COSTOS'
+            )
+            
+            st.session_state.modulo_activo = "⏱️ Costo de Postergar"
             st.rerun()
             
-        if st.session_state.show_planificador_form:
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            col_pad1, col_main, col_pad2 = st.columns([0.08, 0.84, 0.08])
-            with col_main:
-                nombre_p = st.text_input("Nombre del Cliente", placeholder="Ej. Juan Pérez", key="plan_name_input")
-                ingreso_p = st.number_input("Ingreso mensual", min_value=1000, value=30000, step=1000, key="plan_ingreso_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                
-                opciones_dep = [0, 1, 2, 3, 4, 5, 6]
-                dependientes_p = st.selectbox("Dependientes económicos", opciones_dep, key="plan_dep_input")
-                st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-                
-                nec_opciones = ["🏠 Vivienda (Renta/hipoteca)", "🍎 Despensa", "🚗 Gasolina / Transporte", "⚡ Servicios (luz, agua, gas, internet)", "🧹 Personal de limpieza"]
-                with st.popover("📋 Necesidades y Servicios", use_container_width=True):
-                    for op in nec_opciones:
-                        st.checkbox(op, key=f"sidebar_chk_{op}")
-                        
-                est_opciones = ["🎓 Educación / colegiatura", "🥂 Salidas y restaurante", "📺 Suscripciones y digital", "💅 Cuidado personal y ropa", "🎨 Hobbies y proyectos", "🏋️ Gimnasio/club", "🐾 Mascotas (Comida y cuidados)", "🚲 Uber Eats / Delivery", "✈️ Viajes y Vacaciones", "📂 Otros gastos"]
-                with st.popover("📋 Estilo de Vida", use_container_width=True):
-                    for op in est_opciones:
-                        st.checkbox(op, key=f"sidebar_chk_est_{op}")
-                        
-                cred_opciones = ["🚗 Crédito de auto", "💳 Tarjeta de crédito (Meses sin intereses)", "🏦 Otros créditos"]
-                with st.popover("📋 Créditos", use_container_width=True):
-                    for op in cred_opciones:
-                        st.checkbox(op, key=f"sidebar_chk_cred_{op}")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                if st.button("📊 ABRIR PLANIFICADOR", use_container_width=True):
-                    # Sincronizar con las variables exactas que utiliza planificador.py
-                    st.session_state['nombre_cliente'] = nombre_p
-                    st.session_state['sidebar_ingreso'] = float(ingreso_p)
-                    st.session_state['num_dependientes'] = dependientes_p
-                    
-                    st.session_state.modulo_activo = "📈 Planificador Financiero"
-                    st.rerun()
-    #         
-    # with c8:
-    #     st.markdown(f"""
-    #         <div class="hud-card-content">
-    #             <div class="hud-tag"></div>
-    #             <div class="sc-noise"></div>
-    #             <div class="hud-corner corner-tl" style="border-color: #A855F7;"></div>
-    #             <div class="hud-corner corner-tr" style="border-color: #A855F7;"></div>
-    #             <div class="hud-corner corner-bl" style="border-color: #A855F7;"></div>
-    #             <div class="hud-corner corner-br" style="border-color: #A855F7;"></div>
-    #             <div class="scan-line" style="background: linear-gradient(90deg, transparent, #A855F7, transparent); box-shadow: 0 0 15px #A855F7; animation: scan-move 4s ease-in-out infinite alternate;"></div>
-    #             <div class="status-label stat-tl" style="color: #A855F7, opacity: 0.6;">MODULE: PENDING</div>
-    #             <div class="status-label stat-br" style="color: #A855F7, opacity: 0.6;">MOD: NEBULA_V1</div>
-    #             <div style="text-align: center; padding: 45px 20px;">
-    #                 <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; margin-bottom: 20px;">SIMULADOR</div>
-    #                 <div style="font-family: 'Cinzel', serif; color: {TEXT_COLOR}; font-size: 1.9rem; font-weight: 800; text-shadow: 0 0 30px #A855F799; line-height: 1.2;">COMPARACIÓN</div>
-    #                 <div style="margin-top: 15px; font-family: 'Montserrat', sans-serif; color: {TEXT_COLOR}; font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; min-height: 45px; display: flex; align-items: flex-start; justify-content: center;">¿Me conviene más invertir en una casa o en fondos indexados en la bolsa?</div>
-    #             </div>
-    #         </div>
-    #     """, unsafe_allow_html=True)
-    #     
-    #     if st.button(" ", key="btn_toggle_comparacion", use_container_width=True):
-    #         st.session_state.modulo_activo = "⚖️ Simulador Comparación"
-    #         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    col_ret_l, col_ret_c, col_ret_r = st.columns([2, 1, 2])
+    with col_ret_c:
+        if st.button("🏠 REGRESAR", use_container_width=True):
+            st.session_state.modulo_activo = "Hub"
+            st.rerun()
             
     st.stop() # No procesar el resto de la página si estamos en el Hub
 
