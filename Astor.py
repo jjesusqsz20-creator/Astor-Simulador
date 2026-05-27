@@ -1363,15 +1363,21 @@ if st.session_state.modulo_activo == "Form_Postergar":
     # --- PANTALLA FORMULARIO INTERMEDIO ---
     st.markdown("""
         <style>
-        /* Target the container wrapper to style the single big card */
+        /* Target the container wrapper to style the single big card with exact 720x679px dimensions */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #0D1117 !important;
             border: 1px solid rgba(107, 164, 164, 0.25) !important;
             border-radius: 24px !important;
-            padding: 40px !important;
+            padding: 35px 45px 35px 45px !important;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(107, 164, 164, 0.05) !important;
-            max-width: 750px !important;
+            width: 720px !important;
+            max-width: 720px !important;
+            min-width: 720px !important;
+            height: 679px !important;
+            max-height: 679px !important;
+            min-height: 679px !important;
             margin: 0 auto 30px auto !important;
+            box-sizing: border-box !important;
         }
         
         /* Styled input elements */
@@ -1427,21 +1433,25 @@ if st.session_state.modulo_activo == "Form_Postergar":
         </style>
     """, unsafe_allow_html=True)
     
+    # Heading text OUTSIDE/ABOVE the card container
+    st.markdown("""
+        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; width: 100%;">
+            <h1 style="font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.1; color: #FFFFFF; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
+                EL COSTO DE<br>POSTERGAR<br><span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.6);">TU LIBERTAD</span>
+            </h1>
+            <p class="special-elite" style="color: #64748B; font-size: 1.1rem; font-style: italic; margin-top: 12px; margin-bottom: 0px; letter-spacing: 3px;">
+                PROYECTO 5%
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
     # Outer Form Card Wrapper using native Streamlit container with border
     with st.container(border=True):
         st.markdown("""
-            <div style="text-align: center; margin-bottom: 25px; width: 100%;">
-                <h1 style="font-family: 'Inter', sans-serif; font-size: 2.3rem; font-weight: 900; line-height: 1.1; color: #FFFFFF; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
-                    EL COSTO DE<br>POSTERGAR<br><span style="color: #6BA4A4; text-shadow: 0 0 20px rgba(107,164,164,0.6);">TU LIBERTAD</span>
-                </h1>
-                <p class="special-elite" style="color: #64748B; font-size: 1.1rem; font-style: italic; margin-top: 12px; margin-bottom: 25px; letter-spacing: 3px;">
-                    PROYECTO 5%
-                </p>
-                <div style="margin-top: 25px; margin-bottom: 20px; text-align: center;">
-                    <h2 style="font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: #DFBF72; text-shadow: 0 0 15px rgba(223,191,114,0.3); margin: 0; letter-spacing: 1px;">
-                        ¿CUÁL ES EL MONTO MENSUAL DE TU LIBERTAD?
-                    </h2>
-                </div>
+            <div style="margin-top: 5px; margin-bottom: 20px; text-align: center; width: 100%;">
+                <h2 style="font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: #DFBF72; text-shadow: 0 0 15px rgba(223,191,114,0.3); margin: 0; letter-spacing: 1px;">
+                    ¿CUÁL ES EL MONTO MENSUAL DE TU LIBERTAD?
+                </h2>
             </div>
         """, unsafe_allow_html=True)
         
