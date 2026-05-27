@@ -70,27 +70,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
             st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
 
-        # --- CUADRO: APORTACIÓN MENSUAL (viene del Costo de Postergar) ---
-        with st.expander("💵 Aportación Mensual", expanded=True):
-            # Leer la aportación mensual calculada en Costo de Postergar
-            aporte_sync = st.session_state.get("aporte_m_metric", None)
-            if aporte_sync is not None:
-                aporte_display = float(aporte_sync)
-            else:
-                # Fallback: calcular con los datos disponibles
-                renta_fallback = st.session_state.get("renta_costos_sync", 50000.0)
-                rend_fallback = st.session_state.get("costos_rendimiento_anual", 10.0)
-                aporte_display = renta_fallback / 10.0  # estimación simple
-            
-            st.markdown(
-                f"<div style='text-align:center; padding: 12px; background: {CARD_BG}; border-radius: 10px; border: 1px solid {GOLD_COLOR}55;'>"
-                f"<p style='margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; color: {TEXT_COLOR};'>Aportación Mensual</p>"
-                f"<p style='margin: 4px 0 0 0; font-size: 2rem; font-weight: 900; color: {GOLD_COLOR};'>${aporte_display:,.0f}</p>"
-                f"<p style='margin: 0; font-size: 0.75rem; opacity: 0.6; color: {TEXT_COLOR};'>Calculado desde Costo de Postergar</p>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
-
         # --- CUADRO: PARÁMETROS GLOBALES (Rendimiento + Simulación de Suspensión) ---
         with st.expander("⚙️ Parámetros Globales", expanded=True):
             rendimiento_anual = st.number_input(
@@ -284,6 +263,14 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         st.session_state.modulo_activo = "📈 Planificador Financiero"
         st.rerun()
 
+    # --- Aportación Mensual (para el HUD) ---
+    aporte_sync = st.session_state.get("aporte_m_metric", None)
+    if aporte_sync is not None:
+        aporte_display = float(aporte_sync)
+    else:
+        renta_fallback = st.session_state.get("renta_costos_sync", 50000.0)
+        aporte_display = renta_fallback / 10.0
+
     # --- CALCULAR O RECUPERAR ESCENARIO BASE ---
     renta_def = st.session_state.get("renta_costos_sync", 50000.0)
     meta_retiro = (renta_def * 12) / 0.10
@@ -386,17 +373,22 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     Punto de Suspensión: <span style="color: {GOLD_COLOR}; font-size: 1.2rem;">{f"Año {año_paro}" if frecuencia_sel == "Por año" else f"Año {año_paro}, Mes {mes_paro}"}</span> (Mes {mes_paro_total})
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
+<div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_display:,.0f}</div>
+<div style="color: {ACCENT_COLOR}; font-weight: bold; font-size: 0.85rem; opacity: 0.8; text-transform: uppercase;">Desde Costo de Postergar</div>
+</div>
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
 <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${saldo_al_suspender:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo estimado</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${final_con_paro:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">VALOR AL VENCIMIENTO (25 AÑOS)</div>
 </div>
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Total Efectiva</p>
 <div style="color: #A855F7; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #A855F744;">${total_aportado_con_paro:,.0f}</div>
 <div style="color: #A855F7; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">TOTAL INVERTIDO ANTES DEL PARO</div>
