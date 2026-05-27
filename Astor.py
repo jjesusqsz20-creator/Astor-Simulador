@@ -1428,6 +1428,18 @@ if st.session_state.modulo_activo == "Form_Postergar":
             text-align: center !important;
         }
         
+        /* Birth Date Selectboxes (186 x 50 px each) */
+        div[data-testid="stVerticalBlockBorderWrapper"] > div:nth-of-type(5) div[data-testid="column"] [data-baseweb="select"] {
+            width: 186px !important;
+            height: 50px !important;
+        }
+
+        /* Retirement Age Selectbox (622 x 50 px) */
+        div[data-testid="stVerticalBlockBorderWrapper"] > div:nth-of-type(6) [data-baseweb="select"] {
+            width: 622px !important;
+            height: 50px !important;
+        }
+
         /* Selectbox inner text styling */
         div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stSelectbox"] [data-baseweb="select"] [class*="StyledValue"] {
             color: #FEFFFF !important;
@@ -1435,25 +1447,34 @@ if st.session_state.modulo_activo == "Form_Postergar":
             line-height: 48px !important;
         }
         
-        /* Cyan Glow Submit Button */
+        /* Cyan Glow Submit Button (622 x 59 px) */
         .submit-btn-container button {
-            background: linear-gradient(135deg, #6BA4A4 0%, #4D8080 100%) !important;
-            color: #FFFFFF !important;
-            border: 1px solid #8ecbcb33 !important;
-            box-shadow: 0 0 20px rgba(107, 164, 164, 0.3) !important;
-            transition: all 0.3s ease !important;
-            font-weight: 900 !important;
-            font-size: 1.1rem !important;
+            width: 622px !important;
+            height: 59px !important;
+            min-height: 59px !important;
+            background-color: #22D3EE !important;
+            background: #22D3EE !important;
+            color: #000000 !important;
+            font-family: 'Montserrat', sans-serif !important;
+            font-size: 13.6px !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
             letter-spacing: 1px !important;
-            padding: 14px 20px !important;
+            border: none !important;
             border-radius: 12px !important;
-            min-height: 52px !important;
-            margin-top: 15px !important;
+            margin: 8px 0px 0px 0px !important;
+            padding: 20px 24px !important;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.4) !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
         }
         .submit-btn-container button:hover {
-            box-shadow: 0 0 35px rgba(107, 164, 164, 0.7) !important;
+            box-shadow: 0 0 25px rgba(34, 211, 238, 0.7) !important;
             transform: translateY(-2px) !important;
-            border-color: #6BA4A4 !important;
+            background-color: #22D3EE !important;
         }
         </style>
     """, unsafe_allow_html=True)
