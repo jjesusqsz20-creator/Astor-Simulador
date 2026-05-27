@@ -1309,22 +1309,22 @@ if st.session_state.modulo_activo == "Hub":
             margin: 30px auto 0 auto;
         }
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button {
-            background: linear-gradient(135deg, #6BA4A4 0%, #4D8080 100%) !important;
-            color: #FFFFFF !important;
-            border: 1px solid #8ecbcb33 !important;
-            box-shadow: 0 0 20px rgba(107, 164, 164, 0.3) !important;
+            background: linear-gradient(135deg, #22D3EE 0%, #0891B2 100%) !important;
+            color: #000000 !important;
+            border: none !important;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.4) !important;
             transition: all 0.3s ease !important;
             font-weight: 800 !important;
             font-size: 0.95rem !important;
             letter-spacing: 1px !important;
-            padding: 14px 20px !important;
-            border-radius: 12px !important;
-            min-height: 52px !important;
+            width: 316.97px !important;
+            height: 62.38px !important;
+            min-height: 62.38px !important;
+            border-radius: 100px !important; /* Capsule/pill shape as in screenshot */
         }
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(1) button:hover {
-            box-shadow: 0 0 30px rgba(107, 164, 164, 0.6) !important;
+            box-shadow: 0 0 35px rgba(34, 211, 238, 0.7) !important;
             transform: translateY(-2px) !important;
-            border-color: #6BA4A4 !important;
         }
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button {
             background: linear-gradient(135deg, #DFBF72 0%, #B89C53 100%) !important;
@@ -1335,9 +1335,10 @@ if st.session_state.modulo_activo == "Hub":
             font-weight: 800 !important;
             font-size: 0.95rem !important;
             letter-spacing: 1px !important;
-            padding: 14px 20px !important;
-            border-radius: 12px !important;
-            min-height: 52px !important;
+            width: 489.8px !important;
+            height: 62.38px !important;
+            min-height: 62.38px !important;
+            border-radius: 12px !important; /* Rounded corners as in screenshot */
         }
         .hub-buttons-wrapper div[data-testid="stColumn"]:nth-of-type(2) button:hover {
             box-shadow: 0 0 30px rgba(223, 191, 114, 0.4) !important;
@@ -1348,7 +1349,7 @@ if st.session_state.modulo_activo == "Hub":
         <div class="hub-buttons-wrapper">
     """, unsafe_allow_html=True)
     
-    col_btn1, col_btn2 = st.columns(2)
+    col_btn1, col_btn2 = st.columns([3.17, 4.90])
     with col_btn1:
         if st.button("CALCULAR MI LIBERTAD", key="btn_calcular_libertad_hub", use_container_width=True):
             st.session_state.modulo_activo = "Form_Postergar"
