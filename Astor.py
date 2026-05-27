@@ -1363,8 +1363,8 @@ if st.session_state.modulo_activo == "Form_Postergar":
     # --- PANTALLA FORMULARIO INTERMEDIO ---
     st.markdown("""
         <style>
-        /* Target the container wrapper using robust selector :has(h2) to style the single big card with exact 720x679px dimensions */
-        div[data-testid="stVerticalBlock"]:has(h2) {
+        /* Target only the inner container wrapper using nested :has(h2) to style the single big card with exact 720x679px dimensions */
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) {
             background-color: #0D1117 !important;
             border: 1px solid rgba(107, 164, 164, 0.25) !important;
             border-radius: 24px !important;
@@ -1383,9 +1383,9 @@ if st.session_state.modulo_activo == "Form_Postergar":
         }
         
         /* Styled input elements */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] label, 
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] label, 
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] label {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] label, 
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] label, 
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] label {
             color: #6BA4A4 !important;
             font-weight: 800 !important;
             font-size: 0.85rem !important;
@@ -1394,9 +1394,9 @@ if st.session_state.modulo_activo == "Form_Postergar":
             margin-bottom: 6px !important;
         }
         
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] input, 
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] input,
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stTextInput"] input, 
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stNumberInput"] input,
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stSelectbox"] [data-baseweb="select"] {
             background-color: #161B22 !important;
             border: 1px solid #30363D !important;
             color: #FEFFFF !important;
@@ -1405,39 +1405,39 @@ if st.session_state.modulo_activo == "Form_Postergar":
         }
         
         /* Row 1: Nombres & Apellidos Inputs (295 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(1) div[data-testid="stTextInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(1) div[data-testid="stTextInput"] input {
             width: 295px !important;
             height: 50px !important;
             text-transform: uppercase !important;
         }
         
         /* Row 2 - WhatsApp Country Prefix (110 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) [data-baseweb="select"] {
             width: 110px !important;
             height: 50px !important;
         }
         
         /* Row 2 - WhatsApp Phone Number (177 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) div[data-testid="stTextInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) div[data-testid="stTextInput"] input {
             width: 177px !important;
             height: 50px !important;
         }
         
         /* Row 2 - Monto Mensual Deseado (205 x 43 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(3) div[data-testid="stNumberInput"] input {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(3) div[data-testid="stNumberInput"] input {
             width: 205px !important;
             height: 43px !important;
             text-align: center !important;
         }
         
         /* Row 3 - Birth Date Selectboxes (186 x 50 px each) */
-        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(3) div[data-testid="column"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stHorizontalBlock"]:nth-of-type(3) div[data-testid="column"] [data-baseweb="select"] {
             width: 186px !important;
             height: 50px !important;
         }
 
         /* Row 4 - Retirement Age Selectbox (622 x 50 px) */
-        div[data-testid="stVerticalBlock"]:has(h2) > div[data-testid="element-container"] div[data-testid="stSelectbox"] [data-baseweb="select"] {
+        div[data-testid="stVerticalBlock"]:has(h2) div[data-testid="stVerticalBlock"]:has(h2) > div[data-testid="element-container"] div[data-testid="stSelectbox"] [data-baseweb="select"] {
             width: 622px !important;
             height: 50px !important;
         }
