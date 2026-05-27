@@ -245,6 +245,8 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 
     # Variable global para el dashboard y la tabla de costos
     aporte_m_metric = aporte_m
+    # Compartir con Interés Compuesto
+    st.session_state.aporte_m_metric = aporte_m_metric
 
     # --- DASHBOARD UNIFICADO (CABECERA + MÉTRICAS + TABLA COSTE ESPERA) ---
     # Los cálculos de años_inversion, aporte_m, etc., ya están arriba

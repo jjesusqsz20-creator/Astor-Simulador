@@ -18,10 +18,10 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         CARD_BG = "#252932"
         BORDER_COLOR = "#6BA4A422"
     else:
-        TEXT_COLOR = "#1A2530"    # Elegant readable dark text
+        TEXT_COLOR = "#1A2530"
         TEXT_MUTED = "#4B5563"
-        ACCENT_COLOR = "#0891B2"  # Cyan selected button
-        GOLD_COLOR = "#DFBF72"    # Beautiful dynamic gold
+        ACCENT_COLOR = "#0891B2"
+        GOLD_COLOR = "#DFBF72"
         CARD_BG = "#FFFFFF"
         BORDER_COLOR = "#E2E8F0"
 
@@ -37,7 +37,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         with st.expander("👤 Datos del Cliente", expanded=True):
             nombre_def = st.session_state.get("nombre_cliente", "") or st.session_state.get("hub_nombre", "")
             nombre_input = st.text_input("Nombre", value=nombre_def, key="interes_name_input").title()
-            # No modificar 'nombre_cliente' directamente aquí (puede ser gestionado por el widget principal).
             st.session_state['hub_nombre'] = nombre_input
             
             today = date.today()
@@ -70,66 +69,118 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 
             edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
             st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
+
+        # --- CUADRO: APORTACIÓN MENSUAL (viene del Costo de Postergar) ---
+        with st.expander("💵 Aportación Mensual", expanded=True):
+            # Leer la aportación mensual calculada en Costo de Postergar
+            aporte_sync = st.session_state.get("aporte_m_metric", None)
+            if aporte_sync is not None:
+                aporte_display = float(aporte_sync)
+            else:
+                # Fallback: calcular con los datos disponibles
+                renta_fallback = st.session_state.get("renta_costos_sync", 50000.0)
+                rend_fallback = st.session_state.get("costos_rendimiento_anual", 10.0)
+                aporte_display = renta_fallback / 10.0  # estimación simple
             
-        # Rendimiento Anual Estimado (%) - Sincronizado y Modificable
-        st.subheader("Rendimiento")
-        rendimiento_anual = st.number_input(
-            'Rendimiento Anual Estimado (%)', 
-            min_value=1.0, 
-            value=float(st.session_state.get("costos_rendimiento_anual", 10.0)), 
-            step=0.5,
-            key="costos_rendimiento_anual_interes",
-            help="Modifica este valor para simular diferentes tasas de rendimiento anual."
-        )
-        st.session_state.costos_rendimiento_anual = rendimiento_anual
-            
-        st.subheader("Simulación de Suspensión")
-        
-        # Selección de Frecuencia de Visualización (Tiempo de Suspensión)
-        frecuencia_def = st.session_state.get("interes_frecuencia", "Por año")
-        frecuencia_sel = st.selectbox(
-            "Tiempo de suspensión", 
-            ["Por año", "Por mes"], 
-            index=0 if frecuencia_def == "Por año" else 1,
-            key="interes_frecuencia_input",
-            help="Selecciona si deseas simular la suspensión a nivel de año completo o de un mes específico."
-        )
-        st.session_state.interes_frecuencia = frecuencia_sel
-        
-        # Parámetros del Paro
-        if frecuencia_sel == "Por año":
-            año_paro = st.number_input(
-                "Suspender a partir del Año", 
-                min_value=2, 
-                max_value=25, 
-                value=int(st.session_state.get("interes_ano_paro", 5)),
-                step=1,
-                key="interes_ano_paro_input",
-                help="El Año 1 está bloqueado porque requiere los 18 meses obligatorios de aportación."
+            st.markdown(
+                f"<div style='text-align:center; padding: 12px; background: {CARD_BG}; border-radius: 10px; border: 1px solid {GOLD_COLOR}55;'>"
+                f"<p style='margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; color: {TEXT_COLOR};'>Aportación Mensual</p>"
+                f"<p style='margin: 4px 0 0 0; font-size: 2rem; font-weight: 900; color: {GOLD_COLOR};'>${aporte_display:,.0f}</p>"
+                f"<p style='margin: 0; font-size: 0.75rem; opacity: 0.6; color: {TEXT_COLOR};'>Calculado desde Costo de Postergar</p>"
+                f"</div>",
+                unsafe_allow_html=True
             )
-            st.session_state.interes_ano_paro = año_paro
-            # Mes de paro implícito (Fin de año)
-            mes_paro_total = año_paro * 12
-        else: # Por mes (Entrada directa del mes a partir del 18)
-            mes_paro_total = st.number_input(
-                "Mes de la Suspensión (Mes 18+)",
-                min_value=18,
+
+        # --- CUADRO: PARÁMETROS GLOBALES (Rendimiento + Simulación de Suspensión) ---
+        with st.expander("⚙️ Parámetros Globales", expanded=True):
+            rendimiento_anual = st.number_input(
+                'Rendimiento Anual Estimado (%)', 
+                min_value=1.0, 
+                value=float(st.session_state.get("costos_rendimiento_anual", 10.0)), 
+                step=0.5,
+                key="costos_rendimiento_anual_interes",
+                help="Modifica este valor para simular diferentes tasas de rendimiento anual."
+            )
+            st.session_state.costos_rendimiento_anual = rendimiento_anual
+            
+            st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 10px;'>Simulación de Suspensión</p>", unsafe_allow_html=True)
+            
+            # Frecuencia de suspensión — default: "Por mes"
+            frecuencia_def = st.session_state.get("interes_frecuencia", "Por mes")
+            frec_opts = ["Por año", "Por mes"]
+            frec_idx = frec_opts.index(frecuencia_def) if frecuencia_def in frec_opts else 1
+            frecuencia_sel = st.selectbox(
+                "Tiempo de suspensión", 
+                frec_opts, 
+                index=frec_idx,
+                key="interes_frecuencia_input",
+                help="Selecciona si deseas simular la suspensión a nivel de año completo o de un mes específico."
+            )
+            st.session_state.interes_frecuencia = frecuencia_sel
+            
+            if frecuencia_sel == "Por año":
+                año_paro = st.number_input(
+                    "Suspender a partir del Año", 
+                    min_value=2, 
+                    max_value=25, 
+                    value=int(st.session_state.get("interes_ano_paro", 5)),
+                    step=1,
+                    key="interes_ano_paro_input",
+                    help="El Año 1 está bloqueado porque requiere los 18 meses obligatorios de aportación."
+                )
+                st.session_state.interes_ano_paro = año_paro
+                mes_paro_total = año_paro * 12
+                mes_paro = 12
+            else:
+                mes_paro_total = st.number_input(
+                    "Mes de la Suspensión (Mes 18+)",
+                    min_value=18,
+                    max_value=300,
+                    value=int(st.session_state.get("interes_mes_paro_directo", 18)),
+                    step=1,
+                    key="interes_mes_paro_directo",
+                    help="Los primeros 17 meses son estrictamente obligatorios."
+                )
+                año_paro = (mes_paro_total - 1) // 12 + 1
+                mes_paro = (mes_paro_total - 1) % 12 + 1
+                st.session_state.interes_ano_paro_mes = año_paro
+                st.session_state.interes_mes_paro = mes_paro
+
+        # --- CUADRO: DISPOSICIÓN DE CAPITAL ---
+        with st.expander("💰 Disposición de Capital", expanded=True):
+            st.markdown(
+                f"<p style='font-size: 0.78rem; opacity: 0.7; color: {TEXT_COLOR}; margin-top: -4px;'>Solo es posible disponer del capital a partir del <b>Mes 19</b> (completados los primeros 18 pagos obligatorios).</p>",
+                unsafe_allow_html=True
+            )
+            mes_disposicion = st.number_input(
+                "¿A partir de qué mes quieres disponer del capital?",
+                min_value=19,
                 max_value=300,
-                value=int(st.session_state.get("interes_mes_paro_directo", 18)),
+                value=int(st.session_state.get("interes_mes_disposicion", 19)),
                 step=1,
-                key="interes_mes_paro_directo",
-                help="Los primeros 17 meses son estrictamente obligatorios."
+                key="interes_mes_disposicion_input",
+                help="No se puede retirar antes de completar las primeras 18 mensualidades."
+            )
+            st.session_state.interes_mes_disposicion = mes_disposicion
+            
+            tipo_disposicion = st.radio(
+                "¿Cómo quieres disponer del capital?",
+                ["Disponer todo el capital a partir del mes seleccionado", "Retirar una cantidad específica por mes"],
+                key="interes_tipo_disposicion"
             )
             
-            # Calcular año y mes de plan correspondientes
-            año_paro = (mes_paro_total - 1) // 12 + 1
-            mes_paro = (mes_paro_total - 1) % 12 + 1
-            st.session_state.interes_ano_paro_mes = año_paro
-            st.session_state.interes_mes_paro = mes_paro
+            monto_retiro_mensual = 0.0
+            if tipo_disposicion == "Retirar una cantidad específica por mes":
+                monto_retiro_mensual = st.number_input(
+                    "Cantidad a retirar por mes ($)",
+                    min_value=0.0,
+                    value=float(st.session_state.get("interes_monto_retiro", 0.0)),
+                    step=1000.0,
+                    key="interes_monto_retiro_input"
+                )
+                st.session_state.interes_monto_retiro = monto_retiro_mensual
 
     # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR ---
-
-
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
     _, col_center_nav, _ = st.columns([2.5, 8, 1.5])
     with col_center_nav:
@@ -144,11 +195,11 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             align-items: center !important;
             margin: 0 auto 30px auto !important;
             width: fit-content !important;
-            background: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important; /* Elegant light grey in light mode, dark transparent in dark mode */
+            background: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important;
             background-color: {"#EAEFF2" if not is_dark else "rgba(255, 255, 255, 0.03)"} !important;
             padding: 8px !important;
             border-radius: 12px !important;
-            border: 2px solid {"#BDC3C7" if not is_dark else "rgba(255, 255, 255, 0.05)"} !important; /* Elegant subtle grey border */
+            border: 2px solid {"#BDC3C7" if not is_dark else "rgba(255, 255, 255, 0.05)"} !important;
             box-shadow: {"0 4px 15px rgba(0, 0, 0, 0.05)" if not is_dark else "0 4px 30px rgba(0, 0, 0, 0.1)"} !important;
             backdrop-filter: blur(5px) !important;
         }}
@@ -168,8 +219,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             background: transparent !important;
             background-color: transparent !important;
         }}
-        
-        /* Force individual tabs to be transparent to strip native dark backgrounds */
         div[data-testid="stSegmentedControl"] button, 
         .stSegmentedControl button,
         div[data-testid="stSegmentedControl"] [role="radio"],
@@ -186,59 +235,32 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             border: none !important;
             box-shadow: none !important;
         }}
-        
-        /* Unselected active state/inactive buttons (aria-checked="false") - Force elegant legibility */
         div[data-testid="stSegmentedControl"] button[aria-checked="false"],
         .stSegmentedControl button[aria-checked="false"],
         div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"],
         .stSegmentedControl [role="radio"][aria-checked="false"],
-        div[data-testid="stSegmentedControl"] button[aria-checked="false"] p,
-        div[data-testid="stSegmentedControl"] button[aria-checked="false"] div,
-        div[data-testid="stSegmentedControl"] button[aria-checked="false"] span,
-        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] p,
-        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] div,
-        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] span,
         div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
         div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="false"] * {{
             color: {"#1A2530" if not is_dark else "#A0AEC0"} !important; 
             background-color: transparent !important;
             background: transparent !important;
         }}
-        
-        /* Hover state for buttons */
-        div[data-testid="stSegmentedControl"] button:hover,
-        div[data-testid="stSegmentedControl"] [role="radio"]:hover,
-        div[data-testid="stSegmentedControl"] button:hover p,
-        div[data-testid="stSegmentedControl"] button:hover div,
-        div[data-testid="stSegmentedControl"] button:hover span,
-        div[data-testid="stSegmentedControl"] [role="radio"]:hover p,
-        div[data-testid="stSegmentedControl"] [role="radio"]:hover div,
-        div[data-testid="stSegmentedControl"] [role="radio"]:hover span,
         div[data-testid="stSegmentedControl"] button:hover *,
         div[data-testid="stSegmentedControl"] [role="radio"]:hover * {{
             color: {"#000000" if not is_dark else "#FEFFFF"} !important;
             background-color: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
-            background: {"rgba(0,0,0,0.06)" if not is_dark else "rgba(255,255,255,0.05)"} !important;
         }}
-        
-        /* Selected button (active state - aria-checked="true") */
         div[data-testid="stSegmentedControl"] button[aria-checked="true"], 
         .stSegmentedControl button[aria-checked="true"],
         div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="true"],
-        .stSegmentedControl [role="radio"][aria-checked="true"],
-        div[data-testid="stSegmentedControl"] [role="radiogroup"] button[aria-checked="true"],
-        div[data-testid="stSegmentedControl"] [role="radiogroup"] [role="radio"][aria-checked="true"] {{
-            background-color: #0891B2 !important; /* Beautiful corporate cyan key blue */
+        .stSegmentedControl [role="radio"][aria-checked="true"] {{
+            background-color: #0891B2 !important;
             background: #0891B2 !important;
             box-shadow: 0 4px 10px rgba(8, 145, 178, 0.3) !important;
             border-radius: 8px !important;
         }}
-        
-        div[data-testid="stSegmentedControl"] [aria-checked="true"] p,
-        div[data-testid="stSegmentedControl"] [aria-checked="true"] div,
-        div[data-testid="stSegmentedControl"] [aria-checked="true"] span,
         div[data-testid="stSegmentedControl"] [aria-checked="true"] * {{
-            color: #FFFFFF !important; /* Hardcoded solid white text for active tab in both themes */
+            color: #FFFFFF !important;
         }}
         </style>
         """, unsafe_allow_html=True)
@@ -255,7 +277,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         st.rerun()
     elif seleccion_nav == "⏱️ Costo de Postergar":
         nombre_cliente_sync = st.session_state.get('hub_nombre', '')
-        # Evitar modificar la clave 'nombre_cliente' si el widget ya existe; sincronizamos solo el hub global.
         st.session_state['hub_nombre'] = nombre_cliente_sync.title()
         st.session_state['modulo_activo'] = "⏱️ Costo de Postergar"
         st.rerun()
@@ -265,82 +286,91 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
     # --- CALCULAR O RECUPERAR ESCENARIO BASE ---
     renta_def = st.session_state.get("renta_costos_sync", 50000.0)
-    meta_retiro = (renta_def * 12) / 0.10 # 10% por defecto
+    meta_retiro = (renta_def * 12) / 0.10
     rendimiento_anual = st.session_state.get("costos_rendimiento_anual", 10.0)
     inflacion_activa = (st.session_state.get('inf_toggle_postergar', 'Activada') == 'Activada')
     tasa_inf_input = st.session_state.get('inf_val_postergar', 4.0)
     plazo_anos = 25
 
-    # Si ya se ejecutó Costo de Postergar, recuperamos su tabla dinámica oficial para total precisión
     if "df_costos_postergar" in st.session_state:
         df_original = st.session_state.df_costos_postergar
     else:
-        # Fallback de cálculo dinámico idéntico
         aporte_m = encontrar_aporte_necesario(
-            meta_retiro, 
-            int(edad_inicial), 
-            plazo_anos, 
-            rendimiento_anual, 
-            inflacion_activa, 
-            tasa_inf_input,
-            isr=0.0
+            meta_retiro, int(edad_inicial), plazo_anos,
+            rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
         )
         df_original, _ = calcular_escenario(
-            aporte_m, 
-            int(edad_inicial), 
-            rendimiento_anual, 
-            inflacion_activa, 
-            tasa_inf_input,
-            0.0, # isr_retencion
-            plazo_anos=plazo_anos
+            aporte_m, int(edad_inicial), rendimiento_anual,
+            inflacion_activa, tasa_inf_input, 0.0, plazo_anos=plazo_anos
         )
 
-    # Asegurar que mes_paro_total no exceda la tabla
     if mes_paro_total > len(df_original):
         mes_paro_total = len(df_original)
 
-    # --- SIMULACIÓN DE LA SUSPENSIÓN A PARTIR DEL MES SELECCIONADO ---
+    # --- SIMULACIÓN CON SUSPENSIÓN + DISPOSICIÓN DE CAPITAL ---
     r_m = (rendimiento_anual / 100) / 12
     datos_paro = []
     saldo_anterior = 0.0
     total_aportado_con_paro = 0.0
-    
+    saldo_agotado = False
+
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
         fila_original = df_original.iloc[idx_t]
         edad_m = fila_original["Edad"]
-        
+
+        # Fase activa: aportaciones normales
         if m <= mes_paro_total:
-            # Fase activa: Tomado de la simulación activa original
             aportacion_m = fila_original["Aportación"]
             interes_m = fila_original["Interés Generado"]
             saldo_final_m = fila_original["Saldo Final"]
             total_aportado_con_paro += aportacion_m
+            retiro_m = 0.0
+
+        # Fase suspendida: crecimiento puro
         else:
-            # Fase suspendida: Crecimiento puro con interés compuesto
             aportacion_m = 0.0
             interes_m = saldo_anterior * r_m
-            saldo_final_m = saldo_anterior + interes_m
-            
+            saldo_bruto = saldo_anterior + interes_m
+            retiro_m = 0.0
+
+            # Aplicar disposición de capital si aplica
+            if not saldo_agotado and m >= mes_disposicion:
+                if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
+                    if m == mes_disposicion:
+                        retiro_m = saldo_bruto
+                        saldo_bruto = 0.0
+                        saldo_agotado = True
+                    else:
+                        retiro_m = 0.0
+                        saldo_bruto = 0.0
+                else:
+                    retiro_m = min(monto_retiro_mensual, saldo_bruto)
+                    saldo_bruto -= retiro_m
+                    if saldo_bruto <= 0:
+                        saldo_bruto = 0.0
+                        saldo_agotado = True
+
+            saldo_final_m = saldo_bruto
+
         datos_paro.append({
             "No. de Mes del Plan": m,
             "No. de Año del Plan": (m - 1) // 12 + 1,
             "Edad": int(edad_m),
             "Aportación Mensual": aportacion_m,
             "Interés Generado": interes_m,
+            "Retiro": retiro_m,
             "Saldo de Fondo": saldo_final_m
         })
         saldo_anterior = saldo_final_m
-        
+
     df_paro = pd.DataFrame(datos_paro)
-    
+
     saldo_al_suspender = df_paro.iloc[mes_paro_total - 1]["Saldo de Fondo"]
     final_con_paro = df_paro.iloc[-1]["Saldo de Fondo"]
 
-    # --- MAESTRO HUD COMPUESTO ---
+    # --- HUD PRINCIPAL ---
     nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
-    
-    # Calcular el número del mes del plan y año del plan para mostrar abajo
     txt_mes_plan = mes_paro_total
     txt_ano_plan = (mes_paro_total - 1) // 12 + 1
 
@@ -356,29 +386,28 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     Punto de Suspensión: <span style="color: {GOLD_COLOR}; font-size: 1.2rem;">{f"Año {año_paro}" if frecuencia_sel == "Por año" else f"Año {año_paro}, Mes {mes_paro}"}</span> (Mes {mes_paro_total})
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
 <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${saldo_al_suspender:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo estimado</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${final_con_paro:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">VALOR AL VENCIMIENTO (25 AÑOS)</div>
 </div>
-<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 280px; max-width: 380px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Total Efectiva</p>
 <div style="color: #A855F7; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #A855F744;">${total_aportado_con_paro:,.0f}</div>
 <div style="color: #A855F7; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">TOTAL INVERTIDO ANTES DEL PARO</div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     # --- TABS DE RESULTADOS ---
     tab_grafica, tab_tabla = st.tabs(["📈 Gráfica de Crecimiento", "📊 Tabla Dinámica"])
     
     with tab_grafica:
-        # Gráfica de crecimiento acumulado usando Plotly
         df_anual = []
         for a in range(1, 26):
             mes_fin = a * 12
@@ -397,7 +426,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             line=dict(color=ACCENT_COLOR, width=3),
             marker=dict(size=6)
         ))
-        
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
@@ -410,45 +438,49 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         st.plotly_chart(fig, use_container_width=True)
         
     with tab_tabla:
-        if frecuencia_sel == "Por año":
-            st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Tabla Dinámica: Desglose de los Años sin Aportación</h3>", unsafe_allow_html=True)
-            st.write(f"Esta tabla detalla de forma anualizada los años sin aportación (desde el momento de la suspensión hasta concluir los 25 años del plan):")
-            
-            # Filtrar para mostrar únicamente los fines de año posteriores al año de paro
-            df_filtrado = df_paro[(df_paro["No. de Mes del Plan"] % 12 == 0) & (df_paro["No. de Año del Plan"] > año_paro)].copy()
-            
-            # Dar formato a los valores para visualización en tabla
-            df_display = df_filtrado.copy()
-            df_display["Aportación Anual"] = df_display["Aportación Mensual"] * 12
-            df_display["Aportación Anual"] = df_display["Aportación Anual"].apply(lambda x: f"${x:,.2f}")
-            df_display["Saldo de Fondo"] = df_display["Saldo de Fondo"].apply(lambda x: f"${x:,.2f}")
-            df_display = df_display.rename(columns={"Saldo de Fondo": "Saldo de Fondo (Compuesto)"})
-            
-            columnas_finales = ["No. de Año del Plan", "Edad", "Aportación Anual", "Saldo de Fondo (Compuesto)"]
-        else:
-            st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Tabla Dinámica: Desglose de los Meses sin Aportación</h3>", unsafe_allow_html=True)
-            st.write(f"Esta tabla detalla de forma mensual los años sin aportación (desde el momento de la suspensión hasta concluir los 25 años del plan):")
-            
-            # Filtrar para mostrar únicamente desde el mes posterior al paro en adelante
-            df_filtrado = df_paro[df_paro["No. de Mes del Plan"] > mes_paro_total].copy()
-            
-            # Dar formato a los valores para visualización en tabla
-            df_display = df_filtrado.copy()
-            df_display["Aportación Mensual"] = df_display["Aportación Mensual"].apply(lambda x: f"${x:,.2f}")
-            df_display["Saldo de Fondo"] = df_display["Saldo de Fondo"].apply(lambda x: f"${x:,.2f}")
-            df_display = df_display.rename(columns={"Saldo de Fondo": "Saldo de Fondo (Compuesto)"})
-            
-            columnas_finales = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Saldo de Fondo (Compuesto)"]
-            
-        df_display = df_display[columnas_finales]
+        st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Tabla Dinámica: Desglose Completo del Plan</h3>", unsafe_allow_html=True)
         
-        # Convertir a HTML estilizado premium para evitar problemas de codificación de Streamlit en Windows
+        # Mostrar TODOS los meses desde el inicio
+        df_display = df_paro.copy()
+        
+        # Formatear columnas monetarias
+        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
+            df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}")
+        
+        # Renombrar para mejor presentación
+        df_display = df_display.rename(columns={
+            "Saldo de Fondo": "Saldo de Fondo",
+            "Retiro": "Retiro / Disposición"
+        })
+        
+        # Resaltar el mes de suspensión y el mes de disposición
+        def highlight_row(row):
+            mes = row["No. de Mes del Plan"]
+            if mes == mes_paro_total:
+                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
+            elif mes == mes_disposicion and mes_disposicion > mes_paro_total:
+                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
+            return [''] * len(row)
+        
+        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Retiro / Disposición", "Saldo de Fondo"]
+        
         html_table = (
-            df_display.style
+            df_display[cols_show].style
             .set_properties(**{'text-align': 'center'})
+            .apply(highlight_row, axis=1)
             .hide(axis="index")
             .to_html()
         )
+        
+        # Leyenda de colores
+        leyenda = ""
+        if mes_paro_total >= 1:
+            leyenda += f"<span style='background:{GOLD_COLOR}22; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟡 Mes de suspensión (Mes {mes_paro_total})</span>"
+        if mes_disposicion > mes_paro_total:
+            leyenda += f"<span style='background:#34D39922; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;'>🟢 Inicio de disposición (Mes {mes_disposicion})</span>"
+        
+        if leyenda:
+            st.markdown(f"<div style='margin-bottom: 10px;'>{leyenda}</div>", unsafe_allow_html=True)
         
         st.markdown(f"""
 <style>
@@ -458,7 +490,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         border-collapse: collapse;
         color: {TEXT_COLOR};
         font-family: 'Montserrat', sans-serif;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
     }}
     .tabla-espera th {{
         background-color: {ACCENT_COLOR}22 !important;
@@ -467,9 +499,12 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         padding: 12px;
         border-bottom: 2px solid {BORDER_COLOR};
         text-transform: uppercase;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         letter-spacing: 0.5px;
         text-align: center !important;
+        position: sticky;
+        top: 0;
+        z-index: 1;
     }}
     .tabla-espera td {{
         padding: 10px;
@@ -479,7 +514,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         background-color: rgba(255,255,255,0.03);
     }}
 </style>
-<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+<div class="tabla-espera" style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table}
 </div>
         """, unsafe_allow_html=True)
