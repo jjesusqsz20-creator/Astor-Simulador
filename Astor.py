@@ -2011,20 +2011,19 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     eje_x_data_col = "Año" 
     x_axis_title = "Año"
     
-    # Lógica de Retiro: <=35 -> 60, >=36 -> 65. Tope a los 70.
-    retiro_objetivo = 60 if edad <= 35 else 65
+    # Lógica de Retiro: <=35 -> 60, 36-45 -> +25, >=46 -> 70.
+    if edad <= 35:
+        retiro_objetivo = 60
+    elif 36 <= edad <= 45:
+        retiro_objetivo = edad + 25
+    else:
+        retiro_objetivo = 70
+        
+    # Segundo cálculo: Al retiro objetivo
+    anios_para_retiro = max(1, retiro_objetivo - edad)
     
-    # El horizonte de inversión sugerido es de 25 años, pero topado a los 70 de edad
-    anios_horizonte = 25
-    if edad + anios_horizonte > 70:
-        anios_horizonte = max(70 - edad, 1) # Mínimo 1 año
-    
-    # Segundo cálculo: Al retiro objetivo (60 o 65) o al tope de 70
-    anios_para_retiro = max(retiro_objetivo - edad, anios_horizonte)
-    if edad + anios_para_retiro > 70:
-        anios_para_retiro = 70 - edad
-    if anios_para_retiro < anios_horizonte:
-        anios_para_retiro = anios_horizonte
+    # El horizonte de inversión inicial sugerido (para la primera tabla) es 25 años o hasta el retiro
+    anios_horizonte = min(25, anios_para_retiro)
     
     for idx, config in enumerate(escenarios_config):
         opcion_actual_id = idx + 1

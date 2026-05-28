@@ -282,17 +282,25 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     rendimiento_anual = st.session_state.get("costos_rendimiento_anual", 10.0)
     inflacion_activa = (st.session_state.get('inf_toggle_postergar', 'Activada') == 'Activada')
     tasa_inf_input = st.session_state.get('inf_val_postergar', 4.0)
-    plazo_anos = 25
+    edad_inicial_int = int(edad_inicial)
+    if edad_inicial_int <= 35:
+        edad_retiro = 60
+    elif 36 <= edad_inicial_int <= 45:
+        edad_retiro = edad_inicial_int + 25
+    else:
+        edad_retiro = 70
+        
+    plazo_anos = max(1, edad_retiro - edad_inicial_int)
 
     if "df_costos_postergar" in st.session_state:
         df_original = st.session_state.df_costos_postergar
     else:
         aporte_m = encontrar_aporte_necesario(
-            meta_retiro, int(edad_inicial), plazo_anos,
+            meta_retiro, edad_inicial_int, plazo_anos,
             rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
         )
         df_original, _ = calcular_escenario(
-            aporte_m, int(edad_inicial), rendimiento_anual,
+            aporte_m, edad_inicial_int, rendimiento_anual,
             inflacion_activa, tasa_inf_input, 0.0, plazo_anos=plazo_anos
         )
 
@@ -322,6 +330,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     # Fondo fantasma para llevar la cuenta de los retiros y sus intereses perdidos
     fondo_retirado_fantasma = 0.0
     total_cantidad_retirada = 0.0
+    saldo_anterior_pantalla = 0.0
 
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
@@ -340,12 +349,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             saldo_final_m_base = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
             saldo_disponible_raw_base = fila_original.get("Saldo Disponible", 0.0)
             
-            # Ajustamos los valores mostrados restando el agujero y su interés
+            # Ajustamos los valores matemáticos (uso interno para retiros)
             interes_m = max(0.0, interes_m_base - interes_fantasma_m)
             saldo_bruto = max(0.0, saldo_final_m_base - fondo_retirado_fantasma)
             saldo_disponible_m = max(0.0, saldo_disponible_raw_base - fondo_retirado_fantasma)
             
-            saldo_disponible_pantalla = saldo_disponible_m
+            # Valores para la pantalla (intactos, sin restar retiros)
+            saldo_disponible_pantalla = saldo_disponible_raw_base
+            interes_pantalla = interes_m_base
+            saldo_final_m_pantalla = saldo_final_m_base
+            
             total_aportado_con_paro += aportacion_m
             
             # Guardar el capital bloqueado FIJO al final de la fase activa
@@ -355,10 +368,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         # Fase suspendida: crecimiento puro a partir de lo que quedó
         else:
             aportacion_m = 0.0
-            interes_m   = saldo_anterior * r_m
+            
+            # Matemáticas internas
+            interes_m = saldo_anterior * r_m
             saldo_bruto = saldo_anterior + interes_m
             saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado_fijo)
-            saldo_disponible_pantalla = saldo_disponible_m
+            
+            # Pantalla base (sin retiros)
+            interes_pantalla = saldo_anterior_pantalla * r_m
+            saldo_final_m_pantalla = saldo_anterior_pantalla + interes_pantalla
+            saldo_disponible_pantalla = max(0.0, saldo_final_m_pantalla - saldo_bloqueado_fijo)
 
         retiro_m = 0.0
 
@@ -393,13 +412,14 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             "No. de Año del Plan": (m - 1) // 12 + 1,
             "Edad": int(edad_m),
             "Aportación Mensual": aportacion_m,
-            "Interés Generado": interes_m,
+            "Interés Generado": interes_pantalla,
             "Retiro": retiro_m,
             "Saldo Disponible": saldo_disponible_pantalla,
             "Saldo Insuficiente Flag": saldo_insuficiente_m,
-            "Saldo de Fondo": saldo_final_m
+            "Saldo de Fondo": saldo_final_m_pantalla
         })
         saldo_anterior = saldo_final_m
+        saldo_anterior_pantalla = saldo_final_m_pantalla
 
     df_paro = pd.DataFrame(datos_paro)
 
@@ -450,10 +470,10 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${saldo_al_suspender:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de libertad</p>
-<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${final_con_paro:,.0f}</div>
-<div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {int(edad_inicial)+25})</div>
+<div style="flex: 1; min-width: 200px; max-width: 250px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de Libertad</p>
+<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
+<div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {edad_retiro})</div>
 </div>
 {html_disposicion_boxes}
 </div>

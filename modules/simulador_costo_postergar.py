@@ -141,9 +141,18 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             opciones_retiro = [60, 65, 70]
             # Filtrar para que solo muestre opciones mayores a la edad inicial
             opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
-            if not opciones_retiro: opciones_retiro = [70] # Failsafe si el usuario tiene 70
             
-            desired_default = 60 if edad_inicial <= 35 else 65
+            if edad_inicial <= 35:
+                desired_default = 60
+            elif 36 <= edad_inicial <= 45:
+                desired_default = edad_inicial + 25
+            else:
+                desired_default = 70
+                
+            if desired_default not in opciones_retiro and desired_default > edad_inicial:
+                opciones_retiro.append(desired_default)
+            opciones_retiro.sort()
+            
             e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
             if e_retiro_state not in opciones_retiro:
                 e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
