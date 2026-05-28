@@ -2049,38 +2049,35 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             monto_mes_19=monto_mes_19 # Pasamos el nuevo parámetro también aquí
         )
         
-        # Pre-calcular Aportación Anual (Total del año actual para cada fila)
-        df_raw['Aportación Anual'] = df_raw.groupby('Año')['Aportación'].transform('sum')
-        df_65['Aportación Anual'] = df_65.groupby('Año')['Aportación'].transform('sum')
-    
         # --- LOGICA DE AGRUPACIÓN ---
         if frecuencia_vista == "Mensual":
             df_display = df_raw.copy()
+            df_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             eje_x_data_col = "Mes Global"
             x_axis_title = "Meses"
         elif frecuencia_vista == "Semestral":
             df_raw["Semestre"] = (df_raw["Mes Global"] - 1) // 6 + 1
             df_display = df_raw.groupby("Semestre").agg({
                 "Año": "last", "Edad": "max",
-                "Aportación Anual": "max", 
-                "Aportación Acumulada": "last",
+                "Aportación": "last", 
                 "Saldo de Fondo": "last",
                 "Saldo Disponible": "last",
                 "Saldo Disponible Neto": "last",
                 "Post retención": "last"
             }).reset_index()
+            df_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             eje_x_data_col = "Semestre"
             x_axis_title = "Semestres"
         else: # Anual
             df_display = df_raw.groupby("Año").agg({
                 "Edad": "max", 
-                "Aportación Anual": "max",
-                "Aportación Acumulada": "last",
+                "Aportación": "last",
                 "Saldo de Fondo": "last",
                 "Saldo Disponible": "last",
                 "Saldo Disponible Neto": "last",
                 "Post retención": "last"
             }).reset_index()
+            df_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             eje_x_data_col = "Año"
             x_axis_title = "Años"
     
@@ -2096,17 +2093,20 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         if anios_para_retiro > anios_horizonte:
             if frecuencia_vista == "Anual":
                 df_65_display = df_65.groupby("Año").agg({
-                    "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
+                    "Edad": "max", "Aportación": "last",
                     "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
                 }).reset_index()
+                df_65_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             elif frecuencia_vista == "Semestral":
                 df_65["Semestre"] = (df_65["Mes Global"] - 1) // 6 + 1
                 df_65_display = df_65.groupby("Semestre").agg({
-                    "Año": "last", "Edad": "max", "Aportación Anual": "max", "Aportación Acumulada": "last",
+                    "Año": "last", "Edad": "max", "Aportación": "last",
                     "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
                 }).reset_index()
+                df_65_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             else: # Mensual
                 df_65_display = df_65.copy()
+                df_65_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
                 
             resultados[-1]["df_65_display"] = df_65_display
     
@@ -2341,7 +2341,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         
         # Columnas específicas solicitadas
         # ELIMINADA: "Saldo Disponible Neto"
-        cols_to_show = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+        cols_to_show = ["Año", "Edad", "Aportación Mensual", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
         
         # Si es mensual o semestral, añadimos la columna de periodo
         if frecuencia_vista != "Anual":
@@ -2353,8 +2353,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         html_table = (
             seleccion["df_display"][cols_to_show].style
             .format({
-                "Aportación Anual": "${:,.0f}",
-                "Aportación Acumulada": "${:,.0f}", 
+                "Aportación Mensual": "${:,.0f}",
                 "Saldo de Fondo": "${:,.0f}", 
                 "Saldo Disponible": "${:,.0f}", 
                 "Post retención": "${:,.0f}",
@@ -2388,7 +2387,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             id_seleccionado65 = col_sel65.selectbox(f"Ver detalle ({proy_edad_retiro}) de:", opciones_select, index=default_idx65, format_func=lambda x: f"Escenario de inversión {x}", key="sel_65")
             seleccion65 = next(item for item in resultados if item["id"] == id_seleccionado65)
             
-            cols_to_show_65 = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+            cols_to_show_65 = ["Año", "Edad", "Aportación Mensual", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
             if frecuencia_vista != "Anual":
                 cols_to_show_65.insert(1, eje_x_data_col)
     
@@ -2399,8 +2398,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             html_table_65 = (
                 df_65_show[cols_to_show_65].style
                 .format({
-                    "Aportación Anual": "${:,.0f}",
-                    "Aportación Acumulada": "${:,.0f}", 
+                    "Aportación Mensual": "${:,.0f}",
                     "Saldo de Fondo": "${:,.0f}", 
                     "Saldo Disponible": "${:,.0f}", 
                     "Post retención": "${:,.0f}",
@@ -2477,7 +2475,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             if writer.engine != 'xlsxwriter':
                 # Exportación simple para evitar errores
                 for r in res_list:
-                    cols_export_basic = ["Año", "Edad", "Aportación Anual", "Aportación Acumulada", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
+                    cols_export_basic = ["Año", "Edad", "Aportación Mensual", "Saldo de Fondo", "Saldo Disponible", "Post retención"]
                     if frecuencia_vista != "Anual": cols_export_basic.insert(0, eje_x_data_col)
                     r['df_display'][cols_export_basic].to_excel(writer, sheet_name=f"Escenario {r['id']}", index=False)
                 writer.close()

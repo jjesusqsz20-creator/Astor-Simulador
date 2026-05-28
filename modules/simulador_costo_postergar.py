@@ -577,30 +577,25 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         st.write(f"Esta tabla muestra el desglose temporal de sus aportaciones e intereses hasta la meta de retiro.")
         
         # El DataFrame df_costos_real ya fue calculado arriba para HOY
-        df_espera_full = df_costos_real.copy()
-        
-        # Adaptar el DataFrame a la frecuencia seleccionada (Mensual, Semestral, Anual)
         if frecuencia == "Anual":
             df_espera = df_costos_real.groupby('Año').agg({
                 'Edad': 'last',
-                'Aportación': 'sum',
+                'Aportación': 'last',
                 'Aportación Acumulada': 'last',
                 'Saldo de Fondo': 'last',
                 'Saldo Disponible': 'last',
                 'Post retención': 'last'
             }).reset_index()
             df_espera.rename(columns={
-                'Aportación': 'Aportación Anual'
+                'Aportación': 'Aportación Mensual'
             }, inplace=True)
-            # Add Aportacion Mensual if needed, but the user wants columns exactly like Plan de Acumulacion
-            # We'll just omit Aportacion Mensual here if Anual, to match Plan de Acumulacion
         elif frecuencia == "Semestral":
             # Agrupar cada 6 meses
             df_costos_real['Semestre'] = (df_costos_real['Mes Global'] - 1) // 6 + 1
             df_espera = df_costos_real.groupby('Semestre').agg({
                 'Año': 'last',
                 'Edad': 'last',
-                'Aportación': 'sum',
+                'Aportación': 'last',
                 'Aportación Acumulada': 'last',
                 'Saldo de Fondo': 'last',
                 'Saldo Disponible': 'last',
@@ -608,34 +603,28 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             }).reset_index()
             df_espera.rename(columns={
                 'Semestre': 'Periodo',
-                'Aportación': 'Aportación Semestral'
+                'Aportación': 'Aportación Mensual'
             }, inplace=True)
         else:
             # Mensual
             df_espera = df_costos_real.copy()
             df_espera.rename(columns={
-                'Mes Global': 'Mes',
+                'Mes Global': 'Periodo',
                 'Aportación': 'Aportación Mensual'
             }, inplace=True)
             # Seleccionar únicamente las columnas como en plan de acumulacion + Mes
-            columnas_mensuales = ['Año', 'Mes', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
+            columnas_mensuales = ['Año', 'Periodo', 'Edad', 'Aportación Mensual', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
             # Asegurar que todas existan
             columnas_mensuales = [c for c in columnas_mensuales if c in df_espera.columns]
             df_espera = df_espera[columnas_mensuales]
 
         if not df_espera.empty:
-            if frecuencia == "Mensual":
-                col_aporte = "Aportación Mensual"
-            elif frecuencia == "Semestral":
-                col_aporte = "Aportación Semestral"
-            else:
-                col_aporte = "Aportación Anual"
+            col_aporte = "Aportación Mensual"
                 
             col_periodo = next((c for c in df_espera.columns if c in ["Año", "Periodo", "Mes"]), "Año")
             
             format_dict = {
                 col_aporte: "${:,.0f}",
-                "Aportación Acumulada": "${:,.0f}",
                 "Saldo de Fondo": "${:,.0f}",
                 "Saldo Disponible": "${:,.0f}",
                 "Post retención": "${:,.0f}",
