@@ -131,10 +131,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_activar_disposicion = activar_disposicion
             
             if activar_disposicion:
-                st.markdown(
-                    f"<p style='font-size: 0.78rem; opacity: 0.7; color: {TEXT_COLOR}; margin-top: -4px;'>Solo es posible disponer del capital a partir del <b>Mes 19</b> (completados los primeros 18 pagos obligatorios).</p>",
-                    unsafe_allow_html=True
-                )
+            if activar_disposicion:
                 mes_disposicion = st.number_input(
                     "¿A partir de qué mes quieres disponer del capital?",
                     min_value=19,
@@ -312,6 +309,17 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     # al momento de la suspensión. No crece con interés (es la "deuda" intocable).
     saldo_bloqueado_fijo = 0.0
     
+    # Calcular límite de disponibilidad base para el HUD y las validaciones
+    limite_disponible_base = 0.0
+    if st.session_state.get("interes_activar_disposicion", False):
+        m_disp = int(st.session_state.get("interes_mes_disposicion", 19))
+        idx_paro = min(mes_paro_total - 1, len(df_original) - 1)
+        idx_previo = max(0, min(m_disp - 2, len(df_original) - 1))
+        
+        saldo_base_paro = df_original.iloc[idx_paro].get("Saldo Disponible", 0.0)
+        saldo_base_previo = 0.0 if m_disp <= 19 else df_original.iloc[idx_previo].get("Saldo Disponible", 0.0)
+        limite_disponible_base = max(0.0, saldo_base_paro - saldo_base_previo)
+
     # Fondo fantasma para llevar la cuenta de los retiros y sus intereses perdidos
     fondo_retirado_fantasma = 0.0
     total_cantidad_retirada = 0.0
@@ -367,7 +375,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             else:
                 # Retiro de cantidad específica de UNA SOLA VEZ en el mes seleccionado
                 if m == mes_disposicion:
-                    if monto_retiro_mensual > saldo_disponible_m:
+                    if monto_retiro_mensual > limite_disponible_base or monto_retiro_mensual > saldo_disponible_m:
                         # No hay suficiente → marcar, no retirar
                         saldo_insuficiente_m = True
                         retiro_m = 0.0
@@ -407,9 +415,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     txt_ano_plan = (mes_paro_total - 1) // 12 + 1
 
     html_disposicion_boxes = ""
+    hubo_saldo_insuficiente = df_paro["Saldo Insuficiente Flag"].any()
+    
     if activar_disposicion:
-        cantidad_disponible = df_paro.iloc[mes_paro_total - 1]["Saldo Disponible"]
-        
         html_disposicion_boxes = f"""
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
@@ -418,7 +426,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
-<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${cantidad_disponible:,.0f}</div>
+<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disponible_base:,.0f}</div>
 </div>
 """
 
@@ -451,6 +459,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 {html_disposicion_boxes}
 </div>
     """, unsafe_allow_html=True)
+    
+    if hubo_saldo_insuficiente and activar_disposicion:
+        st.error("⚠️ **Saldo insuficiente.** La cantidad que intentas retirar supera tu disponibilidad en el periodo seleccionado. No se aplicó el retiro en la simulación.")
 
     # --- TABS DE RESULTADOS ---
     tab_grafica, tab_tabla = st.tabs(["📈 Gráfica de Crecimiento", "📊 Tabla Dinámica"])
