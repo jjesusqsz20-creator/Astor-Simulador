@@ -314,6 +314,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     
     # Fondo fantasma para llevar la cuenta de los retiros y sus intereses perdidos
     fondo_retirado_fantasma = 0.0
+    total_cantidad_retirada = 0.0
 
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
@@ -354,24 +355,29 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
         retiro_m = 0.0
 
-        # Aplicar disposición de capital de UNA SOLA VEZ en el mes seleccionado
-        if activar_disposicion and m == mes_disposicion:
+        # Aplicar disposición de capital
+        if activar_disposicion:
             if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
-                retiro_m = saldo_disponible_m
-                saldo_bruto -= retiro_m
-                saldo_disponible_m = 0.0
-                fondo_retirado_fantasma += retiro_m
-            else:
-                # Retiro de cantidad específica en el mes seleccionado
-                if monto_retiro_mensual > saldo_disponible_m:
-                    # No hay suficiente → marcar, no retirar
-                    saldo_insuficiente_m = True
-                    retiro_m = 0.0
-                else:
-                    retiro_m = monto_retiro_mensual
+                # Barrer el saldo disponible mes a mes hasta el mes de suspensión
+                if mes_disposicion <= m <= mes_paro_total:
+                    retiro_m = saldo_disponible_m
                     saldo_bruto -= retiro_m
-                    saldo_disponible_m -= retiro_m
+                    saldo_disponible_m = 0.0
                     fondo_retirado_fantasma += retiro_m
+            else:
+                # Retiro de cantidad específica de UNA SOLA VEZ en el mes seleccionado
+                if m == mes_disposicion:
+                    if monto_retiro_mensual > saldo_disponible_m:
+                        # No hay suficiente → marcar, no retirar
+                        saldo_insuficiente_m = True
+                        retiro_m = 0.0
+                    else:
+                        retiro_m = monto_retiro_mensual
+                        saldo_bruto -= retiro_m
+                        saldo_disponible_m -= retiro_m
+                        fondo_retirado_fantasma += retiro_m
+        
+        total_cantidad_retirada += retiro_m
 
         saldo_final_m = saldo_bruto
 
@@ -400,6 +406,22 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     txt_mes_plan = mes_paro_total
     txt_ano_plan = (mes_paro_total - 1) // 12 + 1
 
+    html_disposicion_boxes = ""
+    if activar_disposicion:
+        cantidad_disponible = df_paro.iloc[mes_paro_total - 1]["Saldo Disponible"]
+        
+        html_disposicion_boxes = f"""
+        <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
+        <div style="color: #F87171; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F8717144;">${total_cantidad_retirada:,.0f}</div>
+        </div>
+        
+        <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
+        <div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${cantidad_disponible:,.0f}</div>
+        </div>
+        """
+
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 10px; opacity: 0.9;">
     <h1 class="white-title special-elite" style="margin: 0; padding: 0; line-height: 1.0; font-size: 3.5rem;">SUSPENSIÓN DE PLAN</h1>
@@ -426,6 +448,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${final_con_paro:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {int(edad_inicial)+25})</div>
 </div>
+{html_disposicion_boxes}
 </div>
     """, unsafe_allow_html=True)
 
