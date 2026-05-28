@@ -501,10 +501,15 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             lambda r: "SALDO INSUFICIENTE" if r.get("Saldo Insuficiente Flag", False) else r["Saldo Disponible"], axis=1
         )
 
-        # Formatear columnas monetarias
+        # Formatear columnas monetarias (sin decimales)
         for col in ["Aportación Mensual", "Aportación Anual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
             if col in df_display.columns:
-                df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}")
+                df_display[col] = df_display[col].apply(lambda x: f"${x:,.0f}")
+                
+        # Saldo Disponible: puede ser número o "SALDO INSUFICIENTE"
+        df_display["Saldo Disponible"] = df_display["Saldo Disponible"].apply(
+            lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x
+        )
         
         # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
         def highlight_row(row):
