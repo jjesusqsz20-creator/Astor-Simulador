@@ -308,7 +308,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     datos_paro = []
     saldo_anterior = 0.0
     total_aportado_con_paro = 0.0
-    saldo_bloqueado = 0.0  # capital de las primeras 18 aportaciones (intocable)
+    # El capital bloqueado es FIJO: el valor del fondo menos el saldo disponible
+    # al momento de la suspensión. No crece con interés (es la "deuda" intocable).
+    saldo_bloqueado_fijo = 0.0
 
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
@@ -319,47 +321,39 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         # Fase activa: aportaciones normales
         if m <= mes_paro_total:
             aportacion_m = fila_original.get("Aportación Mensual", fila_original.get("Aportación", 0.0))
-            interes_m = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
+            interes_m    = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
             saldo_final_m = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
             saldo_disponible_raw = fila_original.get("Saldo Disponible", 0.0)
             saldo_disponible_m = saldo_disponible_raw
-
             total_aportado_con_paro += aportacion_m
             retiro_m = 0.0
-
-            # Al final de la fase activa guardamos el capital bloqueado
-            # = todo el fondo menos el saldo disponible de ese mes
-            saldo_bloqueado = max(0.0, saldo_final_m - saldo_disponible_raw)
+            # Guardar el capital bloqueado FIJO al final de la fase activa
+            saldo_bloqueado_fijo = max(0.0, saldo_final_m - saldo_disponible_raw)
 
         # Fase suspendida: crecimiento puro
         else:
             aportacion_m = 0.0
-
-            # El capital bloqueado sigue creciendo con interés
-            saldo_bloqueado = saldo_bloqueado * (1 + r_m)
-
-            # El saldo total del fondo es el anterior más el interés total
-            interes_m = saldo_anterior * r_m
+            # El fondo TOTAL sigue creciendo con interés sobre todo el dinero
+            interes_m   = saldo_anterior * r_m
             saldo_bruto = saldo_anterior + interes_m
 
-            # El saldo disponible DE ESTE MES es el excedente por encima del bloqueo
-            # Se "resetea" cada mes: si retiraste el mes pasado, el bloqueado sigue creciendo
-            # y el nuevo excedente es el disponible fresco de este mes
-            saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado)
+            # El bloqueado es FIJO (capital de primeras 18 aportaciones, no crece)
+            # El disponible es el excedente que sí puede crecer cada mes
+            saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado_fijo)
 
             retiro_m = 0.0
 
-            # Aplicar disposición de capital si está activa y llegamos al mes correcto
+            # Aplicar disposición de capital si está activa
             if activar_disposicion and m >= mes_disposicion:
                 if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
-                    # Retira exactamente el saldo disponible de este mes
+                    # Cada mes retira el disponible fresco de ese mes
                     retiro_m = saldo_disponible_m
                     saldo_bruto -= retiro_m
                     saldo_disponible_m = 0.0
                 else:
                     # Retiro de cantidad fija
                     if monto_retiro_mensual > saldo_disponible_m:
-                        # No hay suficiente → marcar pero no retirar nada
+                        # No hay suficiente este mes → marcar, no retirar (saldo acumula)
                         saldo_insuficiente_m = True
                         retiro_m = 0.0
                     else:
@@ -382,6 +376,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         saldo_anterior = saldo_final_m
 
     df_paro = pd.DataFrame(datos_paro)
+
 
 
     saldo_al_suspender = df_paro.iloc[mes_paro_total - 1]["Saldo de Fondo"]
