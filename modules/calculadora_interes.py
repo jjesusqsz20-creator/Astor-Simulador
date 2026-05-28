@@ -148,14 +148,14 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 
                 tipo_disposicion = st.radio(
                     "¿Cómo quieres disponer del capital?",
-                    ["Disponer todo el capital a partir del mes seleccionado", "Retirar una cantidad específica por mes"],
+                    ["Disponer todo el capital a partir del mes seleccionado", "Retirar una cantidad específica en el mes seleccionado"],
                     key="interes_tipo_disposicion"
                 )
                 
                 monto_retiro_mensual = 0.0
-                if tipo_disposicion == "Retirar una cantidad específica por mes":
+                if tipo_disposicion == "Retirar una cantidad específica en el mes seleccionado":
                     monto_retiro_mensual = st.number_input(
-                        "Cantidad a retirar por mes ($)",
+                        "Cantidad a retirar ($)",
                         min_value=0.0,
                         value=float(st.session_state.get("interes_monto_retiro", 0.0)),
                         step=1000.0,
@@ -311,65 +311,69 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     # El capital bloqueado es FIJO: el valor del fondo menos el saldo disponible
     # al momento de la suspensión. No crece con interés (es la "deuda" intocable).
     saldo_bloqueado_fijo = 0.0
+    
+    # Fondo fantasma para llevar la cuenta de los retiros y sus intereses perdidos
+    fondo_retirado_fantasma = 0.0
 
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
         fila_original = df_original.iloc[idx_t]
         edad_m = fila_original["Edad"]
         saldo_insuficiente_m = False
+        
+        # 1. Crece el "agujero" de los retiros previos
+        interes_fantasma_m = fondo_retirado_fantasma * r_m
+        fondo_retirado_fantasma += interes_fantasma_m
 
-        # Fase activa: aportaciones normales
+        # Fase activa: leemos el cálculo exacto de Allianz (df_original) y le restamos el agujero
         if m <= mes_paro_total:
             aportacion_m = fila_original.get("Aportación Mensual", fila_original.get("Aportación", 0.0))
-            interes_m    = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
-            saldo_final_m = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
-            saldo_disponible_raw = fila_original.get("Saldo Disponible", 0.0)
-            saldo_disponible_m = saldo_disponible_raw
+            interes_m_base = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
+            saldo_final_m_base = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
+            saldo_disponible_raw_base = fila_original.get("Saldo Disponible", 0.0)
+            
+            # Ajustamos los valores mostrados restando el agujero y su interés
+            interes_m = max(0.0, interes_m_base - interes_fantasma_m)
+            saldo_bruto = max(0.0, saldo_final_m_base - fondo_retirado_fantasma)
+            saldo_disponible_m = max(0.0, saldo_disponible_raw_base - fondo_retirado_fantasma)
+            
             saldo_disponible_pantalla = saldo_disponible_m
             total_aportado_con_paro += aportacion_m
-            retiro_m = 0.0
+            
             # Guardar el capital bloqueado FIJO al final de la fase activa
-            saldo_bloqueado_fijo = max(0.0, saldo_final_m - saldo_disponible_raw)
+            # El capital base bloqueado no es afectado por retiros, sigue intacto (saldo - disponible)
+            saldo_bloqueado_fijo = max(0.0, saldo_final_m_base - saldo_disponible_raw_base)
 
-        # Fase suspendida: crecimiento puro
+        # Fase suspendida: crecimiento puro a partir de lo que quedó
         else:
             aportacion_m = 0.0
-            # El fondo TOTAL sigue creciendo con interés sobre todo el dinero
             interes_m   = saldo_anterior * r_m
             saldo_bruto = saldo_anterior + interes_m
-
-            # El bloqueado es FIJO (capital de primeras 18 aportaciones, no crece)
-            # El disponible es el excedente que sí puede crecer cada mes
             saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado_fijo)
-            
-            # Guardamos lo que había disponible ANTES de aplicar el retiro de este mes
             saldo_disponible_pantalla = saldo_disponible_m
 
-            retiro_m = 0.0
+        retiro_m = 0.0
 
-            # Aplicar disposición de capital si está activa
-            if activar_disposicion and m >= mes_disposicion:
-                if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
-                    if m == mes_disposicion:
-                        # Retira todo el disponible fresco solo este mes
-                        retiro_m = saldo_disponible_m
-                        saldo_bruto -= retiro_m
-                        saldo_disponible_m = 0.0
-                    else:
-                        # Los meses siguientes no retira nada, deja que el disponible se acumule
-                        retiro_m = 0.0
+        # Aplicar disposición de capital de UNA SOLA VEZ en el mes seleccionado
+        if activar_disposicion and m == mes_disposicion:
+            if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
+                retiro_m = saldo_disponible_m
+                saldo_bruto -= retiro_m
+                saldo_disponible_m = 0.0
+                fondo_retirado_fantasma += retiro_m
+            else:
+                # Retiro de cantidad específica en el mes seleccionado
+                if monto_retiro_mensual > saldo_disponible_m:
+                    # No hay suficiente → marcar, no retirar
+                    saldo_insuficiente_m = True
+                    retiro_m = 0.0
                 else:
-                    # Retiro de cantidad fija cada mes
-                    if monto_retiro_mensual > saldo_disponible_m:
-                        # No hay suficiente este mes → marcar, no retirar (saldo acumula)
-                        saldo_insuficiente_m = True
-                        retiro_m = 0.0
-                    else:
-                        retiro_m = monto_retiro_mensual
-                        saldo_bruto -= retiro_m
-                        saldo_disponible_m -= retiro_m
+                    retiro_m = monto_retiro_mensual
+                    saldo_bruto -= retiro_m
+                    saldo_disponible_m -= retiro_m
+                    fondo_retirado_fantasma += retiro_m
 
-            saldo_final_m = saldo_bruto
+        saldo_final_m = saldo_bruto
 
         datos_paro.append({
             "No. de Mes del Plan": m,
