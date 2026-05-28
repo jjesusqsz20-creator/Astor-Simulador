@@ -131,7 +131,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             st.session_state.interes_activar_disposicion = activar_disposicion
             
             if activar_disposicion:
-            if activar_disposicion:
                 mes_disposicion = st.number_input(
                     "¿A partir de qué mes quieres disponer del capital?",
                     min_value=19,
