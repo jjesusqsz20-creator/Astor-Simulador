@@ -462,8 +462,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         
         # Renombrar para mejor presentación
         df_display = df_display.rename(columns={
-            "Saldo de Fondo": "Saldo de Fondo",
-            "Retiro": "Retiro / Disposición"
+            "Saldo de Fondo": "Saldo de Fondo"
         })
         
         # Resaltar el mes de suspensión y el mes de disposición
@@ -475,7 +474,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
-        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Retiro / Disposición", "Saldo Disponible", "Saldo de Fondo"]
+        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
         
         html_table = (
             df_display[cols_show].style
