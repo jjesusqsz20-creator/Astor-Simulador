@@ -518,13 +518,13 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             saldo_disp = row["Saldo Disponible"]
             
             if saldo_disp == "SALDO INSUFICIENTE":
-                return ['background-color: #EF444422; color: #EF4444; font-weight: bold;'] * len(row)
+                return ['background-color: #EF444433; color: #EF4444; font-weight: bold;'] * len(row)
             elif mes == mes_disposicion and frecuencia_sel == "Por mes":
-                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
+                return ['background-color: #34D39955; color: inherit; font-weight: bold;'] * len(row)
             elif frecuencia_sel == "Por año" and ano == año_paro:
-                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
+                return ['background-color: #34D39955; color: inherit; font-weight: bold;'] * len(row)
             elif frecuencia_sel == "Por mes" and mes == mes_paro_total:
-                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
+                return ['background-color: #34D39955; color: inherit; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
         html_table = (
