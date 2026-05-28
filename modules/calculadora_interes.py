@@ -127,40 +127,46 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
         # --- CUADRO: DISPOSICIÓN DE CAPITAL ---
         with st.expander("💰 Disposición de Capital", expanded=True):
-            st.markdown(
-                f"<p style='font-size: 0.78rem; opacity: 0.7; color: {TEXT_COLOR}; margin-top: -4px;'>Solo es posible disponer del capital a partir del <b>Mes 19</b> (completados los primeros 18 pagos obligatorios).</p>",
-                unsafe_allow_html=True
-            )
-            mes_disposicion = st.number_input(
-                "¿A partir de qué mes quieres disponer del capital?",
-                min_value=19,
-                max_value=300,
-                value=int(st.session_state.get("interes_mes_disposicion", 19)),
-                step=1,
-                key="interes_mes_disposicion_input",
-                help="No se puede retirar antes de completar las primeras 18 mensualidades."
-            )
-            st.session_state.interes_mes_disposicion = mes_disposicion
+            activar_disposicion = st.toggle("Activar Disposición de Capital", value=bool(st.session_state.get("interes_activar_disposicion", False)), key="interes_activar_disposicion_input")
+            st.session_state.interes_activar_disposicion = activar_disposicion
             
-            st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.85rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">TIPO DE DISPOSICIÓN</p>', unsafe_allow_html=True)
-            retirar_cantidad_especifica = st.toggle(
-                "Retirar una cantidad específica por mes",
-                value=st.session_state.get("interes_retiro_especifico", False),
-                key="interes_retiro_especifico_input",
-                help="Si está desactivado, se dispondrá de todo el capital en un solo pago en el mes seleccionado."
-            )
-            st.session_state.interes_retiro_especifico = retirar_cantidad_especifica
-            
-            monto_retiro_mensual = 0.0
-            if retirar_cantidad_especifica:
-                monto_retiro_mensual = st.number_input(
-                    "Cantidad a retirar por mes ($)",
-                    min_value=0.0,
-                    value=float(st.session_state.get("interes_monto_retiro", 0.0)),
-                    step=1000.0,
-                    key="interes_monto_retiro_input"
+            if activar_disposicion:
+                st.markdown(
+                    f"<p style='font-size: 0.78rem; opacity: 0.7; color: {TEXT_COLOR}; margin-top: -4px;'>Solo es posible disponer del capital a partir del <b>Mes 19</b> (completados los primeros 18 pagos obligatorios).</p>",
+                    unsafe_allow_html=True
                 )
-                st.session_state.interes_monto_retiro = monto_retiro_mensual
+                mes_disposicion = st.number_input(
+                    "¿A partir de qué mes quieres disponer del capital?",
+                    min_value=19,
+                    max_value=300,
+                    value=int(st.session_state.get("interes_mes_disposicion", 19)),
+                    step=1,
+                    key="interes_mes_disposicion_input",
+                    help="No se puede retirar antes de completar las primeras 18 mensualidades."
+                )
+                st.session_state.interes_mes_disposicion = mes_disposicion
+                
+                tipo_disposicion = st.radio(
+                    "¿Cómo quieres disponer del capital?",
+                    ["Disponer todo el capital a partir del mes seleccionado", "Retirar una cantidad específica por mes"],
+                    key="interes_tipo_disposicion"
+                )
+                
+                monto_retiro_mensual = 0.0
+                if tipo_disposicion == "Retirar una cantidad específica por mes":
+                    monto_retiro_mensual = st.number_input(
+                        "Cantidad a retirar por mes ($)",
+                        min_value=0.0,
+                        value=float(st.session_state.get("interes_monto_retiro", 0.0)),
+                        step=1000.0,
+                        key="interes_monto_retiro_input"
+                    )
+                    st.session_state.interes_monto_retiro = monto_retiro_mensual
+            else:
+                # Valores por defecto si está desactivado para no romper el código
+                mes_disposicion = 19
+                tipo_disposicion = "Disponer todo el capital a partir del mes seleccionado"
+                monto_retiro_mensual = 0.0
 
     # --- PESTAÑAS DE NAVEGACIÓN SUPERIOR ---
     opciones_nav = ["⏱️ Costo de Postergar", "📊 Plan de Acumulación", "🧮 Interés Compuesto", "📈 Planificador Financiero"]
@@ -325,8 +331,8 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             retiro_m = 0.0
 
             # Aplicar disposición de capital si aplica
-            if not saldo_agotado and m >= mes_disposicion:
-                if not retirar_cantidad_especifica:
+            if activar_disposicion and not saldo_agotado and m >= mes_disposicion:
+                if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
                     if m == mes_disposicion:
                         retiro_m = saldo_bruto
                         saldo_bruto = 0.0
