@@ -142,14 +142,17 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             )
             st.session_state.interes_mes_disposicion = mes_disposicion
             
-            tipo_disposicion = st.radio(
-                "¿Cómo quieres disponer del capital?",
-                ["Disponer todo el capital a partir del mes seleccionado", "Retirar una cantidad específica por mes"],
-                key="interes_tipo_disposicion"
+            st.markdown(f'<p style="margin-top: 10px; margin-bottom: 5px; font-weight: 700; font-size: 0.85rem; color: {{ACCENT_COLOR if is_dark else "#555"}};">TIPO DE DISPOSICIÓN</p>', unsafe_allow_html=True)
+            retirar_cantidad_especifica = st.toggle(
+                "Retirar una cantidad específica por mes",
+                value=st.session_state.get("interes_retiro_especifico", False),
+                key="interes_retiro_especifico_input",
+                help="Si está desactivado, se dispondrá de todo el capital en un solo pago en el mes seleccionado."
             )
+            st.session_state.interes_retiro_especifico = retirar_cantidad_especifica
             
             monto_retiro_mensual = 0.0
-            if tipo_disposicion == "Retirar una cantidad específica por mes":
+            if retirar_cantidad_especifica:
                 monto_retiro_mensual = st.number_input(
                     "Cantidad a retirar por mes ($)",
                     min_value=0.0,
@@ -323,7 +326,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
             # Aplicar disposición de capital si aplica
             if not saldo_agotado and m >= mes_disposicion:
-                if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
+                if not retirar_cantidad_especifica:
                     if m == mes_disposicion:
                         retiro_m = saldo_bruto
                         saldo_bruto = 0.0
