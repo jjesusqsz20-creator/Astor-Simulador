@@ -325,6 +325,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             saldo_final_m = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
             saldo_disponible_raw = fila_original.get("Saldo Disponible", 0.0)
             saldo_disponible_m = saldo_disponible_raw
+            saldo_disponible_pantalla = saldo_disponible_m
             total_aportado_con_paro += aportacion_m
             retiro_m = 0.0
             # Guardar el capital bloqueado FIJO al final de la fase activa
@@ -340,6 +341,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             # El bloqueado es FIJO (capital de primeras 18 aportaciones, no crece)
             # El disponible es el excedente que sí puede crecer cada mes
             saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado_fijo)
+            
+            # Guardamos lo que había disponible ANTES de aplicar el retiro de este mes
+            saldo_disponible_pantalla = saldo_disponible_m
 
             retiro_m = 0.0
 
@@ -374,7 +378,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             "Aportación Mensual": aportacion_m,
             "Interés Generado": interes_m,
             "Retiro": retiro_m,
-            "Saldo Disponible": "SALDO INSUFICIENTE" if saldo_insuficiente_m else saldo_disponible_m,
+            "Saldo Disponible": "SALDO INSUFICIENTE" if saldo_insuficiente_m else saldo_disponible_pantalla,
             "Saldo de Fondo": saldo_final_m
         })
         saldo_anterior = saldo_final_m
