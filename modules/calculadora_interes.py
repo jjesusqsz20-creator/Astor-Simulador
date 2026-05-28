@@ -481,16 +481,23 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
         )
         
+        frecuencia_sel = st.session_state.get("interes_frecuencia", "Por mes")
+        año_paro = st.session_state.get("interes_ano_paro", 5)
+
         # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
         def highlight_row(row):
             mes = row["No. de Mes del Plan"]
+            ano = row["No. de Año del Plan"]
             saldo_disp = row["Saldo Disponible"]
+            
             if saldo_disp == "SALDO INSUFICIENTE":
                 return ['background-color: #EF444422; color: #EF4444; font-weight: bold;'] * len(row)
-            elif mes == mes_paro_total:
-                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
-            elif mes == mes_disposicion and mes_disposicion > mes_paro_total:
+            elif mes == mes_disposicion:
                 return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
+            elif frecuencia_sel == "Por año" and ano == año_paro:
+                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
+            elif frecuencia_sel == "Por mes" and mes == mes_paro_total:
+                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
         cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
@@ -523,9 +530,11 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         # En Streamlit los scripts incrustados dentro de components no funcionan tan fácil si no están en `components.html`.
         # Vamos a probar inyectando un id en el HTML string crudo.
         html_lines = html_table.split("<tr>")
-        if len(html_lines) > mes_paro_total:
+        target_row_idx = ((año_paro - 1) * 12 + 1) if frecuencia_sel == "Por año" else mes_paro_total
+        
+        if len(html_lines) > target_row_idx:
             # html_lines[0] is the thead, html_lines[1] is row 1, etc.
-            html_lines[mes_paro_total] = f'<tr id="row_suspension">' + html_lines[mes_paro_total][4:] if html_lines[mes_paro_total].startswith("    ") else f'<tr id="row_suspension">' + html_lines[mes_paro_total]
+            html_lines[target_row_idx] = f'<tr id="row_suspension">' + html_lines[target_row_idx][4:] if html_lines[target_row_idx].startswith("    ") else f'<tr id="row_suspension">' + html_lines[target_row_idx]
             html_table = "<tr>".join(html_lines)
             
         script_scroll = """
