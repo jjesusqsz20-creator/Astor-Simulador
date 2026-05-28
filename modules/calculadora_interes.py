@@ -382,7 +382,8 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             "Aportación Mensual": aportacion_m,
             "Interés Generado": interes_m,
             "Retiro": retiro_m,
-            "Saldo Disponible": "SALDO INSUFICIENTE" if saldo_insuficiente_m else saldo_disponible_pantalla,
+            "Saldo Disponible": saldo_disponible_pantalla,
+            "Saldo Insuficiente Flag": saldo_insuficiente_m,
             "Saldo de Fondo": saldo_final_m
         })
         saldo_anterior = saldo_final_m
@@ -463,44 +464,68 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             margin=dict(t=20, b=20, l=10, r=10),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             xaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
-            yaxis=dict(gridcolor="rgba(255,255,255,0.05)", tickprefix="$")
+        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", tickprefix="$")
         )
         st.plotly_chart(fig, use_container_width=True)
         
     with tab_tabla:
         st.markdown(f"<h3 style='text-align: center; color: {GOLD_COLOR};'>Tabla Dinámica: Desglose Completo del Plan</h3>", unsafe_allow_html=True)
         
-        # Mostrar TODOS los meses desde el inicio
-        df_display = df_paro.copy()
+        frecuencia_sel = st.session_state.get("interes_frecuencia", "Por mes")
+        año_paro = st.session_state.get("interes_ano_paro", 5)
+
+        # Si la vista es "Por año", agrupar los datos
+        if frecuencia_sel == "Por año":
+            df_paro_grouped = df_paro.groupby("No. de Año del Plan").agg({
+                "No. de Mes del Plan": "last", 
+                "Edad": "last",
+                "Aportación Mensual": "mean",
+                "Interés Generado": "sum",
+                "Retiro": "sum",
+                "Saldo Disponible": "last",
+                "Saldo Insuficiente Flag": "max",
+                "Saldo de Fondo": "last"
+            }).reset_index()
+            
+            aportacion_anual_sum = df_paro.groupby("No. de Año del Plan")["Aportación Mensual"].sum().reset_index()
+            df_paro_grouped["Aportación Anual"] = aportacion_anual_sum["Aportación Mensual"]
+            
+            df_display = df_paro_grouped.copy()
+            cols_show = ["No. de Año del Plan", "Edad", "Aportación Mensual", "Aportación Anual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
+        else:
+            df_display = df_paro.copy()
+            cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
+
+        # Reemplazar Saldo Disponible con "SALDO INSUFICIENTE" si la bandera está activa
+        df_display["Saldo Disponible"] = df_display.apply(
+            lambda r: "SALDO INSUFICIENTE" if r.get("Saldo Insuficiente Flag", False) else r["Saldo Disponible"], axis=1
+        )
+
+        # Formatear columnas monetarias
+        for col in ["Aportación Mensual", "Aportación Anual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
+            if col in df_display.columns:
+                df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}")
         
-        # Formatear columnas monetarias (excepto Saldo Disponible que puede ser string)
-        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
-            df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
         # Saldo Disponible: puede ser número o "SALDO INSUFICIENTE"
         df_display["Saldo Disponible"] = df_display["Saldo Disponible"].apply(
             lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
         )
         
-        frecuencia_sel = st.session_state.get("interes_frecuencia", "Por mes")
-        año_paro = st.session_state.get("interes_ano_paro", 5)
-
         # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
         def highlight_row(row):
-            mes = row["No. de Mes del Plan"]
             ano = row["No. de Año del Plan"]
+            mes = row.get("No. de Mes del Plan", 0)
             saldo_disp = row["Saldo Disponible"]
             
             if saldo_disp == "SALDO INSUFICIENTE":
                 return ['background-color: #EF444422; color: #EF4444; font-weight: bold;'] * len(row)
-            elif mes == mes_disposicion:
+            elif mes == mes_disposicion and frecuencia_sel == "Por mes":
                 return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
             elif frecuencia_sel == "Por año" and ano == año_paro:
-                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
+                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
             elif frecuencia_sel == "Por mes" and mes == mes_paro_total:
-                return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
+                return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
             return [''] * len(row)
-        
-        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
         
         html_table = (
             df_display[cols_show].style
@@ -512,8 +537,6 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
         
         # Añadir ID a la fila de suspensión para poder hacer scroll hacia ella
-        html_table = html_table.replace(f'<td id="T__{mes_paro_total - 1}_row0_col1" class="data row{mes_paro_total - 1} col1" >{mes_paro_total}</td>', 
-                                        f'<td id="T__{mes_paro_total - 1}_row0_col1" class="data row{mes_paro_total - 1} col1" >{mes_paro_total}</td><script>document.currentScript.parentElement.id="suspension_row";</script>')
         # Ojo: reemplazar por un string que encuentre la fila exacta es complejo si Pandas cambia los IDs. 
         # Es más fácil inyectar el script con CSS selector:
         script_scroll = f"""
@@ -530,7 +553,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         # En Streamlit los scripts incrustados dentro de components no funcionan tan fácil si no están en `components.html`.
         # Vamos a probar inyectando un id en el HTML string crudo.
         html_lines = html_table.split("<tr>")
-        target_row_idx = ((año_paro - 1) * 12 + 1) if frecuencia_sel == "Por año" else mes_paro_total
+        target_row_idx = año_paro if frecuencia_sel == "Por año" else mes_paro_total
         
         if len(html_lines) > target_row_idx:
             # html_lines[0] is the thead, html_lines[1] is row 1, etc.
@@ -546,10 +569,13 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         
         # Leyenda de colores
         leyenda = ""
-        if mes_paro_total >= 1:
-            leyenda += f"<span style='background:{GOLD_COLOR}22; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟡 Mes de suspensión (Mes {mes_paro_total})</span>"
-        if mes_disposicion > mes_paro_total:
-            leyenda += f"<span style='background:#34D39922; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;'>🟢 Inicio de disposición (Mes {mes_disposicion})</span>"
+        if frecuencia_sel == "Por año":
+            leyenda += f"<span style='background:#34D39922; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟢 Año de suspensión (Año {año_paro})</span>"
+        else:
+            leyenda += f"<span style='background:#34D39922; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟢 Mes de suspensión (Mes {mes_paro_total})</span>"
+        
+        if activar_disposicion:
+            leyenda += f"<span style='background:#34D39922; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;'>🟢 Mes de disposición (Mes {mes_disposicion})</span>"
         
         if leyenda:
             st.markdown(f"<div style='margin-bottom: 10px;'>{leyenda}</div>", unsafe_allow_html=True)
