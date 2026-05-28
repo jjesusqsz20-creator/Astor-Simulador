@@ -415,22 +415,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
 <div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_display:,.0f}</div>
-<div style="color: {ACCENT_COLOR}; font-weight: bold; font-size: 0.85rem; opacity: 0.8; text-transform: uppercase;">Desde Costo de Postergar</div>
-</div>
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
-<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${saldo_al_suspender:,.0f}</div>
-<div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo estimado</p>
-<div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${final_con_paro:,.0f}</div>
-<div style="color: #34D399; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">VALOR AL VENCIMIENTO (25 AÑOS)</div>
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
+<div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${saldo_al_suspender:,.0f}</div>
+<div style="color: #34D399; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Total Efectiva</p>
-<div style="color: #A855F7; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #A855F744;">${total_aportado_con_paro:,.0f}</div>
-<div style="color: #A855F7; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">TOTAL INVERTIDO ANTES DEL PARO</div>
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de libertad</p>
+<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${final_con_paro:,.0f}</div>
+<div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {int(edad_inicial)+25})</div>
 </div>
 </div>
     """, unsafe_allow_html=True)
@@ -487,14 +481,11 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 "Saldo de Fondo": "last"
             }).reset_index()
             
-            aportacion_anual_sum = df_paro.groupby("No. de Año del Plan")["Aportación Mensual"].sum().reset_index()
-            df_paro_grouped["Aportación Anual"] = aportacion_anual_sum["Aportación Mensual"]
-            
             df_display = df_paro_grouped.copy()
-            cols_show = ["No. de Año del Plan", "Edad", "Aportación Mensual", "Aportación Anual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
+            cols_show = ["No. de Año del Plan", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
         else:
             df_display = df_paro.copy()
-            cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Saldo Disponible", "Saldo de Fondo"]
+            cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
 
         # Reemplazar Saldo Disponible con "SALDO INSUFICIENTE" si la bandera está activa
         df_display["Saldo Disponible"] = df_display.apply(
