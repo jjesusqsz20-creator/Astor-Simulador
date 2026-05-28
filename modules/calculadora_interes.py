@@ -346,12 +346,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             # Aplicar disposición de capital si está activa
             if activar_disposicion and m >= mes_disposicion:
                 if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
-                    # Cada mes retira el disponible fresco de ese mes
-                    retiro_m = saldo_disponible_m
-                    saldo_bruto -= retiro_m
-                    saldo_disponible_m = 0.0
+                    if m == mes_disposicion:
+                        # Retira todo el disponible fresco solo este mes
+                        retiro_m = saldo_disponible_m
+                        saldo_bruto -= retiro_m
+                        saldo_disponible_m = 0.0
+                    else:
+                        # Los meses siguientes no retira nada, deja que el disponible se acumule
+                        retiro_m = 0.0
                 else:
-                    # Retiro de cantidad fija
+                    # Retiro de cantidad fija cada mes
                     if monto_retiro_mensual > saldo_disponible_m:
                         # No hay suficiente este mes → marcar, no retirar (saldo acumula)
                         saldo_insuficiente_m = True
