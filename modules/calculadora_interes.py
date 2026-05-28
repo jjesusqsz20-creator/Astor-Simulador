@@ -411,16 +411,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         cantidad_disponible = df_paro.iloc[mes_paro_total - 1]["Saldo Disponible"]
         
         html_disposicion_boxes = f"""
-        <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
-        <div style="color: #F87171; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F8717144;">${total_cantidad_retirada:,.0f}</div>
-        </div>
-        
-        <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
-        <div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${cantidad_disponible:,.0f}</div>
-        </div>
-        """
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
+<div style="color: #F87171; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F8717144;">${total_cantidad_retirada:,.0f}</div>
+</div>
+
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
+<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${cantidad_disponible:,.0f}</div>
+</div>
+"""
 
     st.markdown(f"""
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 10px; opacity: 0.9;">

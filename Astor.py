@@ -2060,6 +2060,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             df_display = df_raw.groupby("Semestre").agg({
                 "Año": "last", "Edad": "max",
                 "Aportación": "last", 
+                "Aportación Acumulada": "last",
                 "Saldo de Fondo": "last",
                 "Saldo Disponible": "last",
                 "Saldo Disponible Neto": "last",
@@ -2072,6 +2073,7 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
             df_display = df_raw.groupby("Año").agg({
                 "Edad": "max", 
                 "Aportación": "last",
+                "Aportación Acumulada": "last",
                 "Saldo de Fondo": "last",
                 "Saldo Disponible": "last",
                 "Saldo Disponible Neto": "last",
@@ -2093,14 +2095,14 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         if anios_para_retiro > anios_horizonte:
             if frecuencia_vista == "Anual":
                 df_65_display = df_65.groupby("Año").agg({
-                    "Edad": "max", "Aportación": "last",
+                    "Edad": "max", "Aportación": "last", "Aportación Acumulada": "last",
                     "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
                 }).reset_index()
                 df_65_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
             elif frecuencia_vista == "Semestral":
                 df_65["Semestre"] = (df_65["Mes Global"] - 1) // 6 + 1
                 df_65_display = df_65.groupby("Semestre").agg({
-                    "Año": "last", "Edad": "max", "Aportación": "last",
+                    "Año": "last", "Edad": "max", "Aportación": "last", "Aportación Acumulada": "last",
                     "Saldo de Fondo": "last", "Saldo Disponible": "last", "Post retención": "last"
                 }).reset_index()
                 df_65_display.rename(columns={"Aportación": "Aportación Mensual"}, inplace=True)
