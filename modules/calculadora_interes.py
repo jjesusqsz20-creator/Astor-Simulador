@@ -317,34 +317,45 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
         # Fase activa: aportaciones normales
         if m <= mes_paro_total:
-            aportacion_m = fila_original["Aportación"]
-            interes_m = fila_original["Interés Generado"]
-            saldo_final_m = fila_original["Saldo Final"]
+            aportacion_m = fila_original.get("Aportación Mensual", fila_original.get("Aportación", 0.0))
+            interes_m = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
+            saldo_final_m = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
+            saldo_disponible_m = fila_original.get("Saldo Disponible", 0.0)
+            
             total_aportado_con_paro += aportacion_m
             retiro_m = 0.0
+            
+            # Inicializar el capital bloqueado para cuando empiece la suspensión
+            saldo_bloqueado = max(0.0, saldo_final_m - saldo_disponible_m)
 
         # Fase suspendida: crecimiento puro
         else:
             aportacion_m = 0.0
             interes_m = saldo_anterior * r_m
             saldo_bruto = saldo_anterior + interes_m
+            
+            # El capital bloqueado original (de las primeras 18 aportaciones) sigue creciendo y nunca se puede retirar
+            saldo_bloqueado = saldo_bloqueado * (1 + r_m)
+            saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado)
+            
             retiro_m = 0.0
 
             # Aplicar disposición de capital si aplica
             if activar_disposicion and not saldo_agotado and m >= mes_disposicion:
                 if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
                     if m == mes_disposicion:
-                        retiro_m = saldo_bruto
-                        saldo_bruto = 0.0
+                        retiro_m = saldo_disponible_m
+                        saldo_bruto -= retiro_m
+                        saldo_disponible_m = 0.0
                         saldo_agotado = True
                     else:
                         retiro_m = 0.0
-                        saldo_bruto = 0.0
                 else:
-                    retiro_m = min(monto_retiro_mensual, saldo_bruto)
+                    retiro_m = min(monto_retiro_mensual, saldo_disponible_m)
                     saldo_bruto -= retiro_m
-                    if saldo_bruto <= 0:
-                        saldo_bruto = 0.0
+                    saldo_disponible_m -= retiro_m
+                    if saldo_disponible_m <= 0:
+                        saldo_disponible_m = 0.0
                         saldo_agotado = True
 
             saldo_final_m = saldo_bruto
@@ -356,6 +367,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             "Aportación Mensual": aportacion_m,
             "Interés Generado": interes_m,
             "Retiro": retiro_m,
+            "Saldo Disponible": saldo_disponible_m,
             "Saldo de Fondo": saldo_final_m
         })
         saldo_anterior = saldo_final_m
@@ -445,8 +457,8 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         df_display = df_paro.copy()
         
         # Formatear columnas monetarias
-        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
-            df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}")
+        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo Disponible", "Saldo de Fondo"]:
+            df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
         
         # Renombrar para mejor presentación
         df_display = df_display.rename(columns={
@@ -463,7 +475,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
-        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Retiro / Disposición", "Saldo de Fondo"]
+        cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Interés Generado", "Retiro / Disposición", "Saldo Disponible", "Saldo de Fondo"]
         
         html_table = (
             df_display[cols_show].style
@@ -472,6 +484,37 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             .hide(axis="index")
             .to_html()
         )
+        
+        # Añadir ID a la fila de suspensión para poder hacer scroll hacia ella
+        html_table = html_table.replace(f'<td id="T__{mes_paro_total - 1}_row0_col1" class="data row{mes_paro_total - 1} col1" >{mes_paro_total}</td>', 
+                                        f'<td id="T__{mes_paro_total - 1}_row0_col1" class="data row{mes_paro_total - 1} col1" >{mes_paro_total}</td><script>document.currentScript.parentElement.id="suspension_row";</script>')
+        # Ojo: reemplazar por un string que encuentre la fila exacta es complejo si Pandas cambia los IDs. 
+        # Es más fácil inyectar el script con CSS selector:
+        script_scroll = f"""
+        <script>
+            setTimeout(function() {{
+                var rows = window.parent.document.querySelectorAll('iframe')[0].contentWindow.document.querySelectorAll('table tbody tr');
+                if (rows && rows.length >= {mes_paro_total}) {{
+                    rows[{mes_paro_total - 1}].scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+                }}
+            }}, 500);
+        </script>
+        """
+        # Mejor usar un enfoque sin romper la tabla, agregando un div oculto si hace falta o usando el tr: nth-child. Streamlit ejecuta esto en un iframe.
+        # En Streamlit los scripts incrustados dentro de components no funcionan tan fácil si no están en `components.html`.
+        # Vamos a probar inyectando un id en el HTML string crudo.
+        html_lines = html_table.split("<tr>")
+        if len(html_lines) > mes_paro_total:
+            # html_lines[0] is the thead, html_lines[1] is row 1, etc.
+            html_lines[mes_paro_total] = f'<tr id="row_suspension">' + html_lines[mes_paro_total][4:] if html_lines[mes_paro_total].startswith("    ") else f'<tr id="row_suspension">' + html_lines[mes_paro_total]
+            html_table = "<tr>".join(html_lines)
+            
+        script_scroll = """
+        <script>
+            var el = window.parent.document.getElementById('row_suspension');
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        </script>
+        """
         
         # Leyenda de colores
         leyenda = ""
@@ -515,7 +558,15 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         background-color: rgba(255,255,255,0.03);
     }}
 </style>
-<div class="tabla-espera" style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+<div class="tabla-espera" id="tabla-container" style="height: 500px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table}
 </div>
+<script>
+    setTimeout(function() {{
+        var rows = window.parent.document.querySelectorAll('iframe')[0].contentWindow.document.querySelectorAll('.tabla-espera tbody tr');
+        if (rows && rows.length >= {mes_paro_total}) {{
+            rows[{mes_paro_total - 1}].scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+        }}
+    }}, 600);
+</script>
         """, unsafe_allow_html=True)
