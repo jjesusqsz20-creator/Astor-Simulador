@@ -506,94 +506,42 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             if col in df_display.columns:
                 df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}")
         
-        # Saldo Disponible: puede ser número o "SALDO INSUFICIENTE"
-        df_display["Saldo Disponible"] = df_display["Saldo Disponible"].apply(
-            lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
-        )
+        # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
+        def highlight_row(row):
+            ano = row["No. de Año del Plan"]
+            mes = row.get("No. de Mes del Plan", 0)
+            saldo_disp = row["Saldo Disponible"]
+            
+            style_green = 'background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;'
+            style_red = 'background-color: #fee2e2 !important; color: #b91c1c !important; font-weight: bold !important;'
+            
+            if saldo_disp == "SALDO INSUFICIENTE":
+                return [style_red] * len(row)
+            elif mes == mes_disposicion and activar_disposicion:
+                return [style_green] * len(row)
+            elif frecuencia_sel == "Por año" and ano == año_paro:
+                return [style_green] * len(row)
+            elif frecuencia_sel == "Por mes" and mes == mes_paro_total:
+                return [style_green] * len(row)
+            return [''] * len(row)
         
         html_table = (
             df_display[cols_show].style
             .set_properties(**{'text-align': 'center'})
+            .apply(highlight_row, axis=1)
             .hide(axis="index")
             .to_html()
         )
 
-        
-        # Añadir ID a la fila de suspensión para poder hacer scroll hacia ella
-        # Ojo: reemplazar por un string que encuentre la fila exacta es complejo si Pandas cambia los IDs. 
-        # Es más fácil inyectar el script con CSS selector:
-        script_scroll = f"""
-        <script>
-            setTimeout(function() {{
-                var rows = window.parent.document.querySelectorAll('iframe')[0].contentWindow.document.querySelectorAll('table tbody tr');
-                if (rows && rows.length >= {mes_paro_total}) {{
-                    rows[{mes_paro_total - 1}].scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-                }}
-            }}, 500);
-        </script>
-        """
-        # Mejor usar un enfoque sin romper la tabla, agregando un div oculto si hace falta o usando el tr: nth-child. Streamlit ejecuta esto en un iframe.
-        # En Streamlit los scripts incrustados dentro de components no funcionan tan fácil si no están en `components.html`.
-        # Vamos a probar inyectando un id en el HTML string crudo.
-        html_lines = html_table.split("<tr>")
-        target_row_idx = año_paro if frecuencia_sel == "Por año" else mes_paro_total
-        
-        if len(html_lines) > target_row_idx:
-            # html_lines[0] is the thead, html_lines[1] is row 1, etc.
-            html_lines[target_row_idx] = f'<tr id="row_suspension">' + html_lines[target_row_idx][4:] if html_lines[target_row_idx].startswith("    ") else f'<tr id="row_suspension">' + html_lines[target_row_idx]
-            html_table = "<tr>".join(html_lines)
-            
-        script_scroll = """
-        <script>
-            var el = window.parent.document.getElementById('row_suspension');
-            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-        </script>
-        """
-        
-        # --- INYECTAR FRANJA VERDE DIRECTAMENTE EN EL HTML ---
-        # Pandas Styler no funciona bien con el CSS externo, así que inyectamos los estilos
-        # directamente en las filas <tr> del HTML generado.
-        html_rows = html_table.split("<tr")
-        new_rows = []
-        for i, chunk in enumerate(html_rows):
-            if i == 0:
-                new_rows.append(chunk)
-                continue
-            
-            # Determinar el índice de fila de datos (i=1 es el header <th>, i=2 es fila 1, etc.)
-            row_data_idx = i - 1  # fila de datos (1-indexed)
-            
-            style_inject = ""
-            
-            if frecuencia_sel == "Por mes":
-                if row_data_idx == mes_paro_total:
-                    style_inject = "background-color: #34D399 !important; color: #fff !important; font-weight: bold !important;"
-                elif row_data_idx == mes_disposicion and activar_disposicion:
-                    style_inject = "background-color: #34D399 !important; color: #fff !important; font-weight: bold !important;"
-            elif frecuencia_sel == "Por año":
-                if row_data_idx == año_paro:
-                    style_inject = "background-color: #34D399 !important; color: #fff !important; font-weight: bold !important;"
-            
-            # Verificar si es fila de SALDO INSUFICIENTE
-            if "SALDO INSUFICIENTE" in chunk:
-                style_inject = "background-color: #EF4444 !important; color: #fff !important; font-weight: bold !important;"
-            
-            if style_inject:
-                new_rows.append(f' style="{style_inject}"' + chunk)
-            else:
-                new_rows.append(chunk)
-        
-        html_table = "<tr".join(new_rows)
-        
         # Leyenda de colores
         leyenda = ""
         if frecuencia_sel == "Por año":
-            leyenda += f"<span style='background:#34D399; color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟢 Año de suspensión (Año {año_paro})</span>"
+            leyenda += f"<span style='background:#dcfce7; color:#166534; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px; font-weight: bold;'>🟢 Año de suspensión (Año {año_paro})</span>"
         else:
-            leyenda += f"<span style='background:#34D399; color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;'>🟢 Mes de suspensión (Mes {mes_paro_total})</span>"
+            leyenda += f"<span style='background:#dcfce7; color:#166534; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px; font-weight: bold;'>🟢 Mes de suspensión (Mes {mes_paro_total})</span>"
         
         if activar_disposicion:
-            leyenda += f"<span style='background:#34D399; color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;'>🟢 Mes de disposición (Mes {mes_disposicion})</span>"
+            leyenda += f"<span style='background:#dcfce7; color:#166534; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;'>🟢 Mes de disposición (Mes {mes_disposicion})</span>"
         
         if leyenda:
             st.markdown(f"<div style='margin-bottom: 10px;'>{leyenda}</div>", unsafe_allow_html=True)
