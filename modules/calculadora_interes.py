@@ -308,55 +308,64 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     datos_paro = []
     saldo_anterior = 0.0
     total_aportado_con_paro = 0.0
-    saldo_agotado = False
+    saldo_bloqueado = 0.0  # capital de las primeras 18 aportaciones (intocable)
 
     for m in range(1, 301):
         idx_t = min(m - 1, len(df_original) - 1)
         fila_original = df_original.iloc[idx_t]
         edad_m = fila_original["Edad"]
+        saldo_insuficiente_m = False
 
         # Fase activa: aportaciones normales
         if m <= mes_paro_total:
             aportacion_m = fila_original.get("Aportación Mensual", fila_original.get("Aportación", 0.0))
             interes_m = fila_original.get("Interés Generado", fila_original.get("Interés", 0.0))
             saldo_final_m = fila_original.get("Saldo de Fondo", fila_original.get("Saldo Final", 0.0))
-            saldo_disponible_m = fila_original.get("Saldo Disponible", 0.0)
-            
+            saldo_disponible_raw = fila_original.get("Saldo Disponible", 0.0)
+            saldo_disponible_m = saldo_disponible_raw
+
             total_aportado_con_paro += aportacion_m
             retiro_m = 0.0
-            
-            # Inicializar el capital bloqueado para cuando empiece la suspensión
-            saldo_bloqueado = max(0.0, saldo_final_m - saldo_disponible_m)
+
+            # Al final de la fase activa guardamos el capital bloqueado
+            # = todo el fondo menos el saldo disponible de ese mes
+            saldo_bloqueado = max(0.0, saldo_final_m - saldo_disponible_raw)
 
         # Fase suspendida: crecimiento puro
         else:
             aportacion_m = 0.0
+
+            # El capital bloqueado sigue creciendo con interés
+            saldo_bloqueado = saldo_bloqueado * (1 + r_m)
+
+            # El saldo total del fondo es el anterior más el interés total
             interes_m = saldo_anterior * r_m
             saldo_bruto = saldo_anterior + interes_m
-            
-            # El capital bloqueado original (de las primeras 18 aportaciones) sigue creciendo y nunca se puede retirar
-            saldo_bloqueado = saldo_bloqueado * (1 + r_m)
+
+            # El saldo disponible DE ESTE MES es el excedente por encima del bloqueo
+            # Se "resetea" cada mes: si retiraste el mes pasado, el bloqueado sigue creciendo
+            # y el nuevo excedente es el disponible fresco de este mes
             saldo_disponible_m = max(0.0, saldo_bruto - saldo_bloqueado)
-            
+
             retiro_m = 0.0
 
-            # Aplicar disposición de capital si aplica
-            if activar_disposicion and not saldo_agotado and m >= mes_disposicion:
+            # Aplicar disposición de capital si está activa y llegamos al mes correcto
+            if activar_disposicion and m >= mes_disposicion:
                 if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
-                    if m == mes_disposicion:
-                        retiro_m = saldo_disponible_m
-                        saldo_bruto -= retiro_m
-                        saldo_disponible_m = 0.0
-                        saldo_agotado = True
-                    else:
-                        retiro_m = 0.0
-                else:
-                    retiro_m = min(monto_retiro_mensual, saldo_disponible_m)
+                    # Retira exactamente el saldo disponible de este mes
+                    retiro_m = saldo_disponible_m
                     saldo_bruto -= retiro_m
-                    saldo_disponible_m -= retiro_m
-                    if saldo_disponible_m <= 0:
-                        saldo_disponible_m = 0.0
-                        saldo_agotado = True
+                    saldo_disponible_m = 0.0
+                else:
+                    # Retiro de cantidad fija
+                    if monto_retiro_mensual > saldo_disponible_m:
+                        # No hay suficiente → marcar pero no retirar nada
+                        saldo_insuficiente_m = True
+                        retiro_m = 0.0
+                    else:
+                        retiro_m = monto_retiro_mensual
+                        saldo_bruto -= retiro_m
+                        saldo_disponible_m -= retiro_m
 
             saldo_final_m = saldo_bruto
 
@@ -367,12 +376,13 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             "Aportación Mensual": aportacion_m,
             "Interés Generado": interes_m,
             "Retiro": retiro_m,
-            "Saldo Disponible": saldo_disponible_m,
+            "Saldo Disponible": "SALDO INSUFICIENTE" if saldo_insuficiente_m else saldo_disponible_m,
             "Saldo de Fondo": saldo_final_m
         })
         saldo_anterior = saldo_final_m
 
     df_paro = pd.DataFrame(datos_paro)
+
 
     saldo_al_suspender = df_paro.iloc[mes_paro_total - 1]["Saldo de Fondo"]
     final_con_paro = df_paro.iloc[-1]["Saldo de Fondo"]
@@ -456,19 +466,21 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         # Mostrar TODOS los meses desde el inicio
         df_display = df_paro.copy()
         
-        # Formatear columnas monetarias
-        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo Disponible", "Saldo de Fondo"]:
+        # Formatear columnas monetarias (excepto Saldo Disponible que puede ser string)
+        for col in ["Aportación Mensual", "Interés Generado", "Retiro", "Saldo de Fondo"]:
             df_display[col] = df_display[col].apply(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+        # Saldo Disponible: puede ser número o "SALDO INSUFICIENTE"
+        df_display["Saldo Disponible"] = df_display["Saldo Disponible"].apply(
+            lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
+        )
         
-        # Renombrar para mejor presentación
-        df_display = df_display.rename(columns={
-            "Saldo de Fondo": "Saldo de Fondo"
-        })
-        
-        # Resaltar el mes de suspensión y el mes de disposición
+        # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
         def highlight_row(row):
             mes = row["No. de Mes del Plan"]
-            if mes == mes_paro_total:
+            saldo_disp = row["Saldo Disponible"]
+            if saldo_disp == "SALDO INSUFICIENTE":
+                return ['background-color: #EF444422; color: #EF4444; font-weight: bold;'] * len(row)
+            elif mes == mes_paro_total:
                 return [f'background-color: {GOLD_COLOR}22; font-weight: bold;'] * len(row)
             elif mes == mes_disposicion and mes_disposicion > mes_paro_total:
                 return [f'background-color: #34D39922; font-weight: bold;'] * len(row)
@@ -483,6 +495,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             .hide(axis="index")
             .to_html()
         )
+
         
         # Añadir ID a la fila de suspensión para poder hacer scroll hacia ella
         html_table = html_table.replace(f'<td id="T__{mes_paro_total - 1}_row0_col1" class="data row{mes_paro_total - 1} col1" >{mes_paro_total}</td>', 
