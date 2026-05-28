@@ -115,7 +115,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                     "Mes de la Suspensión (Mes 18+)",
                     min_value=18,
                     max_value=300,
-                    value=int(st.session_state.get("interes_mes_paro_directo", 18)),
+                    value=int(st.session_state.get("interes_mes_paro_directo", 19)),
                     step=1,
                     key="interes_mes_paro_directo",
                     help="Los primeros 17 meses son estrictamente obligatorios."
