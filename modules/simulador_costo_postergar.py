@@ -153,11 +153,18 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 opciones_retiro.append(desired_default)
             opciones_retiro.sort()
             
+            if "last_edad_costos" not in st.session_state:
+                st.session_state["last_edad_costos"] = edad_inicial
+                
+            if st.session_state["last_edad_costos"] != edad_inicial:
+                st.session_state["costos_edad_retiro"] = desired_default
+                st.session_state["last_edad_costos"] = edad_inicial
+                
             e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
             if e_retiro_state not in opciones_retiro:
                 e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
             idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
-            edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro)
+            edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro, key="costos_edad_retiro")
             
             rend_def = st.session_state.get('persist_rend_postergar', 10.0)
             rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=float(rend_def), step=0.5)
@@ -622,7 +629,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Aportación': 'Aportación Mensual'
             }, inplace=True)
             # Seleccionar únicamente las columnas como en plan de acumulacion + Mes
-            columnas_mensuales = ['Año', 'Periodo', 'Edad', 'Aportación Mensual', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
+            columnas_mensuales = ['Año', 'Periodo', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
             # Asegurar que todas existan
             columnas_mensuales = [c for c in columnas_mensuales if c in df_espera.columns]
             df_espera = df_espera[columnas_mensuales]
@@ -634,6 +641,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             
             format_dict = {
                 col_aporte: "${:,.0f}",
+                "Aportación Acumulada": "${:,.0f}",
                 "Saldo de Fondo": "${:,.0f}",
                 "Saldo Disponible": "${:,.0f}",
                 "Post retención": "${:,.0f}",

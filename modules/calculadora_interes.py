@@ -321,11 +321,15 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     if st.session_state.get("interes_activar_disposicion", False):
         m_disp = int(st.session_state.get("interes_mes_disposicion", 19))
         idx_paro = min(mes_paro_total - 1, len(df_original) - 1)
-        idx_previo = max(0, min(m_disp - 2, len(df_original) - 1))
-        
         saldo_base_paro = df_original.iloc[idx_paro].get("Saldo Disponible", 0.0)
-        saldo_base_previo = 0.0 if m_disp <= 19 else df_original.iloc[idx_previo].get("Saldo Disponible", 0.0)
-        limite_disponible_base = max(0.0, saldo_base_paro - saldo_base_previo)
+        
+        if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
+            idx_previo = max(0, min(m_disp - 2, len(df_original) - 1))
+            saldo_base_previo = 0.0 if m_disp <= 19 else df_original.iloc[idx_previo].get("Saldo Disponible", 0.0)
+            limite_disponible_base = max(0.0, saldo_base_paro - saldo_base_previo)
+        else:
+            # Opción 2: Ignorar ventana de tiempo, el límite es todo lo acumulado hasta la suspensión
+            limite_disponible_base = saldo_base_paro
 
     # Fondo fantasma para llevar la cuenta de los retiros y sus intereses perdidos
     fondo_retirado_fantasma = 0.0
@@ -391,8 +395,8 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                     saldo_disponible_m = 0.0
                     fondo_retirado_fantasma += retiro_m
             else:
-                # Retiro de cantidad específica de UNA SOLA VEZ en el mes seleccionado
-                if m == mes_disposicion:
+                # Retiro de cantidad específica de UNA SOLA VEZ en el mes de la suspensión
+                if m == mes_paro_total:
                     if monto_retiro_mensual > limite_disponible_base or monto_retiro_mensual > saldo_disponible_m:
                         # No hay suficiente → marcar, no retirar
                         saldo_insuficiente_m = True
@@ -420,6 +424,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         })
         saldo_anterior = saldo_final_m
         saldo_anterior_pantalla = saldo_final_m_pantalla
+
+    if activar_disposicion and tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado" and int(st.session_state.get("interes_mes_disposicion", 19)) == 19:
+        total_cantidad_retirada = limite_disponible_base
 
     df_paro = pd.DataFrame(datos_paro)
 
