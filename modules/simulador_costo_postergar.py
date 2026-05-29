@@ -618,18 +618,18 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Post retención': 'last'
             }).reset_index()
             df_espera.rename(columns={
-                'Semestre': 'Periodo',
+                'Semestre': 'Mes',
                 'Aportación': 'Aportación Mensual'
             }, inplace=True)
         else:
             # Mensual
             df_espera = df_costos_real.copy()
             df_espera.rename(columns={
-                'Mes Global': 'Periodo',
+                'Mes Global': 'Mes',
                 'Aportación': 'Aportación Mensual'
             }, inplace=True)
             # Seleccionar únicamente las columnas como en plan de acumulacion + Mes
-            columnas_mensuales = ['Año', 'Periodo', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
+            columnas_mensuales = ['Año', 'Mes', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
             # Asegurar que todas existan
             columnas_mensuales = [c for c in columnas_mensuales if c in df_espera.columns]
             df_espera = df_espera[columnas_mensuales]

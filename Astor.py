@@ -2382,8 +2382,12 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
         # --- TABLA BONITA CON BARRAS DE PROGRESO ---
         # --- TABLA HTML PERSONALIZADA ---
         # Convertimos a HTML para tener control TOTAL del estilo y evitar el fondo blanco de Streamlit
+        df_for_html = seleccion["df_display"][cols_to_show].copy()
+        if eje_x_data_col in df_for_html.columns:
+            df_for_html.rename(columns={eje_x_data_col: "Mes"}, inplace=True)
+            
         html_table = (
-            seleccion["df_display"][cols_to_show].style
+            df_for_html.style
             .format({
                 "Aportación Mensual": "${:,.0f}",
                 "Saldo de Fondo": "${:,.0f}", 

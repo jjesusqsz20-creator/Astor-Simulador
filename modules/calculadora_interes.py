@@ -550,10 +550,12 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             }).reset_index()
             
             df_display = df_paro_grouped.copy()
-            cols_show = ["No. de Año del Plan", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
+            df_display.rename(columns={"No. de Mes del Plan": "Mes", "No. de Año del Plan": "Año"}, inplace=True)
+            cols_show = ["Año", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
         else:
             df_display = df_paro.copy()
-            cols_show = ["No. de Año del Plan", "No. de Mes del Plan", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
+            df_display.rename(columns={"No. de Mes del Plan": "Mes", "No. de Año del Plan": "Año"}, inplace=True)
+            cols_show = ["Año", "Mes", "Edad", "Aportación Mensual", "Saldo Disponible", "Saldo de Fondo"]
 
         # Reemplazar Saldo Disponible con "SALDO INSUFICIENTE" si la bandera está activa
         df_display["Saldo Disponible"] = df_display.apply(
@@ -572,8 +574,8 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         
         # Resaltar el mes de suspensión, el mes de disposición y las filas con saldo insuficiente
         def highlight_row(row):
-            ano = row["No. de Año del Plan"]
-            mes = row.get("No. de Mes del Plan", 0)
+            ano = row.get("Año", 0)
+            mes = row.get("Mes", 0)
             saldo_disp = row["Saldo Disponible"]
             
             style_green = 'background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold !important;'
