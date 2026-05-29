@@ -1709,8 +1709,32 @@ if st.session_state.modulo_activo == "Form_Postergar":
             m_val = st.selectbox("Mes", m_names, index=8, key="form_birth_month")
         with col_a:
             y_val = st.selectbox("Año", list(range(1940, date.today().year + 1)), index=list(range(1940, date.today().year + 1)).index(1987), key="form_birth_year")
+        m_idx = m_names.index(m_val) + 1
+        try:
+            birth_date_form = date(int(y_val), int(m_idx), int(d_val))
+        except Exception:
+            birth_date_form = date(int(y_val), int(m_idx), 1)
+        today = date.today()
+        edad_form = today.year - birth_date_form.year - ((today.month, today.day) < (birth_date_form.month, birth_date_form.day))
+        
+        if edad_form <= 35:
+            default_retiro_val = 60
+        elif 36 <= edad_form <= 45:
+            default_retiro_val = edad_form + 25
+        else:
+            default_retiro_val = 70
             
-        retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", [50, 55, 60, 65, 70], index=2, key="form_retiro_age")
+        opciones_retiro_form = [50, 55, 60, 65, 70]
+        if default_retiro_val not in opciones_retiro_form:
+            opciones_retiro_form.append(default_retiro_val)
+        opciones_retiro_form.sort()
+        
+        # Filtramos para que no muestre edades de retiro menores a la edad actual
+        opciones_retiro_form = [o for o in opciones_retiro_form if o > edad_form]
+        
+        default_retiro_idx = opciones_retiro_form.index(default_retiro_val) if default_retiro_val in opciones_retiro_form else 0
+            
+        retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", opciones_retiro_form, index=default_retiro_idx, key="form_retiro_age")
         
         st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
         if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
