@@ -1734,6 +1734,13 @@ if st.session_state.modulo_activo == "Form_Postergar":
         
         default_retiro_idx = opciones_retiro_form.index(default_retiro_val) if default_retiro_val in opciones_retiro_form else 0
             
+        if "last_edad_form" not in st.session_state:
+            st.session_state["last_edad_form"] = edad_form
+            
+        if st.session_state["last_edad_form"] != edad_form:
+            st.session_state["form_retiro_age"] = default_retiro_val
+            st.session_state["last_edad_form"] = edad_form
+            
         retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", opciones_retiro_form, index=default_retiro_idx, key="form_retiro_age")
         
         st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
