@@ -597,7 +597,6 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             df_espera = df_costos_real.groupby('Año').agg({
                 'Edad': 'last',
                 'Aportación': 'last',
-                'Aportación Acumulada': 'last',
                 'Saldo de Fondo': 'last',
                 'Saldo Disponible': 'last',
                 'Post retención': 'last'
@@ -612,7 +611,6 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Año': 'last',
                 'Edad': 'last',
                 'Aportación': 'last',
-                'Aportación Acumulada': 'last',
                 'Saldo de Fondo': 'last',
                 'Saldo Disponible': 'last',
                 'Post retención': 'last'
@@ -629,7 +627,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
                 'Aportación': 'Aportación Mensual'
             }, inplace=True)
             # Seleccionar únicamente las columnas como en plan de acumulacion + Mes
-            columnas_mensuales = ['Año', 'Mes', 'Edad', 'Aportación Mensual', 'Aportación Acumulada', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
+            columnas_mensuales = ['Año', 'Mes', 'Edad', 'Aportación Mensual', 'Saldo de Fondo', 'Saldo Disponible', 'Post retención']
             # Asegurar que todas existan
             columnas_mensuales = [c for c in columnas_mensuales if c in df_espera.columns]
             df_espera = df_espera[columnas_mensuales]
@@ -641,7 +639,6 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             
             format_dict = {
                 col_aporte: "${:,.0f}",
-                "Aportación Acumulada": "${:,.0f}",
                 "Saldo de Fondo": "${:,.0f}",
                 "Saldo Disponible": "${:,.0f}",
                 "Post retención": "${:,.0f}",
