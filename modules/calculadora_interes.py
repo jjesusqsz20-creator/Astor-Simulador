@@ -430,10 +430,9 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
     df_paro = pd.DataFrame(datos_paro)
 
-
-
-    saldo_al_suspender = df_paro.iloc[mes_paro_total - 1]["Saldo de Fondo"]
-    final_con_paro = df_paro.iloc[-1]["Saldo de Fondo"]
+    # Valores matemáticos para el HUD
+    saldo_al_suspender_hud = max(0.0, df_paro.iloc[mes_paro_total - 1]["Saldo de Fondo"] - total_cantidad_retirada)
+    final_con_paro_hud = max(0.0, saldo_anterior)
 
     # --- HUD PRINCIPAL ---
     nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
@@ -444,7 +443,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     hubo_saldo_insuficiente = df_paro["Saldo Insuficiente Flag"].any()
     
     if activar_disposicion:
-        html_disposicion_boxes = f"""
+        if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
+            html_disposicion_boxes = f"""
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
+<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disponible_base:,.0f}</div>
+</div>
+"""
+        else:
+            limite_disp_restado = max(0.0, limite_disponible_base - total_cantidad_retirada)
+            html_disposicion_boxes = f"""
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
 <div style="color: #F87171; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F8717144;">${total_cantidad_retirada:,.0f}</div>
@@ -452,7 +460,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
-<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disponible_base:,.0f}</div>
+<div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disp_restado:,.0f}</div>
 </div>
 """
 
@@ -474,12 +482,12 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
 </div>
 <div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
-<div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${saldo_al_suspender:,.0f}</div>
+<div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${saldo_al_suspender_hud:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
 <div style="flex: 1; min-width: 200px; max-width: 250px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de Libertad</p>
-<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
+<div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${final_con_paro_hud:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {edad_retiro})</div>
 </div>
 {html_disposicion_boxes}
