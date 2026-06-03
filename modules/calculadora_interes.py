@@ -82,25 +82,28 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
             if "last_edad_interes" not in st.session_state:
                 st.session_state["last_edad_interes"] = edad_inicial_int
                 
-            if "interes_edad_retiro" not in st.session_state or st.session_state["last_edad_interes"] != edad_inicial_int:
-                st.session_state["interes_edad_retiro"] = int(desired_default)
+            if "persist_edad_retiro" not in st.session_state or st.session_state["last_edad_interes"] != edad_inicial_int:
+                st.session_state["persist_edad_retiro"] = int(desired_default)
                 st.session_state["last_edad_interes"] = edad_inicial_int
 
         # --- CUADRO: PARÁMETROS GLOBALES (Rendimiento + Simulación de Suspensión) ---
         with st.expander("⚙️ Parámetros Globales", expanded=True):
             st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 0px;'>Edad de Retiro</p>", unsafe_allow_html=True)
-            edad_retiro = st.number_input('¿A qué edad quieres dejar de trabajar?', min_value=edad_inicial_int + 1, max_value=100, step=1, key="interes_edad_retiro", label_visibility="collapsed")
+            min_retiro_permitido = min(edad_inicial_int + 1, int(desired_default))
+            val_retiro_def = st.session_state.get("persist_edad_retiro", int(desired_default))
+            edad_retiro = st.number_input('¿A qué edad quieres dejar de trabajar?', min_value=min_retiro_permitido, max_value=100, value=int(val_retiro_def), step=1, key="interes_edad_retiro", label_visibility="collapsed")
+            st.session_state["persist_edad_retiro"] = edad_retiro
             
             st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 10px;'>Rendimiento Anual</p>", unsafe_allow_html=True)
             rendimiento_anual = st.number_input(
                 'Rendimiento Anual Estimado (%)', 
                 min_value=1.0, 
-                value=float(st.session_state.get("costos_rendimiento_anual", 10.0)), 
+                value=float(st.session_state.get("persist_rend_postergar", 10.0)), 
                 step=0.5,
                 key="costos_rendimiento_anual_interes",
                 help="Modifica este valor para simular diferentes tasas de rendimiento anual."
             )
-            st.session_state.costos_rendimiento_anual = rendimiento_anual
+            st.session_state.persist_rend_postergar = rendimiento_anual
             
             st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 10px;'>Simulación de Suspensión</p>", unsafe_allow_html=True)
             
@@ -289,35 +292,45 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         st.rerun()
 
     # --- Aportación Mensual (para el HUD) ---
-    aporte_sync = st.session_state.get("aporte_m_metric", None)
-    if aporte_sync is not None:
-        aporte_display = float(aporte_sync)
-    else:
-        renta_fallback = st.session_state.get("renta_costos_sync", 50000.0)
-        aporte_display = renta_fallback / 10.0
-
-    # --- CALCULAR O RECUPERAR ESCENARIO BASE ---
-    renta_def = st.session_state.get("renta_costos_sync", 50000.0)
-    meta_retiro = (renta_def * 12) / 0.10
-    rendimiento_anual = st.session_state.get("costos_rendimiento_anual", 10.0)
-    inflacion_activa = (st.session_state.get('inf_toggle_postergar', 'Activada') == 'Activada')
-    tasa_inf_input = st.session_state.get('inf_val_postergar', 4.0)
+    # Calculamos localmente para asegurar total consistencia matemática con Costo de Postergar
+    renta_mensual_sidebar = st.session_state.get("renta_costos_sync", 50000.0)
+    rendimiento_anual = st.session_state.get("persist_rend_postergar", 10.0)
+    inflacion_activa = (st.session_state.get('persist_inf_op_postergar', 'Activada') == 'Activada')
+    tasa_inf_input = st.session_state.get('persist_tasa_inf_postergar', 4.0)
+    
+    blindar_adquisitivo = st.session_state.get('persist_blindar_postergar', False)
+    tasa_inf_blindaje = st.session_state.get('persist_tasa_blindaje_postergar', 4.0)
+    patrimonio_actual = st.session_state.get('patrimonio_persist', 0.0)
+    
     edad_inicial_int = int(edad_inicial)
-    edad_retiro = st.session_state.get("interes_edad_retiro", 65)
-        
+    # edad_retiro ya fue obtenido del input en la barra lateral
     plazo_anos = max(1, edad_retiro - edad_inicial_int)
+    r_anual_dec = rendimiento_anual / 100.0
 
-    if "df_costos_postergar" in st.session_state:
-        df_original = st.session_state.df_costos_postergar
+    # Lógica de Blindaje de Poder Adquisitivo: VF = VP * (1 + pi)^n
+    if blindar_adquisitivo:
+        tasa_blindaje = (tasa_inf_blindaje / 100.0)
+        renta_mensual_calculada = renta_mensual_sidebar * ((1 + tasa_blindaje) ** plazo_anos)
     else:
-        aporte_m = encontrar_aporte_necesario(
-            meta_retiro, edad_inicial_int, plazo_anos,
-            rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
-        )
-        df_original, _ = calcular_escenario(
-            aporte_m, edad_inicial_int, rendimiento_anual,
-            inflacion_activa, tasa_inf_input, 0.0, plazo_anos=plazo_anos
-        )
+        renta_mensual_calculada = renta_mensual_sidebar
+        
+    meta_retiro = (renta_mensual_calculada * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
+    fv_patrimonio = patrimonio_actual * ((1 + r_anual_dec) ** plazo_anos)
+    meta_neta = max(0.0, meta_retiro - fv_patrimonio)
+
+    aporte_m = encontrar_aporte_necesario(
+        meta_neta, edad_inicial_int, plazo_anos,
+        rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
+    )
+    
+    aporte_display = aporte_m
+
+    # SIEMPRE calculamos el escenario nativamente aquí para evitar datos desactualizados de otras pestañas
+    df_original, _ = calcular_escenario(
+        aporte_m, edad_inicial_int, rendimiento_anual,
+        inflacion_activa, tasa_inf_input, 0.0, plazo_anos=plazo_anos,
+        extras=st.session_state.get('aportaciones_extra', [])
+    )
 
     if mes_paro_total > len(df_original):
         mes_paro_total = len(df_original)
@@ -351,7 +364,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     total_cantidad_retirada = 0.0
     saldo_anterior_pantalla = 0.0
 
-    for m in range(1, 301):
+    for m in range(1, len(df_original) + 1):
         idx_t = min(m - 1, len(df_original) - 1)
         fila_original = df_original.iloc[idx_t]
         edad_m = fila_original["Edad"]
@@ -460,7 +473,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     if activar_disposicion:
         if tipo_disposicion == "Disponer todo el capital a partir del mes seleccionado":
             html_disposicion_boxes = f"""
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
 <div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disponible_base:,.0f}</div>
 </div>
@@ -468,12 +481,12 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         else:
             limite_disp_restado = max(0.0, limite_disponible_base - total_cantidad_retirada)
             html_disposicion_boxes = f"""
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #F87171; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #F87171; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Retirada</p>
 <div style="color: #F87171; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F8717144;">${total_cantidad_retirada:,.0f}</div>
 </div>
 
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #60A5FA; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #60A5FA; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Cantidad Disponible a Retirar</p>
 <div style="color: #60A5FA; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #60A5FA44;">${limite_disp_restado:,.0f}</div>
 </div>
@@ -491,16 +504,16 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     Punto de Suspensión: <span style="color: {GOLD_COLOR}; font-size: 1.2rem;">{f"Año {año_paro}" if frecuencia_sel == "Por año" else f"Año {año_paro}, Mes {mes_paro}"}</span> (Mes {mes_paro_total})
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
 <div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_display:,.0f}</div>
 </div>
-<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 280px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Saldo del fondo</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${saldo_al_suspender_hud:,.0f}</div>
 <div style="color: #34D399; font-weight: bold; font-size: 0.95rem; opacity: 0.8; text-transform: uppercase;">Mes {txt_mes_plan} | Año {txt_ano_plan}</div>
 </div>
-<div style="flex: 1; min-width: 200px; max-width: 250px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 200px; max-width: 250px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de Libertad</p>
 <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${final_con_paro_hud:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">100% DE DISCIPLINA (EDAD {edad_retiro})</div>
@@ -639,7 +652,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     }}
     .tabla-espera th {{
         background-color: {ACCENT_COLOR}22 !important;
-        color: {GOLD_COLOR} !important;
+        color: {ACCENT_COLOR} !important;
         font-weight: bold;
         padding: 12px;
         border-bottom: 2px solid {BORDER_COLOR};

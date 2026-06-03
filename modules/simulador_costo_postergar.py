@@ -156,11 +156,14 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             if "last_edad_costos" not in st.session_state:
                 st.session_state["last_edad_costos"] = edad_inicial
                 
-            if "costos_edad_retiro" not in st.session_state or st.session_state["last_edad_costos"] != edad_inicial:
-                st.session_state["costos_edad_retiro"] = int(desired_default)
+            if "persist_edad_retiro" not in st.session_state or st.session_state["last_edad_costos"] != edad_inicial:
+                st.session_state["persist_edad_retiro"] = int(desired_default)
                 st.session_state["last_edad_costos"] = edad_inicial
                 
-            edad_retiro = st.number_input('Edad a la que te quieres retirar', min_value=int(edad_inicial) + 1, max_value=100, step=1, key="costos_edad_retiro")
+            min_retiro_permitido = min(int(edad_inicial) + 1, int(desired_default))
+            val_retiro_def = st.session_state.get("persist_edad_retiro", int(desired_default))
+            edad_retiro = st.number_input('Edad a la que te quieres retirar', min_value=min_retiro_permitido, max_value=100, value=int(val_retiro_def), step=1, key="costos_edad_retiro")
+            st.session_state["persist_edad_retiro"] = edad_retiro
             
             rend_def = st.session_state.get('persist_rend_postergar', 10.0)
             rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=float(rend_def), step=0.5)
@@ -262,6 +265,26 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 
     # --- DASHBOARD UNIFICADO (CABECERA + MÉTRICAS + TABLA COSTE ESPERA) ---
     # Los cálculos de años_inversion, aporte_m, etc., ya están arriba
+    
+    # Cálculos de Proyecto 5%
+    mostrar_proyecto_5 = edad_inicial > 24
+    if mostrar_proyecto_5:
+        plazo_y_24 = edad_retiro - 24
+        aporte_24 = encontrar_aporte_necesario_original(
+            meta_retiro, 24, plazo_y_24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
+        )
+        df_24, _ = calcular_escenario(
+            aporte_24, 24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr_retencion=0.0, plazo_anos=plazo_y_24
+        )
+        # Buscar el Saldo de Fondo en el año correspondiente a edad_inicial
+        fila_actual = df_24[df_24['Edad'] == edad_inicial]
+        if not fila_actual.empty:
+            patrimonio_actual_necesario = fila_actual['Saldo de Fondo'].iloc[0]
+        else:
+            patrimonio_actual_necesario = 0.0
+    else:
+        aporte_24 = 0.0
+        patrimonio_actual_necesario = 0.0
     
     # Definiciones para compatibilidad con Proyecto 5%
     rendimiento_retiro = rendimiento_anual 
@@ -519,30 +542,52 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     Proyección para el cliente: <b>{nombre_cliente.title()}</b>
 </div>
 <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #34D399; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #34D399; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">{"Monto Mensual Blindado" if blindar_adquisitivo else "Monto Mensual"}</p>
 <div style="color: #34D399; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #34D39944;">${renta_mensual_calculada:,.0f}</div>
 <div style="color: #34D399; font-size: 0.95rem; opacity: 1.0; margin-top: 8px; font-weight: bold; text-transform: uppercase;">{f"Equivalente a ${renta_mensual_sidebar:,.0f} de hoy (con inflación al {tasa_inf_blindaje:.1f}%)" if blindar_adquisitivo else "Esta cantidad equivale al poder adquisitivo actual"}</div>
 </div>
-<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {GOLD_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {GOLD_COLOR}; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Fondo de Libertad ({edad_retiro} años)</p>
 <div style="color: {GOLD_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {GOLD_COLOR}44;">${meta_retiro:,.0f}</div>
 <div style="color: {GOLD_COLOR}; font-weight: bold; font-size: 0.85rem; opacity: 0.85; text-transform: uppercase;">${meta_retiro:,.0f} x {rendimiento_anual:.1f}% = ${rendimiento_anual_monto:,.0f} ANUAL</div>
 </div>
-<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid {ACCENT_COLOR}; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid {ACCENT_COLOR}; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Aportación Mensual</p>
 <div style="color: {ACCENT_COLOR}; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px {ACCENT_COLOR}44;">${aporte_m_metric:,.0f}</div>
 <div style="color: {ACCENT_COLOR}; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">PARA LOGRAR LA META</div>
 </div>
-<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; border-top: 5px solid #A855F7; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+<div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #A855F7; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
 <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">🎁 Bono de bienvenida (Hoy)</p>
 <div style="color: #A855F7; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #A855F744;">${bono_monto:,.0f}</div>
 <div style="color: #A855F7; font-weight: bold; font-size: 0.9rem; opacity: 0.8;">{bono_pct*100:.0f}% DE BONO ACREDITADO</div>
-<div style="color: #A855F7; font-size: 0.7rem; opacity: 0.8; margin-top: 5px; font-weight: bold; text-transform: uppercase;">+${bono_mensual_ano1:,.0f} al mes en el Año 1</div>
+<div style="color: #A855F7; font-size: 0.9rem; opacity: 0.8; margin-top: 5px; font-weight: bold; text-transform: uppercase;">+${bono_mensual_ano1:,.0f} al mes en el Año 1</div>
 </div>
 </div>
 
-<div style="width: 100%; background: {CARD_BG}; border: 1px solid {ACCENT_COLOR}33; border-top: 5px solid {ACCENT_COLOR}; border-radius: 12px; padding: 30px; margin-bottom: 45px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; position: relative; overflow: hidden;">
+{f'''
+<div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #14B8A6; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Si hubieras conocido proyecto 5% a los 24 años </p>
+        <div style="color: #14B8A6; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #14B8A644;">${aporte_24:,.0f}</div>
+        <div style="color: #14B8A6; font-weight: bold; font-size: 0.85rem; opacity: 0.8; text-transform: uppercase;">APORTACIÓN MENSUAL </div>
+    </div>
+    <div style="flex: 1; min-width: 250px; max-width: 400px; background-color: {CARD_BG}; border: 1px solid #F59E0B; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Patrimonio actual necesario a la edad de {edad_inicial}</p>
+        <div style="color: #F59E0B; font-size: 2.3rem; font-weight: bold; margin: 5px 0; text-shadow: 0 0 10px #F59E0B44;">${patrimonio_actual_necesario:,.0f}</div>
+        <div style="color: #F59E0B; font-weight: bold; font-size: 0.85rem; opacity: 0.8; text-transform: uppercase;">FONDO QUE DEBERÍAS TENER HOY</div>
+    </div>
+</div>
+''' if mostrar_proyecto_5 else f'''
+<div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 520px; max-width: 820px; background-color: {CARD_BG}; border: 1px solid #14B8A6; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 190px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+        <p style="color: {TEXT_COLOR}; font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">El mejor momento es AHORA</p>
+        <div style="color: {TEXT_COLOR}; font-size: 1.6rem; font-weight: bold; margin: 15px 0; line-height: 1.4; font-family: 'Montserrat', sans-serif;">La libertad financiera tiene precio, y hoy <span style="color: #22d3ee; text-shadow: 0 0 10px #22d3ee88;">por tu edad</span> la tienes con el mayor descuento de tu vida. ¡Aprovéchala ya!</div>
+    </div>
+</div>
+'''}
+
+<div style="width: 100%; background: {CARD_BG}; border: 1px solid {ACCENT_COLOR}33; border-radius: 12px; padding: 30px; margin-bottom: 45px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; position: relative; overflow: hidden;">
     <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, {ACCENT_COLOR}15, transparent); pointer-events: none;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif;">
         Para garantizar un retiro mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${renta_mensual_calculada:,.0f}</span>, 
@@ -551,7 +596,8 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     </p>
     <div style="height: 1px; background: linear-gradient(90deg, transparent, {ACCENT_COLOR}44, transparent); margin: 25px auto; width: 70%;"></div>
     <p style="color: {TEXT_COLOR}; font-size: 1.35rem; line-height: 1.6; margin: 0; font-family: 'Montserrat', sans-serif; opacity: 0.95;">
-        Por lo tanto, considerando que actualmente tienes <span style="color: #34D399; font-weight: 800;">{edad_inicial} años</span>, 
+        Por lo tanto, considerando que actualmente tienes <span style="color: #34D399; font-weight: 800;">{edad_inicial} años</span> 
+        y en el año <span style="color: #34D399; font-weight: 800;">{fecha_nac_s.year + edad_retiro}</span> vas a cumplir <span style="color: #34D399; font-weight: 800;">{edad_retiro} años</span>, 
         el plan de acción requiere una aportación mensual de <span style="color: {GOLD_COLOR}; font-weight: 800;">${aporte_m_metric:,.2f}</span>.
     </p>
 </div>
@@ -655,12 +701,35 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     .tabla-espera table {{
         width: 100% !important;
         margin: 0 auto !important;
+        border-collapse: collapse;
+        color: {TEXT_COLOR};
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.92rem;
     }}
     .tabla-espera th {{
+        background-color: {ACCENT_COLOR}22 !important;
+        color: {ACCENT_COLOR} !important;
+        font-weight: bold;
+        padding: 12px;
+        border-bottom: 2px solid {BORDER_COLOR};
+        text-transform: uppercase;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        text-align: center !important;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }}
+    .tabla-espera td {{
+        padding: 10px;
+        border-bottom: 1px solid {BORDER_COLOR};
         text-align: center !important;
     }}
+    .tabla-espera tr:hover {{
+        background-color: rgba(255,255,255,0.03);
+    }}
 </style>
-<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table}
 </div>
 """, unsafe_allow_html=True)
@@ -779,12 +848,36 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 <style>
     .tabla-espera table {{
         width: 100% !important;
+        margin: 0 auto !important;
+        border-collapse: collapse;
+        color: {TEXT_COLOR};
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.92rem;
     }}
-    .tabla-espera th, .tabla-espera td {{
+    .tabla-espera th {{
+        background-color: {ACCENT_COLOR}22 !important;
+        color: {ACCENT_COLOR} !important;
+        font-weight: bold;
+        padding: 12px;
+        border-bottom: 2px solid {BORDER_COLOR};
+        text-transform: uppercase;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        text-align: center !important;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }}
+    .tabla-espera td {{
+        padding: 10px;
+        border-bottom: 1px solid {BORDER_COLOR};
         text-align: center !important;
     }}
+    .tabla-espera tr:hover {{
+        background-color: rgba(255,255,255,0.03);
+    }}
 </style>
-<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+<div class="tabla-espera" style="height: 400px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table_ret}
 </div>
 """, unsafe_allow_html=True)

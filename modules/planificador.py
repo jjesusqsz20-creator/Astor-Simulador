@@ -602,7 +602,7 @@ def render_planificador():
 
     /* Columna 1: Azul */
     [data-testid="column"]:nth-of-type(1) [data-testid="stVerticalBlockBorderWrapper"] {
-        border-top: 5px solid #3B82F6 !important;
+        border-radius: 12px !important;
         border-radius: 16px !important;
         padding: 20px !important;
         margin-bottom: 20px !important;
@@ -610,7 +610,7 @@ def render_planificador():
 
     /* Columna 3 (Sugerencia): Verde */
     [data-testid="column"]:nth-of-type(3) [data-testid="stVerticalBlockBorderWrapper"] {
-        border-top: 5px solid #34D399 !important;
+        border-radius: 12px !important;
         border-radius: 16px !important;
         padding: 20px !important;
         margin-bottom: 20px !important;
@@ -618,7 +618,7 @@ def render_planificador():
 
     /* Columna 5 (Comparativa): Púrpura */
     [data-testid="column"]:nth-of-type(5) [data-testid="stVerticalBlockBorderWrapper"] {
-        border-top: 5px solid #8B5CF6 !important;
+        border-radius: 12px !important;
         border-radius: 16px !important;
         padding: 20px !important;
         margin-bottom: 20px !important;

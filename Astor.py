@@ -1176,16 +1176,15 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         # Se libera todo si cumple AL MENOS UNA de estas reglas:
         # - Tiene 25 años en el plan
         # - Llega a la edad tope de 70 años
-        # - Llega a 60 años de edad Y tiene al menos 5 años con el plan
-        if anio_actual >= 25 or edad_actual >= 70 or (edad_actual >= 60 and anio_actual >= 5):
+        if anio_actual >= 25 or edad_actual >= 70:
             saldo_disponible = saldo_total
         else:
             saldo_disponible = saldo_regular
         
         # 2. Impuestos (ISR):
-        # - Antes de los 65: Se aplica retención sobre lo disponible.
-        # - A los 65 o más: Exento de impuestos.
-        if edad_actual >= 60:
+        # - Antes de cumplir con los requisitos (60 años + 5 de plan, o llegar a 70): Se aplica retención.
+        # - Al cumplirlos: Exento de impuestos.
+        if (edad_actual >= 60 and anio_actual >= 5) or edad_actual >= 70:
             saldo_neto_disponible = saldo_disponible
         else:
             saldo_neto_disponible = saldo_disponible * (1 - (isr_retencion/100))
@@ -1201,7 +1200,7 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         # Año 20+: 8.18%
         
         tasa_retencion_allianz = 0.0
-        if edad_actual >= 60:
+        if (edad_actual >= 60 and anio_actual >= 5) or edad_actual >= 70:
             tasa_retencion_allianz = 0.0
         elif anio_actual == 1: tasa_retencion_allianz = 0.00
         elif anio_actual == 2: tasa_retencion_allianz = 0.0043
@@ -1236,21 +1235,19 @@ def encontrar_aporte_necesario(meta_objetivo, edad_ini, plazo_y, tasa_anual, inf
     """
     Encuentra la aportación mensual necesaria para alcanzar una meta usando el motor de Allianz.
     """
-    # Punto de partida: fórmula básica de anualidad (como piso)
+    low = 1.0 # Empezamos desde un aporte inicial mínimo ($1)
+    
     r_m = (tasa_anual / 100) / 12
     if r_m > 0:
-        low = (meta_objetivo * r_m) / (((1 + r_m) ** (plazo_y * 12)) - 1)
+        base = (meta_objetivo * r_m) / (((1 + r_m) ** (plazo_y * 12)) - 1)
     else:
-        low = meta_objetivo / (plazo_y * 12)
+        base = meta_objetivo / (plazo_y * 12)
         
-    # Ampliamos el rango para la búsqueda (considerando comisiones)
-    high = low * 4.0 
+    high = base * 10.0 # Techo alto para la búsqueda binaria
     
-    # Búsqueda binaria por 25 iteraciones para máxima precisión
-    for _ in range(25):
+    # Búsqueda binaria por 40 iteraciones para máxima precisión y rango amplio
+    for _ in range(40):
         mid = (low + high) / 2
-        # Simulamos con el motor real
-        # IMPORTANTE: Pasamos isr_retencion como argumento posicional o keyword correcto
         df_temp, _ = calcular_escenario(mid, edad_ini, tasa_anual, infl_activa, tasa_infl, isr_retencion=isr, plazo_anos=plazo_y)
         final_val = df_temp['Saldo de Fondo'].iloc[-1]
         
@@ -1739,7 +1736,8 @@ if st.session_state.modulo_activo == "Form_Postergar":
             st.session_state["form_retiro_age"] = int(default_retiro_val)
             st.session_state["last_edad_form"] = edad_form
             
-        retiro_val = st.number_input("¿A qué edad quieres dejar de trabajar?", min_value=int(edad_form) + 1, max_value=100, step=1, key="form_retiro_age")
+        min_retiro_permitido = min(int(edad_form) + 1, int(default_retiro_val))
+        retiro_val = st.number_input("¿A qué edad quieres dejar de trabajar?", min_value=min_retiro_permitido, max_value=100, step=1, key="form_retiro_age")
         
         st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
         if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):
@@ -2404,12 +2402,35 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     .tabla-espera table {{
         width: 100% !important;
         margin: 0 auto !important;
+        border-collapse: collapse;
+        color: {TEXT_COLOR};
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.92rem;
     }}
     .tabla-espera th {{
+        background-color: {ACCENT_COLOR}22 !important;
+        color: {ACCENT_COLOR} !important;
+        font-weight: bold;
+        padding: 12px;
+        border-bottom: 2px solid {BORDER_COLOR};
+        text-transform: uppercase;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        text-align: center !important;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }}
+    .tabla-espera td {{
+        padding: 10px;
+        border-bottom: 1px solid {BORDER_COLOR};
         text-align: center !important;
     }}
+    .tabla-espera tr:hover {{
+        background-color: rgba(255,255,255,0.03);
+    }}
 </style>
-<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table}
 </div>
 """, unsafe_allow_html=True)
@@ -2450,12 +2471,35 @@ if st.session_state.modulo_activo == "📊 Plan de Acumulación":
     .tabla-espera table {{
         width: 100% !important;
         margin: 0 auto !important;
+        border-collapse: collapse;
+        color: {TEXT_COLOR};
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.92rem;
     }}
     .tabla-espera th {{
+        background-color: {ACCENT_COLOR}22 !important;
+        color: {ACCENT_COLOR} !important;
+        font-weight: bold;
+        padding: 12px;
+        border-bottom: 2px solid {BORDER_COLOR};
+        text-transform: uppercase;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        text-align: center !important;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }}
+    .tabla-espera td {{
+        padding: 10px;
+        border-bottom: 1px solid {BORDER_COLOR};
         text-align: center !important;
     }}
+    .tabla-espera tr:hover {{
+        background-color: rgba(255,255,255,0.03);
+    }}
 </style>
-<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG};">
+<div class="tabla-espera" style="height: 600px; overflow-y: auto; border: 1px solid {BORDER_COLOR}; border-radius: 10px; background-color: {CARD_BG}; padding: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
 {html_table_65}
 </div>
 """, unsafe_allow_html=True)
