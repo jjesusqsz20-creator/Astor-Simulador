@@ -69,9 +69,29 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
                 
             edad_inicial = today.year - fecha_nac_s.year - ((today.month, today.day) < (fecha_nac_s.month, fecha_nac_s.day))
             st.markdown(f"<p style='margin-top: -15px; margin-bottom: 10px; font-size: 0.85rem; opacity: 0.8; font-weight: 600; color: {ACCENT_COLOR if is_dark else '#555'};'>EDAD DETECTADA: {edad_inicial} AÑOS</p>", unsafe_allow_html=True)
+            
+            # Edad de Retiro auto-calculada pero modificable libremente
+            edad_inicial_int = int(edad_inicial)
+            if edad_inicial_int <= 35:
+                desired_default = 60
+            elif 36 <= edad_inicial_int <= 45:
+                desired_default = edad_inicial_int + 25
+            else:
+                desired_default = 70
+                
+            if "last_edad_interes" not in st.session_state:
+                st.session_state["last_edad_interes"] = edad_inicial_int
+                
+            if "interes_edad_retiro" not in st.session_state or st.session_state["last_edad_interes"] != edad_inicial_int:
+                st.session_state["interes_edad_retiro"] = int(desired_default)
+                st.session_state["last_edad_interes"] = edad_inicial_int
 
         # --- CUADRO: PARÁMETROS GLOBALES (Rendimiento + Simulación de Suspensión) ---
         with st.expander("⚙️ Parámetros Globales", expanded=True):
+            st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 0px;'>Edad de Retiro</p>", unsafe_allow_html=True)
+            edad_retiro = st.number_input('¿A qué edad quieres dejar de trabajar?', min_value=edad_inicial_int + 1, max_value=100, step=1, key="interes_edad_retiro", label_visibility="collapsed")
+            
+            st.markdown(f"<p style='font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: {ACCENT_COLOR if is_dark else '#555'}; margin-top: 10px;'>Rendimiento Anual</p>", unsafe_allow_html=True)
             rendimiento_anual = st.number_input(
                 'Rendimiento Anual Estimado (%)', 
                 min_value=1.0, 
@@ -283,12 +303,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     inflacion_activa = (st.session_state.get('inf_toggle_postergar', 'Activada') == 'Activada')
     tasa_inf_input = st.session_state.get('inf_val_postergar', 4.0)
     edad_inicial_int = int(edad_inicial)
-    if edad_inicial_int <= 35:
-        edad_retiro = 60
-    elif 36 <= edad_inicial_int <= 45:
-        edad_retiro = edad_inicial_int + 25
-    else:
-        edad_retiro = 70
+    edad_retiro = st.session_state.get("interes_edad_retiro", 65)
         
     plazo_anos = max(1, edad_retiro - edad_inicial_int)
 

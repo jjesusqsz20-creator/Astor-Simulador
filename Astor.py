@@ -1172,10 +1172,12 @@ def calcular_escenario(monto_aporte, edad, tasa_anual, inflacion_activa, tasa_in
         
         # --- CÁLCULO DE SALDO DISPONIBLE Y NETO (REGLAS ACTUALIZADAS) ---
         
-        # 1. Disponibilidad:
-        # - Antes de los 65: Solo Saldo Regular (Saldo Inicial + Bono está bloqueado).
-        # - A los 65 o más: TODO es disponible (Inicial + Regular + Bono).
-        if edad_actual >= 65 or anio_actual >= 25:
+        # 1. Disponibilidad (100% libre, Saldo Disponible = Saldo Total):
+        # Se libera todo si cumple AL MENOS UNA de estas reglas:
+        # - Tiene 25 años en el plan
+        # - Llega a la edad tope de 70 años
+        # - Llega a 60 años de edad Y tiene al menos 5 años con el plan
+        if anio_actual >= 25 or edad_actual >= 70 or (edad_actual >= 60 and anio_actual >= 5):
             saldo_disponible = saldo_total
         else:
             saldo_disponible = saldo_regular
@@ -1730,18 +1732,14 @@ if st.session_state.modulo_activo == "Form_Postergar":
         opciones_retiro_form.sort()
         
         # Filtramos para que no muestre edades de retiro menores a la edad actual
-        opciones_retiro_form = [o for o in opciones_retiro_form if o > edad_form]
-        
-        default_retiro_idx = opciones_retiro_form.index(default_retiro_val) if default_retiro_val in opciones_retiro_form else 0
-            
         if "last_edad_form" not in st.session_state:
             st.session_state["last_edad_form"] = edad_form
             
-        if st.session_state["last_edad_form"] != edad_form:
-            st.session_state["form_retiro_age"] = default_retiro_val
+        if "form_retiro_age" not in st.session_state or st.session_state["last_edad_form"] != edad_form:
+            st.session_state["form_retiro_age"] = int(default_retiro_val)
             st.session_state["last_edad_form"] = edad_form
             
-        retiro_val = st.selectbox("¿A qué edad quieres dejar de trabajar?", opciones_retiro_form, index=default_retiro_idx, key="form_retiro_age")
+        retiro_val = st.number_input("¿A qué edad quieres dejar de trabajar?", min_value=int(edad_form) + 1, max_value=100, step=1, key="form_retiro_age")
         
         st.markdown('<div class="submit-btn-container">', unsafe_allow_html=True)
         if st.button("CALCULAR MI LIBERTAD →", key="btn_submit_form_libertad", use_container_width=True):

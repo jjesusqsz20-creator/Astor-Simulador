@@ -156,15 +156,11 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             if "last_edad_costos" not in st.session_state:
                 st.session_state["last_edad_costos"] = edad_inicial
                 
-            if st.session_state["last_edad_costos"] != edad_inicial:
-                st.session_state["costos_edad_retiro"] = desired_default
+            if "costos_edad_retiro" not in st.session_state or st.session_state["last_edad_costos"] != edad_inicial:
+                st.session_state["costos_edad_retiro"] = int(desired_default)
                 st.session_state["last_edad_costos"] = edad_inicial
                 
-            e_retiro_state = st.session_state.get('costos_edad_retiro', desired_default)
-            if e_retiro_state not in opciones_retiro:
-                e_retiro_state = desired_default if desired_default in opciones_retiro else opciones_retiro[0]
-            idx_retiro = opciones_retiro.index(e_retiro_state) if e_retiro_state in opciones_retiro else 0
-            edad_retiro = st.selectbox('Edad a la que te quieres retirar', opciones_retiro, index=idx_retiro, key="costos_edad_retiro")
+            edad_retiro = st.number_input('Edad a la que te quieres retirar', min_value=int(edad_inicial) + 1, max_value=100, step=1, key="costos_edad_retiro")
             
             rend_def = st.session_state.get('persist_rend_postergar', 10.0)
             rendimiento_anual = st.number_input('Rendimiento Anual Estimado (%)', min_value=1.0, value=float(rend_def), step=0.5)
