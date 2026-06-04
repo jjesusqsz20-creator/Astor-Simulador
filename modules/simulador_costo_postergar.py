@@ -270,14 +270,24 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     mostrar_proyecto_5 = edad_inicial > 24
     if mostrar_proyecto_5:
         plazo_y_24 = edad_retiro - 24
-        aporte_24 = encontrar_aporte_necesario_original(
+        aporte_24 = encontrar_aporte_necesario(
             meta_retiro, 24, plazo_y_24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
         )
         df_24, _ = calcular_escenario(
             aporte_24, 24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr_retencion=0.0, plazo_anos=plazo_y_24
         )
-        # Buscar el Saldo de Fondo en el año correspondiente a edad_inicial
-        fila_actual = df_24[df_24['Edad'] == edad_inicial]
+        
+        # Calcular con precisión el número de meses transcurridos desde que cumplió 24 años hasta hoy
+        # tomando en cuenta el día, el mes y el año de nacimiento del cliente
+        meses_desde_24 = (today.year - (fecha_nac_s.year + 24)) * 12 + (today.month - fecha_nac_s.month)
+        if today.day >= fecha_nac_s.day:
+            meses_desde_24 += 1
+            
+        # Limitar los meses transcurridos al rango válido de la simulación
+        meses_desde_24 = max(1, min(meses_desde_24, len(df_24)))
+        
+        # Buscar el Saldo de Fondo en el mes transcurrido exacto
+        fila_actual = df_24[df_24['Mes Global'] == meses_desde_24]
         if not fila_actual.empty:
             patrimonio_actual_necesario = fila_actual['Saldo de Fondo'].iloc[0]
         else:
