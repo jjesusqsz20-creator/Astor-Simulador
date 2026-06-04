@@ -270,8 +270,17 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
     mostrar_proyecto_5 = edad_inicial > 24
     if mostrar_proyecto_5:
         plazo_y_24 = edad_retiro - 24
+        
+        # Recalcular la meta para 24 años
+        if blindar_adquisitivo:
+            renta_mensual_calculada_24 = renta_mensual_sidebar * ((1 + tasa_blindaje) ** plazo_y_24)
+        else:
+            renta_mensual_calculada_24 = renta_mensual_sidebar
+            
+        meta_retiro_24 = (renta_mensual_calculada_24 * 12) / (r_anual_dec if r_anual_dec > 0 else 0.01)
+        
         aporte_24 = encontrar_aporte_necesario(
-            meta_retiro, 24, plazo_y_24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
+            meta_retiro_24, 24, plazo_y_24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr=0.0
         )
         df_24, _ = calcular_escenario(
             aporte_24, 24, rendimiento_anual, inflacion_activa, tasa_inf_input, isr_retencion=0.0, plazo_anos=plazo_y_24
@@ -618,14 +627,14 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
 </div>
 <div style="background: rgba(10, 10, 10, 0.5); border: 1px solid rgba(184, 134, 11, 0.2); border-radius: 12px; padding: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 40px;">
     <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-        <thead style="border-bottom: 2px solid {GOLD_COLOR};">
+        <thead style="border-bottom: 2px solid {ACCENT_COLOR};">
             <tr>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan</th>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de sobre costo mensual</th>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de aportación acumulada</th>
-                <th style="padding: 18px; color: {GOLD_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de rendimiento acumulado</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Si comienzas tu plan</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Aportación Mensual</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Sobre Costo Mensual</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de sobre costo mensual</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de aportación acumulada</th>
+                <th style="padding: 18px; color: {ACCENT_COLOR}; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; text-align: center;">Monto total de rendimiento acumulado</th>
             </tr>
         </thead>
         <tbody style="text-align: center;">{rows_html_unified}</tbody>
