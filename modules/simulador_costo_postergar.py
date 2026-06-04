@@ -137,7 +137,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             st.session_state.renta_costos_sync = float(renta_mensual_sidebar)
             
             # Actualizar default de retiro basado en la edad inicial
-            # Regla: <=35 -> 60, >=36 -> 65. Tope 70.
+            # Regla: <=35 -> 60, 36-45 -> edad_inicial + 25, >=46 -> 70.
             opciones_retiro = [60, 65, 70]
             # Filtrar para que solo muestre opciones mayores a la edad inicial
             opciones_retiro = [o for o in opciones_retiro if o > edad_inicial]
