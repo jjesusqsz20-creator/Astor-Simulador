@@ -35,7 +35,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
         st.title("Configuración")
         
         with st.expander("👤 Datos del Cliente", expanded=True):
-            nombre_def = st.session_state.get("nombre_cliente", "") or st.session_state.get("hub_nombre", "")
+            nombre_def = st.session_state.get("hub_nombre", "") or st.session_state.get("nombre_cliente", "")
             nombre_input = st.text_input("Nombre", value=nombre_def, key="interes_name_input").title()
             st.session_state['hub_nombre'] = nombre_input
             
@@ -463,7 +463,7 @@ def render_calculadora(get_asset_path, encontrar_aporte_necesario, calcular_esce
     final_con_paro_hud = max(0.0, saldo_anterior)
 
     # --- HUD PRINCIPAL ---
-    nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
+    nombre_cliente = st.session_state.get('hub_nombre', '') or st.session_state.get('nombre_cliente', '')
     txt_mes_plan = mes_paro_total
     txt_ano_plan = (mes_paro_total - 1) // 12 + 1
 

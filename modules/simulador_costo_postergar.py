@@ -73,7 +73,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
         st.title("Configuración")
         
         with st.expander("👤 Datos del Cliente", expanded=True):
-            nombre_def_p = st.session_state.get("nombre_cliente", "") or st.session_state.get("hub_nombre", "")
+            nombre_def_p = st.session_state.get("hub_nombre", "") or st.session_state.get("nombre_cliente", "")
             nombre_input = st.text_input("Nombre", value=nombre_def_p, key="postergar_name_input").title()
             # No escribir directamente en 'nombre_cliente' para evitar modificar la clave después de creado el widget.
             st.session_state['hub_nombre'] = nombre_input
@@ -513,7 +513,7 @@ def render_simulador(get_asset_path, encontrar_aporte_necesario_original, calcul
             key="main_nav_pestañas_postergar",
             label_visibility="collapsed"
         )
-    nombre_cliente = st.session_state.get('nombre_cliente', '') or st.session_state.get('hub_nombre', '')
+    nombre_cliente = st.session_state.get('hub_nombre', '') or st.session_state.get('nombre_cliente', '')
     if seleccion_nav == "📊 Plan de Acumulación":
         base = float(aporte_m_metric)
         st.session_state.monto_1 = base

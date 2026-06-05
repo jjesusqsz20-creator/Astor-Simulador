@@ -68,8 +68,12 @@ def render_planificador():
     if 'dark_mode' not in st.session_state: st.session_state['dark_mode'] = True
     # Sincronizar con el botón global de Astor.py (st.session_state.theme)
     st.session_state['dark_mode'] = (st.session_state.get('theme', 'dark') == 'dark')
-    if 'nombre_cliente' not in st.session_state: st.session_state['nombre_cliente'] = "Cliente Ejemplo"
-    if 'sidebar_ingreso' not in st.session_state: st.session_state['sidebar_ingreso'] = 25000
+    # Sincronizar el nombre del cliente con el Hub si existe
+    if st.session_state.get('hub_nombre'):
+        st.session_state['nombre_cliente'] = st.session_state['hub_nombre']
+    elif 'nombre_cliente' not in st.session_state:
+        st.session_state['nombre_cliente'] = "Cliente Ejemplo"
+    if 'sidebar_ingreso' not in st.session_state: st.session_state['sidebar_ingreso'] = 50000
     if 'num_dependientes' not in st.session_state: st.session_state['num_dependientes'] = 0
     if 'sidebar_gastos_dep' not in st.session_state: st.session_state['sidebar_gastos_dep'] = 0
     if 'listo' not in st.session_state: st.session_state['listo'] = False
@@ -198,12 +202,11 @@ def render_planificador():
             .astor-metric-box {
                 background: var(--bg-card) !important;
                 border: 2px solid var(--border-color) !important;
-                border-left: 8px solid var(--border-color) !important;
-                padding: 12px 20px !important;
+                padding: 10px 15px !important;
                 border-radius: 12px !important;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
                 text-align: center !important;
-                min-width: 270px !important;
+                min-width: 200px !important;
             }
         """
     else:
@@ -254,12 +257,11 @@ def render_planificador():
             .astor-metric-box {
                 background: white !important;
                 border: 2px solid #3B82F6 !important;
-                border-left: 8px solid #3B82F6 !important;
-                padding: 12px 20px !important;
+                padding: 10px 15px !important;
                 border-radius: 12px !important;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
                 text-align: center !important;
-                min-width: 270px !important;
+                min-width: 200px !important;
             }
         """
 
@@ -919,7 +921,7 @@ def render_planificador():
 
             # Estructura: Título -> Monto -> Input
             st.markdown("Ingreso mensual (MXN)")
-            st.markdown(f'<p style="color: var(--value-color); font-weight: bold; margin-bottom: -15px; margin-top: -15px; font-size: 0.9rem;">$ {st.session_state.get("sidebar_ingreso", 25000):,.0f}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: var(--value-color); font-weight: bold; margin-bottom: -15px; margin-top: -15px; font-size: 0.9rem;">$ {st.session_state.get("sidebar_ingreso", 50000):,.0f}</p>', unsafe_allow_html=True)
             ingreso_mensual = st.number_input("Ingreso mensual (MXN)", min_value=0, step=1000, key="sidebar_ingreso", label_visibility="collapsed")
 
             estado_civil = "n/a"
@@ -933,7 +935,7 @@ def render_planificador():
             if num_dependientes > 0:
                 st.markdown(f'<p style="color: var(--accent-blue); font-size: 0.85rem; margin-bottom: 10px;">Has seleccionado {num_dependientes} D. económico(s).</p>', unsafe_allow_html=True)
                 # Mostrar la cantidad del 5% del ingreso por cada dependiente
-                monto_por_dependiente = st.session_state.get("sidebar_ingreso", 25000) * 0.05
+                monto_por_dependiente = st.session_state.get("sidebar_ingreso", 50000) * 0.05
                 for i in range(1, num_dependientes + 1):
                     st.markdown(f"""
                     <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; margin-bottom: 8px; background-color: var(--bg-card); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
@@ -1138,14 +1140,17 @@ def render_planificador():
     
     if seleccion_nav == "📊 Plan de Acumulación":
         st.session_state['modulo_activo'] = "📊 Plan de Acumulación"
+        st.rerun()
     elif seleccion_nav == "⏱️ Costo de Postergar":
         nombre_cliente_sync = st.session_state.get('hub_nombre', '')
         st.session_state['hub_nombre'] = nombre_cliente_sync.title()
         st.session_state['modulo_activo'] = "⏱️ Costo de Postergar"
+        st.rerun()
     elif seleccion_nav == "🧮 Interés Compuesto":
         nombre_cliente_sync = st.session_state.get('hub_nombre', '')
         st.session_state['hub_nombre'] = nombre_cliente_sync.title()
         st.session_state['modulo_activo'] = "🧮 Interés Compuesto"
+        st.rerun()
 
     # --- TÍTULO PRINCIPAL ---
     st.markdown(
@@ -1165,26 +1170,24 @@ def render_planificador():
 
     # Métricas de resumen si hay datos
     if nombre.strip() or ingreso_mensual > 0:
-        col_m1, col_m2 = st.columns(2)
-        with col_m1:
-            if nombre.strip():
-                st.markdown(
-                    f"<div class='astor-metric-box'>"
-                    f"<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;'>👤 Cliente e Ingreso</div>"
-                    f"<div style='color: var(--primary-blue); font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2;'>{nombre.upper()}</div>"
-                    f"<div style='color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;'>$ {ingreso_mensual:,.0f}</div>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
-        with col_m2:
-            if ahorro_inversion_pre > 0:
-                st.markdown(
-                    f"<div class='astor-metric-box'>"
-                    f"<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px;'>💰 Potencial de inversión</div>"
-                    f"<div style='color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 0;'>$ {ahorro_inversion_pre:,.0f}</div>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
+        # Se usa un layout flex en HTML puro (como en Interés Compuesto) para controlar el ancho máximo
+        html_boxes = "<div style='display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;'>"
+        
+        if nombre.strip():
+            html_boxes += f"""<div style="flex: 1; min-width: 200px; max-width: 350px; background-color: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center;">
+<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px; text-transform: uppercase;'>👤 Cliente e Ingreso</div>
+<div style='color: var(--primary-blue); font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2;'>{nombre.upper()}</div>
+<div style='color: var(--value-color); font-size: 2rem; font-weight: 800; margin: 5px 0 0 0;'>$ {ingreso_mensual:,.0f}</div>
+</div>"""
+            
+        if ahorro_inversion_pre > 0:
+            html_boxes += f"""<div style="flex: 1; min-width: 200px; max-width: 350px; background-color: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center;">
+<div style='color: var(--accent-blue); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px; text-transform: uppercase;'>💰 Potencial de inversión</div>
+<div style='color: var(--value-color); font-size: 2.3rem; font-weight: 800; margin: 5px 0 0 0;'>$ {ahorro_inversion_pre:,.0f}</div>
+</div>"""
+            
+        html_boxes += "</div>"
+        st.markdown(html_boxes, unsafe_allow_html=True)
 
 
 
